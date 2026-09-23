@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Speechy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#000000;
+    --ink-soft:#4B6070;
+    --vista-blue:#003399;
+    --line:#B8CFE0;
+    --signal:#2B7CC4;
+    --c-now:#1F5FA8;
+    --c-people:#6A3D95;
+    --c-work:#0E7B72;
+    --c-church:#3F7A22;
+    --c-around:#9A5B06;
+    --c-recent:#A32C24;
+    --c-joke:#B07206;
+    --radius:3px;
+    --font:"Segoe UI",Tahoma,"Atkinson Hyperlegible",ui-sans-serif,-apple-system,sans-serif;
+    --gloss:linear-gradient(180deg,#FDFEFF 0%,#EFF6FC 49%,#DCEAF7 50%,#E9F3FC 100%);
+    --glossblue:linear-gradient(180deg,#9FD6F7 0%,#5BAFE8 49%,#2277C4 50%,#3E95D6 100%);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.35;
+    overscroll-behavior:none;
+    background:
+      radial-gradient(1100px 460px at 14% 6%, rgba(150,235,255,.34), transparent 60%),
+      radial-gradient(900px 600px at 86% 20%, rgba(120,255,214,.15), transparent 62%),
+      radial-gradient(1200px 760px at 60% 98%, rgba(56,142,230,.45), transparent 66%),
+      linear-gradient(168deg,#04101F 0%,#0A2648 44%,#071C36 74%,#030C18 100%);
+    background-attachment:fixed;
+  }
+  button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+  :focus-visible{outline:1px dotted #333;outline-offset:2px}
+
+  .desktop{min-height:100%;display:flex;padding:0;position:relative}
+
+  /* window states */
+  body.state-min .window,body.state-closed .window{display:none}
+  body.state-open .deskicons,body.state-open .taskbar{display:none}
+  body.state-closed .taskbtn{display:none}
+
+  .deskicons{position:absolute;top:calc(18px + env(safe-area-inset-top));left:16px;z-index:2}
+  .deskicon{
+    display:flex;flex-direction:column;align-items:center;gap:6px;width:92px;padding:9px 4px;
+    border:1px solid transparent;border-radius:3px;
+  }
+  .deskicon:hover{background:rgba(120,190,255,.28);border-color:rgba(160,215,255,.6)}
+  .deskicon .ic{
+    font-size:30px;width:52px;height:52px;line-height:52px;border-radius:7px;
+    background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(150,205,245,.35));
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 6px rgba(0,0,0,.45);
+  }
+  .deskicon .lbl{
+    font-size:12px;color:#fff;line-height:1.25;
+    text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 8px rgba(0,0,0,.8);
+  }
+
+  .taskbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;gap:7px;
+    padding:4px 8px;padding-bottom:calc(4px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(28,58,92,.86) 0%,rgba(8,22,40,.92) 48%,
+               rgba(4,14,28,.94) 52%,rgba(14,34,60,.9) 100%);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-top:1px solid rgba(150,205,245,.5);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .orb{
+    width:40px;height:40px;border-radius:50%;flex:0 0 auto;
+    background:
+      radial-gradient(circle at 50% 24%,rgba(255,255,255,.95) 0%,rgba(190,235,255,.5) 26%,transparent 46%),
+      radial-gradient(circle at 50% 60%,#3DA8E8 0%,#1B6BB0 55%,#0B3D72 100%);
+    border:1px solid #0B3D72;
+    box-shadow:0 0 12px rgba(110,200,255,.85),inset 0 -2px 6px rgba(0,0,0,.45);
+  }
+  .orb:hover{box-shadow:0 0 18px rgba(150,220,255,1),inset 0 -2px 6px rgba(0,0,0,.45)}
+  .taskbtn{
+    padding:8px 14px;border-radius:3px;font-size:13px;color:#EAF6FF;max-width:230px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    background:linear-gradient(180deg,rgba(140,195,240,.42) 0%,rgba(60,120,180,.32) 49%,
+               rgba(30,80,135,.35) 50%,rgba(80,150,210,.35) 100%);
+    border:1px solid rgba(160,215,255,.55);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+    text-shadow:0 1px 2px rgba(0,0,0,.7);
+  }
+  .taskbtn:hover{filter:brightness(1.25)}
+  .tray{
+    margin-left:auto;font-size:12px;color:#DCEEFF;padding:0 8px;
+    text-shadow:0 1px 2px rgba(0,0,0,.8);border-left:1px solid rgba(160,215,255,.3);
+  }
+
+  /* ================= the window ================= */
+  .window{
+    flex:1;display:flex;flex-direction:column;min-height:100vh;min-height:100%;
+    background:#F0F6FB;overflow:hidden;
+  }
+  @media (min-width:900px){
+    .desktop{padding:26px 20px 34px}
+    .window{
+      max-width:1240px;margin:0 auto;min-height:0;height:calc(100vh - 60px);
+      border:1px solid rgba(255,255,255,.55);border-radius:9px 9px 5px 5px;
+      box-shadow:0 0 0 1px rgba(0,40,80,.5),0 26px 60px rgba(0,0,0,.62),
+                 inset 0 1px 0 rgba(255,255,255,.7);
+    }
+  }
+
+  /* ---- glass title bar ---- */
+  .titlebar{
+    display:flex;align-items:center;gap:9px;padding:9px 8px 9px 13px;position:relative;
+    background:linear-gradient(180deg,rgba(228,244,255,.58) 0%,rgba(166,206,238,.42) 48%,
+               rgba(120,172,218,.40) 52%,rgba(178,216,245,.50) 100%);
+    -webkit-backdrop-filter:blur(16px) saturate(1.5);backdrop-filter:blur(16px) saturate(1.5);
+    border-bottom:1px solid rgba(255,255,255,.55);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+    padding-top:calc(9px + env(safe-area-inset-top));
+  }
+  .ticon{font-size:15px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+  .caption{
+    font-size:14px;font-weight:600;color:#0B2440;
+    text-shadow:0 0 7px rgba(255,255,255,.95),0 0 12px rgba(255,255,255,.85);
+  }
+  .caps{margin-left:auto;display:flex;gap:2px}
+  .cap{
+    width:29px;height:21px;border:1px solid rgba(255,255,255,.7);border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(255,255,255,.72) 0%,rgba(205,232,250,.5) 49%,
+               rgba(140,190,230,.45) 50%,rgba(190,224,248,.55) 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .cap i{display:block;background:#0B2440}
+  .cap.min i{width:9px;height:2px;margin-top:6px}
+  .cap.max i{width:10px;height:9px;background:none;border:2px solid #0B2440;border-top-width:3px}
+  .cap.close{
+    width:45px;
+    background:linear-gradient(180deg,#FBBFA8 0%,#E8724C 49%,#C8331A 50%,#E05C36 100%);
+    border-color:#9C2A14;
+  }
+  .cap.close i{
+    width:11px;height:11px;background:none;position:relative;
+  }
+  .cap.close i::before,.cap.close i::after{
+    content:"";position:absolute;left:0;top:4px;width:11px;height:2px;background:#fff;
+    box-shadow:0 0 2px rgba(0,0,0,.5);
+  }
+  .cap.close i::before{transform:rotate(45deg)}
+  .cap.close i::after{transform:rotate(-45deg)}
+  .cap:hover{filter:brightness(1.12)}
+
+  /* ---- address bar ---- */
+  .navbar{
+    display:flex;align-items:center;gap:6px;padding:7px 9px;
+    background:linear-gradient(180deg,rgba(226,242,253,.55),rgba(186,216,240,.42));
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(255,255,255,.4);
+  }
+  .navbtn{
+    width:26px;height:26px;border-radius:50%;font-size:11px;color:#0B3E73;
+    background:radial-gradient(circle at 50% 30%,#FFFFFF 0%,#D6EBFA 45%,#96C4E6 100%);
+    border:1px solid #79A8CC;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 1px 2px rgba(0,0,0,.3);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .navbtn:hover{background:radial-gradient(circle at 50% 30%,#FFFFFF 0%,#E8F6FF 45%,#7FC4F0 100%)}
+  .address{
+    flex:1;min-width:0;display:flex;align-items:center;gap:4px;overflow:hidden;
+    height:26px;padding:0 8px;background:#fff;border:1px solid #7EA7C4;border-radius:2px;
+    box-shadow:inset 0 1px 2px rgba(20,60,100,.22);font-size:13px;white-space:nowrap;
+  }
+  .crumb{color:#123B63}
+  .crumb.here{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+  .sep{color:#6C93B3;font-size:9px}
+  .searchbox{width:130px;flex:0 0 auto}
+  .searchbox input{
+    width:100%;height:26px;padding:0 8px;font-family:inherit;font-size:13px;
+    background:#fff;border:1px solid #7EA7C4;border-radius:2px;color:#000;
+    box-shadow:inset 0 1px 2px rgba(20,60,100,.22);
+  }
+  @media (max-width:560px){ .searchbox{width:86px} .address{font-size:12px} }
+
+  /* ---- command bar ---- */
+  .toolbar{
+    display:flex;align-items:center;gap:2px;padding:4px 8px;
+    background:linear-gradient(180deg,#F7FBFE 0%,#E4EFF8 48%,#D7E8F5 52%,#EAF4FC 100%);
+    border-bottom:1px solid #A8C6DC;
+  }
+  .tbtn{
+    padding:5px 11px;font-size:13px;color:#10314F;border:1px solid transparent;border-radius:3px;
+  }
+  .tbtn:hover{
+    background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(206,232,250,.9));
+    border-color:#9DC4E0;box-shadow:inset 0 1px 0 #fff;
+  }
+  .tbtn[aria-pressed="true"]{
+    background:linear-gradient(180deg,#BFE0F6,#8FC4E8);border-color:#6FA3C8;
+    box-shadow:inset 0 1px 3px rgba(20,60,100,.35);font-weight:600;
+  }
+  .tsep{width:1px;height:16px;background:#B4CDDF;margin:0 4px}
+
+  /* ---- panes ---- */
+  .frame{flex:1;display:flex;min-height:0;background:#fff}
+  .navpane{display:none}
+  @media (min-width:980px){
+    .navpane{
+      display:block;width:196px;flex:0 0 196px;overflow-y:auto;padding:12px 10px;
+      background:linear-gradient(180deg,#EDF4FA,#E2EDF7);border-right:1px solid #C3D8E7;
+    }
+    .nphead{font-size:12px;color:#5A7994;font-weight:600;padding:0 6px 8px}
+    .navitem{
+      display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+      padding:7px 8px;border-radius:3px;font-size:13px;color:#123B63;border:1px solid transparent;
+    }
+    .navitem:hover{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(212,234,250,.9));border-color:#AFD0E8}
+    .navitem[aria-selected="true"]{
+      background:linear-gradient(180deg,#D6EAF9,#B7D8F0);border-color:#8FB9D8;font-weight:600;
+    }
+    .navitem .dot{width:9px;height:9px;border-radius:2px;background:var(--cat);flex:0 0 auto;
+                  box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+    .rail{display:none !important}
+  }
+  .content{flex:1;min-width:0;overflow-y:auto;background:#fff;position:relative}
+
+  /* ---- vista scrollbars ---- */
+  .content::-webkit-scrollbar,.navpane::-webkit-scrollbar,.sheet-inner::-webkit-scrollbar{width:16px}
+  .content::-webkit-scrollbar-track,.navpane::-webkit-scrollbar-track,.sheet-inner::-webkit-scrollbar-track{
+    background:linear-gradient(90deg,#F2F7FB,#E6EFF6);border-left:1px solid #CBDCE9;
+  }
+  .content::-webkit-scrollbar-thumb,.navpane::-webkit-scrollbar-thumb,.sheet-inner::-webkit-scrollbar-thumb{
+    border:1px solid #8FB4D0;border-radius:3px;
+    background:linear-gradient(90deg,#FDFEFF,#D9EAF8 48%,#BBD9F0 52%,#DCEDFB);
+  }
+
+  /* ---- the speak panel ---- */
+  .stage{padding:12px 12px 10px;position:sticky;top:0;z-index:20;
+         background:linear-gradient(180deg,#FFFFFF 70%,rgba(255,255,255,.92))}
+  .said{
+    background:linear-gradient(180deg,#F8FCFF,#E9F3FB);
+    border:1px solid #A9C9E0;border-radius:4px;padding:14px;
+    box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(20,60,100,.18);
+  }
+  .said p{margin:0 0 12px;font-size:25px;line-height:1.22;font-weight:600;min-height:1.22em;word-break:break-word}
+  .said p.empty{color:#7C93A6;font-weight:400;font-size:19px}
+  .modebar{display:flex;gap:5px;margin-bottom:11px}
+  .mode{
+    flex:1;padding:7px 8px;border-radius:3px;font-size:13px;color:#10314F;
+    background:var(--gloss);border:1px solid #A9C9E0;box-shadow:inset 0 1px 0 #fff;
+  }
+  .mode[aria-pressed="true"]{
+    background:var(--glossblue);color:#fff;border-color:#1B6098;font-weight:600;
+    text-shadow:0 1px 1px rgba(0,0,0,.45);
+  }
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .actions.three{grid-template-columns:1.1fr 1.3fr .7fr}
+  .act{
+    padding:13px 9px;border-radius:3px;font-size:17px;font-weight:600;color:#fff;
+    background:var(--glossblue);border:1px solid #1B6098;text-shadow:0 1px 1px rgba(0,0,0,.45);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 1px 2px rgba(0,0,0,.28);
+  }
+  .act:hover:not(:disabled){filter:brightness(1.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 0 9px rgba(120,200,250,.95),0 1px 2px rgba(0,0,0,.28)}
+  .act.secondary{background:linear-gradient(180deg,#9AA8B6 0%,#64788C 49%,#3F5468 50%,#586E83 100%);border-color:#334758}
+  .act.ghost{background:var(--gloss);color:#10314F;border-color:#A9C9E0;text-shadow:none}
+  .act:disabled{opacity:.45}
+  .act:active{transform:translateY(1px)}
+
+  /* ---- tabs (mobile) ---- */
+  .rail{display:flex;gap:3px;overflow-x:auto;padding:0 12px;scrollbar-width:none;
+        position:sticky;top:var(--stageH,150px);z-index:19;background:#fff;
+        border-bottom:1px solid #C3D8E7}
+  .rail::-webkit-scrollbar{display:none}
+  .chip{
+    white-space:nowrap;padding:8px 13px;border-radius:3px 3px 0 0;font-size:13px;color:#1B3A57;
+    flex:0 0 auto;background:linear-gradient(180deg,#F4F9FD,#DDEBF7);
+    border:1px solid #BCD5E7;border-bottom:none;
+  }
+  .chip[aria-selected="true"]{
+    background:#fff;color:var(--cat);font-weight:600;
+    box-shadow:inset 0 2px 0 var(--cat);
+  }
+
+  /* ---- tiles ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+  .tile{
+    background:var(--gloss);border:1px solid #A9C9E0;border-left:5px solid var(--cat);
+    border-radius:var(--radius);padding:14px 13px;text-align:left;font-size:16px;font-weight:600;
+    line-height:1.25;min-height:84px;display:flex;align-items:flex-start;position:relative;color:#10314F;
+    box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(20,60,100,.16);
+  }
+  .tile:hover{background:linear-gradient(180deg,#FFFFFF 0%,#F2F9FF 49%,#DCEEFC 50%,#EDF7FF 100%);
+              border-color:#7FB4DA;box-shadow:inset 0 1px 0 #fff,0 0 8px rgba(120,200,250,.75)}
+  .tile:active{background:linear-gradient(180deg,#D3E7F7,#BCD9F0)}
+  .tile.wide{grid-column:1 / -1;min-height:0;font-size:17px}
+  .grid.compact{grid-template-columns:repeat(3,1fr);gap:7px}
+  .grid.compact .tile{min-height:58px;font-size:15px;padding:9px 6px;
+                      align-items:center;justify-content:center;text-align:center;border-left-width:4px}
+  .tile .del{
+    position:absolute;top:-8px;right:-8px;width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(180deg,#FBBFA8 0%,#E8724C 49%,#C8331A 50%,#E05C36 100%);
+    color:#fff;font-size:16px;font-weight:700;line-height:26px;text-align:center;
+    border:1px solid #9C2A14;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.4);
+  }
+  .tile.random{
+    grid-column:1 / -1;border-left:none;min-height:0;padding:13px;justify-content:center;
+    text-align:center;font-size:17px;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.45);
+    background:linear-gradient(180deg,#F8D89A 0%,#E0A93A 49%,#B47A08 50%,#D09A20 100%);
+    border:1px solid #8A5D06;
+  }
+  .addtile{
+    grid-column:1 / -1;padding:13px;border-radius:var(--radius);border:1px dashed #9FC2DC;
+    font-size:14px;color:#3E6183;background:#F6FAFD;
+  }
+  .empty-note{grid-column:1 / -1;padding:26px 6px;color:#5A7994;font-size:15px}
+  .addon-note{grid-column:1 / -1;color:#5A7994;font-size:13px;padding:2px 2px 6px}
+  .group-head{
+    grid-column:1 / -1;font-size:12px;font-weight:700;color:#5A7994;letter-spacing:.06em;
+    text-transform:uppercase;padding:14px 2px 4px;border-bottom:1px solid #DCE9F3;margin-bottom:2px;
+  }
+
+  /* ---- command area + status bar ---- */
+  .dock{
+    display:flex;gap:7px;padding:8px 12px;
+    background:linear-gradient(180deg,#F5FAFE,#E2EDF7);border-top:1px solid #B4CDDF;
+  }
+  .dock button{
+    flex:1;padding:11px 8px;border-radius:3px;font-size:15px;font-weight:600;color:#10314F;
+    background:var(--gloss);border:1px solid #A9C9E0;box-shadow:inset 0 1px 0 #fff;
+  }
+  .dock button:hover{border-color:#7FB4DA;box-shadow:inset 0 1px 0 #fff,0 0 8px rgba(120,200,250,.7)}
+  .dock button.card{
+    flex:0 0 auto;padding:11px 16px;color:#fff;background:var(--glossblue);
+    border-color:#1B6098;text-shadow:0 1px 1px rgba(0,0,0,.45);
+  }
+  .details{
+    padding:5px 12px;font-size:12px;color:#3E6183;
+    background:linear-gradient(180deg,#EFF5FA,#DFEAF4);border-top:1px solid #C3D8E7;
+    padding-bottom:calc(5px + env(safe-area-inset-bottom));
+  }
+
+  /* ---- overlays: readability first ---- */
+  .overlay{position:fixed;inset:0;z-index:60;background:#FFFFFF;display:none;flex-direction:column;
+           padding:22px;border-top:5px solid #2277C4}
+  .overlay.open{display:flex}
+  .overlay .fit{flex:1;display:flex;align-items:center;justify-content:center;text-align:center}
+  .overlay .fit span{font-weight:700;line-height:1.12;word-break:break-word;color:#00182E}
+  .overlay .hint{text-align:center;color:#4A6E8F;font-size:15px;padding-top:10px}
+  .card-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px}
+  .card-body p{margin:0;font-size:27px;font-weight:600;line-height:1.3;color:#00182E}
+  .card-body p.small{font-size:18px;font-weight:400;color:#4A6E8F}
+
+  /* ---- task dialogs ---- */
+  .sheet{position:fixed;inset:0;z-index:70;background:rgba(6,22,40,.45);display:none;
+         align-items:flex-end;justify-content:center}
+  .sheet.open{display:flex}
+  .sheet-inner{
+    width:100%;max-width:620px;padding:0;max-height:88vh;overflow:auto;background:#fff;
+    border:1px solid #6E97B8;border-bottom:none;border-radius:6px 6px 0 0;
+    box-shadow:0 -10px 40px rgba(0,0,0,.5);
+  }
+  .sheet h2{
+    margin:0;padding:16px 18px 4px;font-size:19px;font-weight:400;color:var(--vista-blue);
+  }
+  .sheet-inner > *:not(h2):not(.sheet-actions){margin-left:18px;margin-right:18px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px;color:#10314F}
+  textarea,select,input[type=text]{
+    width:100%;font-family:inherit;font-size:16px;padding:8px;border-radius:2px;
+    border:1px solid #7EA7C4;background:#fff;color:#000;
+    box-shadow:inset 0 1px 2px rgba(20,60,100,.22);
+  }
+  textarea{min-height:90px;resize:vertical}
+  input[type=range]{width:100%;accent-color:#2277C4}
+  .sheet-actions{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 0;padding:12px 18px;
+    background:linear-gradient(180deg,#F2F7FB,#E6EFF6);border-top:1px solid #C3D8E7;
+  }
+  .sheet-actions button{
+    padding:10px;border-radius:3px;font-size:14px;color:#10314F;
+    background:var(--gloss);border:1px solid #9DBFD8;box-shadow:inset 0 1px 0 #fff;
+  }
+  .sheet-actions button:hover{border-color:#6FA3C8;box-shadow:inset 0 1px 0 #fff,0 0 7px rgba(120,200,250,.8)}
+  .sheet-actions button.primary{
+    color:#fff;background:var(--glossblue);border-color:#1B6098;font-weight:600;
+    text-shadow:0 1px 1px rgba(0,0,0,.4);
+  }
+  .note{font-size:12px;color:#5A7994;margin:10px 0 14px;line-height:1.45}
+  .opt{
+    display:block;width:100%;text-align:left;border-radius:var(--radius);padding:14px;
+    font-size:17px;font-weight:600;line-height:1.3;margin-bottom:8px;color:#10314F;
+    background:var(--gloss);border:1px solid #A9C9E0;border-left:5px solid var(--signal);
+    box-shadow:inset 0 1px 0 #fff;
+  }
+  .opt:hover{border-color:#7FB4DA;box-shadow:inset 0 1px 0 #fff,0 0 8px rgba(120,200,250,.75)}
+  .thinking{padding:20px 4px;font-size:15px;color:#3E6183}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+
+  @media (min-width:640px){
+    .grid{grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
+    .grid.compact{grid-template-columns:repeat(5,1fr)}
+    .said p{font-size:30px}
+    .tile{font-size:17px;min-height:98px}
+    .grid.compact .tile{font-size:16px;min-height:66px}
+  }
+  @media (min-width:980px){
+    .grid{grid-template-columns:repeat(4,1fr)}
+    .grid.compact{grid-template-columns:repeat(6,1fr)}
+    .said p{font-size:34px}
+    .tile{font-size:18px;min-height:108px}
+    .act{font-size:19px;padding:15px 10px}
+  }
+  @media (min-width:1300px){
+    .grid{grid-template-columns:repeat(5,1fr)}
+    .grid.compact{grid-template-columns:repeat(8,1fr)}
+  }
+
+  /* ================= dark Aero ================= */
+  [data-theme="dark"]{
+    --ink:#E6EEF6;
+    --ink-soft:#8FA3B5;
+    --line:#39434E;
+    --gloss:linear-gradient(180deg,#39424D 0%,#2D353E 49%,#232A32 50%,#2B333B 100%);
+  }
+  [data-theme="dark"] body{
+    color:#E6EEF6;
+    background:
+      radial-gradient(1100px 460px at 14% 6%, rgba(60,150,190,.20), transparent 60%),
+      radial-gradient(900px 600px at 86% 20%, rgba(50,180,150,.10), transparent 62%),
+      radial-gradient(1200px 760px at 60% 98%, rgba(30,90,150,.28), transparent 66%),
+      linear-gradient(168deg,#02070D 0%,#061424 44%,#040E1A 74%,#01050A 100%);
+  }
+  [data-theme="dark"] .window{background:#1A1D21;border-color:rgba(255,255,255,.14)}
+  @media (min-width:900px){
+    [data-theme="dark"] .window{
+      box-shadow:0 0 0 1px rgba(0,0,0,.8),0 26px 60px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.14);
+    }
+  }
+  [data-theme="dark"] .titlebar{
+    background:linear-gradient(180deg,rgba(78,88,100,.55) 0%,rgba(44,52,62,.45) 48%,
+               rgba(28,34,42,.48) 52%,rgba(56,66,78,.5) 100%);
+    border-bottom-color:rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
+  }
+  [data-theme="dark"] .caption{color:#EAF2FA;text-shadow:0 0 8px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.9)}
+  [data-theme="dark"] .cap{
+    background:linear-gradient(180deg,rgba(120,132,146,.5) 0%,rgba(70,80,92,.42) 49%,
+               rgba(46,54,64,.45) 50%,rgba(88,100,114,.45) 100%);
+    border-color:rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  [data-theme="dark"] .cap i{background:#E6EEF6}
+  [data-theme="dark"] .cap.max i{background:none;border-color:#E6EEF6}
+  [data-theme="dark"] .navbar{
+    background:linear-gradient(180deg,rgba(60,70,82,.5),rgba(32,38,46,.42));
+    border-bottom-color:rgba(255,255,255,.12);
+  }
+  [data-theme="dark"] .navbtn{
+    color:#CFE4F5;border-color:#2A323B;
+    background:radial-gradient(circle at 50% 30%,#6E7C8C 0%,#414B57 45%,#232A32 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.6);
+  }
+  [data-theme="dark"] .address,[data-theme="dark"] .searchbox input{
+    background:#10141A;border-color:#39434E;color:#E6EEF6;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+  }
+  [data-theme="dark"] .crumb{color:#BBD3E8}
+  [data-theme="dark"] .sep{color:#66788A}
+  [data-theme="dark"] .toolbar{
+    background:linear-gradient(180deg,#333B45 0%,#272E36 48%,#212831 52%,#2D343D 100%);
+    border-bottom-color:#12161B;
+  }
+  [data-theme="dark"] .tbtn{color:#D5E3F0}
+  [data-theme="dark"] .tbtn:hover{
+    background:linear-gradient(180deg,rgba(90,104,120,.8),rgba(56,66,78,.8));border-color:#4A5663;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  [data-theme="dark"] .tbtn[aria-pressed="true"]{
+    background:linear-gradient(180deg,#1C4E7A,#143A5C);border-color:#0E2A44;color:#EAF4FF;
+  }
+  [data-theme="dark"] .tsep{background:#414B57}
+  [data-theme="dark"] .frame{background:#1A1D21}
+  [data-theme="dark"] .navpane{
+    background:linear-gradient(180deg,#242B33,#1D232A);border-right-color:#12161B;
+  }
+  [data-theme="dark"] .nphead{color:#8FA3B5}
+  [data-theme="dark"] .navitem{color:#CFE0EF}
+  [data-theme="dark"] .navitem:hover{
+    background:linear-gradient(180deg,rgba(90,104,120,.5),rgba(56,66,78,.5));border-color:#4A5663;
+  }
+  [data-theme="dark"] .navitem[aria-selected="true"]{
+    background:linear-gradient(180deg,#1C4E7A,#143A5C);border-color:#0E2A44;color:#EAF4FF;
+  }
+  [data-theme="dark"] .content{background:#1A1D21}
+  [data-theme="dark"] .content::-webkit-scrollbar-track,
+  [data-theme="dark"] .navpane::-webkit-scrollbar-track,
+  [data-theme="dark"] .sheet-inner::-webkit-scrollbar-track{
+    background:linear-gradient(90deg,#1E242B,#171C22);border-left-color:#2A323B;
+  }
+  [data-theme="dark"] .content::-webkit-scrollbar-thumb,
+  [data-theme="dark"] .navpane::-webkit-scrollbar-thumb,
+  [data-theme="dark"] .sheet-inner::-webkit-scrollbar-thumb{
+    border-color:#4A5663;
+    background:linear-gradient(90deg,#5E6B79,#434E5A 50%,#36404A);
+  }
+  [data-theme="dark"] .stage{background:linear-gradient(180deg,#1A1D21 70%,rgba(26,29,33,.94))}
+  [data-theme="dark"] .said{
+    background:linear-gradient(180deg,#262D35,#1E242B);border-color:#39434E;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 3px rgba(0,0,0,.5);
+  }
+  [data-theme="dark"] .said p{color:#EDF4FA}
+  [data-theme="dark"] .said p.empty{color:#76889A}
+  [data-theme="dark"] .mode{color:#D5E3F0;border-color:#414B57;box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+  [data-theme="dark"] .act.ghost{color:#D5E3F0;border-color:#414B57}
+  [data-theme="dark"] .act.secondary{
+    background:linear-gradient(180deg,#5C6976 0%,#3B4753 49%,#28323C 50%,#36424E 100%);border-color:#1B222A;
+  }
+  [data-theme="dark"] .rail{background:#1A1D21;border-bottom-color:#2A323B}
+  [data-theme="dark"] .chip{
+    background:linear-gradient(180deg,#2E363F,#232A32);border-color:#3A434E;color:#BCD0E2;
+  }
+  [data-theme="dark"] .chip[aria-selected="true"]{background:#1A1D21;color:#EAF4FF}
+  [data-theme="dark"] .tile{
+    border-color:#3A434E;color:#E4EDF5;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 1px 2px rgba(0,0,0,.5);
+  }
+  [data-theme="dark"] .tile:hover{
+    background:linear-gradient(180deg,#43505D 0%,#36404B 49%,#2B343D 50%,#333D48 100%);
+    border-color:#5D6E7E;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 9px rgba(60,140,200,.5);
+  }
+  [data-theme="dark"] .tile:active{background:linear-gradient(180deg,#1F2831,#18202A)}
+  [data-theme="dark"] .addtile{background:#20262D;border-color:#414B57;color:#9DB2C5}
+  [data-theme="dark"] .empty-note,[data-theme="dark"] .addon-note{color:#8FA3B5}
+  [data-theme="dark"] .group-head{color:#8FA3B5;border-bottom-color:#2A323B}
+  [data-theme="dark"] .dock{
+    background:linear-gradient(180deg,#2B333B,#212831);border-top-color:#12161B;
+  }
+  [data-theme="dark"] .dock button{color:#D5E3F0;border-color:#414B57}
+  [data-theme="dark"] .dock button.card{color:#fff}
+  [data-theme="dark"] .details{
+    background:linear-gradient(180deg,#20262D,#191F25);border-top-color:#2A323B;color:#8FA3B5;
+  }
+  [data-theme="dark"] .overlay{background:#0D1116;border-top-color:#2277C4}
+  [data-theme="dark"] .overlay .fit span,[data-theme="dark"] .card-body p{color:#F2F8FD}
+  [data-theme="dark"] .overlay .hint,[data-theme="dark"] .card-body p.small{color:#8FA3B5}
+  [data-theme="dark"] .sheet-inner{background:#20262D;border-color:#39434E}
+  [data-theme="dark"] .sheet h2{color:#6FB8F2}
+  [data-theme="dark"] label{color:#BCD0E2}
+  [data-theme="dark"] textarea,[data-theme="dark"] select,[data-theme="dark"] input[type=text]{
+    background:#10141A;border-color:#39434E;color:#E6EEF6;box-shadow:inset 0 1px 2px rgba(0,0,0,.6);
+  }
+  [data-theme="dark"] .sheet-actions{
+    background:linear-gradient(180deg,#252C34,#1D232A);border-top-color:#2A323B;
+  }
+  [data-theme="dark"] .sheet-actions button{color:#D5E3F0;border-color:#414B57}
+  [data-theme="dark"] .sheet-actions button.primary{color:#fff}
+  [data-theme="dark"] .note,[data-theme="dark"] .thinking{color:#8FA3B5}
+  [data-theme="dark"] .opt{color:#E4EDF5;border-color:#3A434E}
+</style>
+</head>
+<body>
+<div class="desktop">
+
+  <div class="deskicons">
+    <button class="deskicon" id="deskIcon">
+      <span class="ic" aria-hidden="true">&#128483;</span>
+      <span class="lbl">Speechy</span>
+    </button>
+  </div>
+
+<div class="window" id="app">
+
+  <div class="titlebar">
+    <span class="ticon" aria-hidden="true">&#128483;</span>
+    <span class="caption">Speechy</span>
+    <div class="caps">
+      <button class="cap min" id="minBtn" aria-label="Minimize"><i></i></button>
+      <button class="cap max" id="maxBtn" aria-label="Maximize"><i></i></button>
+      <button class="cap close" id="closeBtn" aria-label="Close"><i></i></button>
+    </div>
+  </div>
+
+  <div class="navbar">
+    <button class="navbtn" id="backBtn" aria-label="Back">&#9664;</button>
+    <button class="navbtn" id="fwdBtn" aria-label="Forward">&#9654;</button>
+    <div class="address">
+      <span class="crumb">Lance</span><span class="sep">&#9654;</span><span class="crumb">Speechy</span><span class="sep">&#9654;</span><span class="crumb here" id="crumb">Right now</span>
+    </div>
+    <div class="searchbox">
+      <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
+    <span class="tsep"></span>
+    <button class="tbtn" id="setBtn">Voice</button>
+    <span class="tsep"></span>
+    <button class="tbtn" id="fsBtn">Full screen</button>
+    <span class="tsep"></span>
+    <button class="tbtn" id="themeBtn">Dark theme</button>
+  </div>
+
+  <div class="frame">
+    <div class="navpane">
+      <div class="nphead">Favorite Links</div>
+      <div id="navlist"></div>
+    </div>
+
+    <div class="content">
+      <div class="stage" id="stage">
+        <div class="said">
+          <div class="modebar" role="group" aria-label="What tapping a tile does">
+            <button id="modeSpeak" class="mode" aria-pressed="true">Tap speaks</button>
+            <button id="modeBuild" class="mode" aria-pressed="false">Tap builds</button>
+          </div>
+          <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
+          <div class="actions" id="speakActions">
+            <button class="act" id="sayAgain" disabled>Say again</button>
+            <button class="act secondary" id="showBig" disabled>Show big</button>
+          </div>
+          <div class="actions three" id="buildActions" hidden>
+            <button class="act" id="buildSay" disabled>Say it</button>
+            <button class="act secondary" id="buildExpand" disabled>Make a sentence</button>
+            <button class="act ghost" id="buildClear" disabled>Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rail" id="rail" role="tablist"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <button id="typeBtn">Type something</button>
+    <button class="card" id="cardBtn">Card</button>
+  </div>
+
+  <div class="details" id="details"></div>
+</div>
+
+  <div class="taskbar">
+    <button class="orb" id="orbBtn" aria-label="Start"></button>
+    <button class="taskbtn" id="taskBtn"><span aria-hidden="true">&#128483;</span> Speechy</button>
+    <div class="tray"><span id="clock"></span></div>
+  </div>
+</div>
+
+<!-- show-big overlay -->
+<div class="overlay" id="bigOverlay" role="dialog" aria-label="Displayed message">
+  <div class="fit"><span id="bigText"></span></div>
+  <div class="hint">Tap anywhere to close</div>
+</div>
+
+<!-- explainer card overlay -->
+<div class="overlay" id="cardOverlay" role="dialog" aria-label="Explainer card">
+  <div class="card-body">
+    <p id="cardText"></p>
+    <p class="small">Tap anywhere to close. Hold Edit on the board to change this.</p>
+  </div>
+</div>
+
+<!-- sentence options sheet -->
+<div class="sheet" id="optSheet" role="dialog" aria-label="Sentence options">
+  <div class="sheet-inner">
+    <h2>Pick a sentence</h2>
+    <div id="optList"></div>
+    <div class="sheet-actions">
+      <button id="optCancel">Back</button>
+      <button class="primary" id="optAgain">Try again</button>
+    </div>
+    <p class="note" id="optNote"></p>
+  </div>
+</div>
+
+<!-- type sheet -->
+<div class="sheet" id="typeSheet" role="dialog" aria-label="Type a message">
+  <div class="sheet-inner">
+    <h2>Type a message</h2>
+    <textarea id="typeInput" placeholder="Write what you want to say" autocomplete="off"></textarea>
+    <div class="sheet-actions">
+      <button id="typeCancel">Cancel</button>
+      <button class="primary" id="typeSpeak">Say it</button>
+    </div>
+    <div class="sheet-actions" style="grid-template-columns:1fr 1fr;margin-top:8px">
+      <button id="typeExpand">Make a sentence</button>
+      <button id="typeShow">Show it big</button>
+    </div>
+  </div>
+</div>
+
+<!-- add phrase sheet -->
+<div class="sheet" id="addSheet" role="dialog" aria-label="Add a phrase">
+  <div class="sheet-inner">
+    <h2 id="addTitle">Add a phrase</h2>
+    <textarea id="addInput" placeholder="Write it out the way you'd say it, as a full sentence"></textarea>
+    <div class="sheet-actions">
+      <button id="addCancel">Cancel</button>
+      <button class="primary" id="addSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- settings sheet -->
+<div class="sheet" id="setSheet" role="dialog" aria-label="Voice settings">
+  <div class="sheet-inner">
+    <h2>Voice</h2>
+    <label for="voiceSel">Which voice</label>
+    <select id="voiceSel"></select>
+    <label for="rate">Speed</label>
+    <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
+    <label for="cardEdit">Card for handing to someone</label>
+    <textarea id="cardEdit"></textarea>
+    <div class="sheet-actions">
+      <button id="setClose">Done</button>
+      <button class="primary" id="setTest">Test the voice</button>
+    </div>
+    <p class="note" id="voiceNote"></p>
+    <div class="sheet-actions" style="grid-template-columns:1fr;margin-top:10px">
+      <button id="resetBtn">Reset board to the original phrases</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+const CATS = [
+  {id:'recent',  name:'Used most', color:'var(--c-recent)'},
+  {id:'quick',   name:'Quick answers', color:'var(--c-now)'},
+  {id:'addon',   name:'Add on', color:'var(--c-people)', compact:true, addon:true},
+  {id:'now',     name:'Right now', color:'var(--c-now)'},
+  {id:'ask',     name:'Questions', color:'var(--c-people)'},
+  {id:'people',  name:'Meeting people', color:'var(--c-people)'},
+  {id:'work',    name:'Work', color:'var(--c-work)'},
+  {id:'hearing', name:'Hearings & calls', color:'var(--c-work)'},
+  {id:'church',  name:'Church & friends', color:'var(--c-church)'},
+  {id:'food',    name:'Eating out', color:'var(--c-around)'},
+  {id:'around',  name:'Getting around', color:'var(--c-around)'},
+  {id:'appts',   name:'Appointments', color:'var(--c-recent)'},
+  {id:'offduty', name:'Off duty', color:'var(--c-joke)', jokes:true}
+];
+
+const JOKE_GROUPS = [
+  {name:"Courtroom", lines:[
+    "Your Honor, I move for a mistrial on the grounds that I forgot what I was going to say.",
+    "Objection. Relevance. Also, that man's tie is a crime.",
+    "The defense rests. The defense also needs a nap.",
+    "I'd approach the bench, but the bench has been distant with me lately.",
+    "Let the record reflect that I absolutely nailed that.",
+    "Counsel, I've reviewed your brief, and I have concerns about the font.",
+    "I'd like to reserve time for rebuttal and also for a sandwich.",
+    "I'm not saying my client is innocent. I'm saying the evidence is a lot of reading.",
+    "I object. Not to anything in particular. Just generally.",
+    "Opposing counsel is being extremely correct and I resent it.",
+    "I'd like to enter this into evidence, mostly because I laminated it."
+  ]},
+  {name:"Church", lines:[
+    "I'd like to add a prayer request for whoever parked across two spaces.",
+    "Great sermon. I was awake for a really solid chunk of it.",
+    "The men's study is doing a deep dive on Leviticus, so pray for us.",
+    "I'm not the most spiritual man here, but I did bring the donuts.",
+    "Save me a seat, just not the one next to the guy who improvises harmony.",
+    "There are three kinds of Jell-O salad at the potluck. Truly, we are blessed.",
+    "I tithe ten percent and I think about the other ninety quite a lot.",
+    "I said amen a half beat early and now I have to live with that."
+  ]},
+  {name:"Medical file", lines:[
+    "I had a brain injury, so I'm legally allowed to say whatever I want now.",
+    "My speech is impaired. My opinions are fully intact.",
+    "Give me a second. I'm buffering.",
+    "I talk slowly so everyone has time to appreciate it.",
+    "I'm not slow. I'm deliberate. Deliberate is billable.",
+    "CP affects my speech, not my taste, which is how I know about that haircut.",
+    "I've had CP my whole life, so I've been perfecting this dramatic pause since birth.",
+    "My neurologist says I'm doing great, which I believe is what they tell everybody.",
+    "I've earned the right to pause dramatically and I intend to use it."
+  ]},
+  {name:"Robot voice", lines:[
+    "This message was brought to you by a rectangle.",
+    "Hello. I am Lance dot exe.",
+    "Beep boop. Attorney at law.",
+    "I have four hundred phrases loaded and I chose this one.",
+    "Everything I say sounds more confident than I actually am.",
+    "I could have said that myself, but the phone has better diction.",
+    "I paid extra for this voice and I regret nothing.",
+    "Please hold. Your attorney is loading.",
+    "I'd like to thank the phone, without whom none of this would be audible."
+  ]},
+  {name:"Nebraska & Idaho", lines:[
+    "In Idaho we had mountains. In Nebraska we have a deeply committed sunset.",
+    "I moved here for a woman and stayed for the corn. Mostly the woman.",
+    "Nebraska has two seasons: football, and waiting for football.",
+    "I'm from Boise, where the potato jokes are exhausted and still land.",
+    "Omaha drivers treat the turn signal as a plot twist.",
+    "People ask if I miss the mountains. No. The mountains should call me.",
+    "Idaho is where I learned that a two hour drive is considered close."
+  ]},
+  {name:"At home", lines:[
+    "Janae says I have one joke. This is a different one.",
+    "I asked my wife to rate that joke and she left the room.",
+    "My wife is why I live in Nebraska. The corn is a bonus.",
+    "Janae is parking the car, which is how she avoids conversations like this.",
+    "I've been told I'm very funny, mostly by me.",
+    "I have a lovely singing voice and absolutely no evidence."
+  ]},
+  {name:"Pure dork", lines:[
+    "I'm reading a book about anti-gravity. Impossible to put down.",
+    "I only know twenty-five letters of the alphabet. I don't know y.",
+    "Parallel lines have so much in common. Shame they'll never meet.",
+    "I used to hate facial hair, but then it grew on me.",
+    "My favorite legal remedy is a nap.",
+    "I'd tell you a UDP joke, but you might not get it.",
+    "I told my computer I needed a break, and now it sends me vacation ads.",
+    "I have a fear of speed bumps, but I'm slowly getting over it.",
+    "A boiled egg every morning is hard to beat.",
+    "I bought shoes from a drug dealer. No idea what he laced them with, but I was tripping all day."
+  ]}
+];
+
+const BASE = {
+  addon:[
+    "please.","thank you.","if you don't mind.","if that works for you.",
+    "when you get a chance.","no rush.","as soon as you can.","one more time.",
+    "in the morning.","this afternoon.","later today.","before Friday.",
+    "by the end of the week.","next week.","on Sunday.","sometime soon.",
+    "with Janae.","with my co-counsel.","at your office.","over coffee.",
+    "by email.","in writing.","instead.","but not today.",
+    "and could you let me know?","and send me a copy.","and I'll follow up in writing.",
+    "and I'll be there."
+  ],
+  quick:[
+    "Yes, that's right.",
+    "No, thank you.",
+    "That works for me.",
+    "I'm not sure yet.",
+    "Let me think about that for a second.",
+    "I don't think so.",
+    "Thank you, I appreciate it.",
+    "I'm sorry, I missed that.",
+    "Could you give me a minute?",
+    "I'm doing all right, thank you.",
+    "That's exactly what I meant.",
+    "That's not quite what I meant.",
+    "You're close. Keep going.",
+    "Never mind, it wasn't important.",
+    "I'll come back to that in a minute.",
+    "Let me start that over."
+  ],
+  now:[
+    "Give me a second and I'll get there.",
+    "I'm still working on the words.",
+    "Could you say that again, please?",
+    "Could you slow down a little for me?",
+    "Let's sit down somewhere.",
+    "I need to take a short break.",
+    "Could I get a glass of water?",
+    "I'd rather not, thank you.",
+    "I'm going to type this out instead.",
+    "It's easier if I show you on the screen.",
+    "I understand you fine. It just takes me a moment.",
+    "I'm tired, but I'm okay."
+  ],
+  ask:[
+    "What do you think about that?",
+    "Where should I go from here?",
+    "Who should I be talking to?",
+    "When do you need this by?",
+    "How much does that cost?",
+    "Could you help me with something?",
+    "Is there a quieter place we could talk?",
+    "Could you write that down for me?",
+    "Do you have a minute to talk?",
+    "Would you tell me more about that?",
+    "Am I in the right place?",
+    "What happens next?"
+  ],
+  people:[
+    "It's good to meet you. My name is Lance.",
+    "My speech is affected, but I understand everything just fine.",
+    "Please talk to me the way you'd talk to anyone else.",
+    "I have cerebral palsy, and it affects my speech.",
+    "Give me a moment and I'll get the words out.",
+    "I'd much rather meet in person than talk on the phone.",
+    "Could we get coffee instead of doing a call?",
+    "Email is the easiest way to reach me.",
+    "This is my wife, Janae.",
+    "I'm an attorney here in Omaha.",
+    "I've spent time in both Nebraska and Idaho.",
+    "Boise is home for me too."
+  ],
+  work:[
+    "I'm an attorney, and I work on disability and Medicaid cases.",
+    "I'm here for a meeting with your office.",
+    "Could you email me instead of calling?",
+    "I'd like to think that over before I answer.",
+    "Let me write that down so I have it.",
+    "Could you send me the documents when you get a chance?",
+    "I'll follow up with you in writing.",
+    "I'm very interested in the position.",
+    "What does the timeline look like?",
+    "I'll have that to you by Friday.",
+    "I'm coming back to practice after an injury.",
+    "I take contract work and appellate writing.",
+    "Most of my work is Medicaid and disability access.",
+    "I also handle timeshare rescission and Social Security appeals.",
+    "I'd like to be considered for hearing officer work.",
+    "Send me the file and I'll review it this week.",
+    "Let me check with my co-counsel before I commit.",
+    "I'll put my thoughts in a memo for you.",
+    "Could we push that meeting to the morning?",
+    "Meeting in person works much better for me than a call."
+  ],
+  hearing:[
+    "Good morning. Lance Pounds, appearing for the claimant.",
+    "May I have a moment, please?",
+    "Could we take a short recess?",
+    "I'd like to respond to that in writing.",
+    "Could the witness repeat that answer?",
+    "I'd like to offer this as an exhibit.",
+    "My full position is set out in the brief.",
+    "I'd like to reserve time for rebuttal.",
+    "Could you speak up a little, please?",
+    "Give me a second to find that page.",
+    "Could we go off the record for a moment?",
+    "I'll rest on the record for that point."
+  ],
+  church:[
+    "It's good to see you.",
+    "How are you doing, really?",
+    "Let's get coffee sometime soon.",
+    "I'll be there for the men's study.",
+    "Would you save me a seat?",
+    "I've been praying for you.",
+    "I'm dropping Janae off at her study.",
+    "Count me in for that.",
+    "I'll bring something to share.",
+    "Thank you for asking.",
+    "I'll see you on Sunday.",
+    "I'm helping with Grief Share this year.",
+    "Come sit with us.",
+    "Can I pray for you about that?"
+  ],
+  food:[
+    "Could I see a menu, please?",
+    "I need another minute to decide.",
+    "I'll have water, no ice.",
+    "I'd like a coffee, black.",
+    "I'll have the same thing he's having.",
+    "Could you read me the specials?",
+    "Could we get separate checks?",
+    "Could we sit somewhere quieter?",
+    "That's all for me, thank you.",
+    "Could I get a box for this?",
+    "We're ready for the check whenever you are.",
+    "That was very good, thank you."
+  ],
+  around:[
+    "Which way is the elevator?",
+    "I'm running about ten minutes late.",
+    "I'll drive, it's no trouble.",
+    "Could you text me instead of calling?",
+    "Could you give me one moment?",
+    "I'm looking for the front desk.",
+    "Could you point me in the right direction?",
+    "Thank you, I appreciate your help.",
+    "I'm here for a ten o'clock appointment.",
+    "Where do I check in?",
+    "I'm flying out to Boise.",
+    "I'm parked right out front."
+  ],
+  appts:[
+    "Could you write those instructions down for me?",
+    "Could you say that again more slowly?",
+    "My speech is the main thing I'm working on.",
+    "I tire out faster than I used to.",
+    "Mornings work much better for me.",
+    "Could you send the instructions by email?",
+    "Let me repeat that back to make sure I have it.",
+    "Who should I follow up with?",
+    "Could Janae come back with me?",
+    "I'd like to have that in writing before I decide."
+  ]
+};
+
+const CARD_OLD =
+  "My speech is affected by an injury.\n\nI understand you completely — please talk to me normally, and give me a moment to answer.\n\nThank you.";
+const CARD_DEFAULT =
+  "My speech is affected by cerebral palsy.\n\nI understand you completely. Please talk to me normally, and give me a moment to answer.\n\nThank you.";
+const RETIRED_PHRASES = ["I had a brain injury last year, and my speech is still coming back."];
+
+let custom = {};      // {catId: [phrases]}
+let removed = {};     // {catId: [phrases removed from BASE]}
+let counts  = {};     // {phrase: n}
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
+let activeCat = 'now';
+let editing = false;
+let lastSaid = '';
+let buffer = '';
+let mode = 'speak';
+let addTarget = null;
+
+/* ------------------------------------------------------------- storage */
+/* Works in three places: a published page (claude db, syncs across your
+   devices), the chat preview (window.storage), or a plain saved file
+   (localStorage). Falls back to memory-only rather than breaking. */
+let backend = 'memory', dbDoc = null;
+
+async function initBackend(){
+  try{
+    if(window.claude && typeof window.claude.use === 'function'){
+      const db = await window.claude.use('db');
+      if(db){ dbDoc = db.doc('board/main'); backend = 'db'; return; }
+    }
+  }catch(e){}
+  if(window.storage && window.storage.get){ backend = 'storage'; return; }
+  try{
+    localStorage.setItem('aac:probe','1'); localStorage.removeItem('aac:probe');
+    backend = 'local';
+  }catch(e){ backend = 'memory'; }
+}
+
+function apply(raw){
+  if(!raw) return;
+  custom = raw.custom || {}; removed = raw.removed || {};
+  counts = raw.counts || {}; settings = Object.assign(settings, raw.settings || {});
+  // the saved card still carries the old "injury" wording unless he edited it himself
+  let changed = false;
+  if(settings.card === CARD_OLD){ settings.card = CARD_DEFAULT; changed = true; }
+  RETIRED_PHRASES.forEach(p=>{ if(counts[p] !== undefined){ delete counts[p]; changed = true; } });
+  if(changed) save();
+}
+
+async function load(){
+  try{
+    if(backend === 'db'){
+      const snap = await dbDoc.get();
+      if(snap.exists) apply(snap.data());
+    } else if(backend === 'storage'){
+      const r = await window.storage.get('aac:board');
+      if(r && r.value) apply(JSON.parse(r.value));
+    } else if(backend === 'local'){
+      const v = localStorage.getItem('aac:board');
+      if(v) apply(JSON.parse(v));
+    }
+  }catch(e){ /* nothing saved yet, or storage unavailable — defaults stand */ }
+}
+
+let saveTimer;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    const payload = {custom, removed, counts, settings};
+    try{
+      if(backend === 'db') await dbDoc.set(payload);
+      else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
+      else if(backend === 'local') localStorage.setItem('aac:board', JSON.stringify(payload));
+    }catch(e){ console.error('Could not save', e); }
+  }, 300);
+}
+
+/* --------------------------------------------------------------- speech */
+let voices = [];
+function loadVoices(){
+  if(!window.speechSynthesis) return;
+  voices = speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
+  const sel = document.getElementById('voiceSel');
+  sel.innerHTML = '';
+  if(!voices.length){
+    sel.innerHTML = '<option>Device default</option>';
+  } else {
+    voices.forEach(v=>{
+      const o = document.createElement('option');
+      o.value = v.voiceURI; o.textContent = v.name;
+      if(v.voiceURI === settings.voiceURI) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+  document.getElementById('voiceNote').textContent = window.speechSynthesis
+    ? 'If the room is loud, Show big works better than the voice.'
+    : 'This device will not play a voice. Show big and the card still work.';
+}
+if(window.speechSynthesis){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function speak(text){
+  if(!text) return;
+  lastSaid = text;
+  renderSaid();
+  if(!window.speechSynthesis){ showBig(text); return; }
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = settings.rate;
+    const v = voices.find(v=>v.voiceURI===settings.voiceURI);
+    if(v) u.voice = v;
+    speechSynthesis.speak(u);
+  }catch(e){ showBig(text); }
+}
+
+function bump(p){ counts[p] = (counts[p]||0)+1; save(); }
+
+/* ---------------------------------------------------------------- render */
+function phrasesFor(cat){
+  if(cat === 'recent'){
+    return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,12);
+  }
+  const gone = removed[cat] || [];
+  if(cat === 'offduty'){
+    return JOKE_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom.offduty || []);
+  }
+  return (BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]);
+}
+
+function renderSaid(){
+  const el = document.getElementById('saidText');
+  const build = mode === 'build';
+  document.getElementById('speakActions').hidden = build;
+  document.getElementById('buildActions').hidden = !build;
+  document.getElementById('modeSpeak').setAttribute('aria-pressed', !build);
+  document.getElementById('modeBuild').setAttribute('aria-pressed', build);
+
+  const text = build ? buffer : lastSaid;
+  if(text){ el.textContent = text; el.classList.remove('empty'); }
+  else {
+    el.textContent = build
+      ? 'Tap words and phrases. They collect here.'
+      : 'Tap a phrase and it speaks.';
+    el.classList.add('empty');
+  }
+  document.getElementById('sayAgain').disabled = !lastSaid;
+  document.getElementById('showBig').disabled  = !lastSaid;
+  document.getElementById('buildSay').disabled    = !buffer;
+  document.getElementById('buildExpand').disabled = !buffer;
+  document.getElementById('buildClear').disabled  = !buffer;
+  measure();
+}
+
+function addToBuffer(fragment, isAddon){
+  const f = fragment.trim();
+  if(!buffer){
+    buffer = isAddon ? f.charAt(0).toUpperCase() + f.slice(1) : f;
+    renderSaid();
+    return;
+  }
+  if(isAddon){
+    // attach to the end of what's there: "I'll have it to you." + "before Friday."
+    // becomes "I'll have it to you before Friday."
+    const ended = (buffer.match(/([.?!])\s*$/) || [])[1] || '';
+    let joined = buffer.replace(/[.?!]\s*$/, '') + ' ' + f;
+    if(ended === '?' && /\.$/.test(joined)) joined = joined.replace(/\.$/, '?');
+    buffer = joined;
+  } else if(/[.?!]\s*$/.test(buffer)){
+    // two complete sentences stay two sentences
+    buffer = buffer.replace(/\s*$/, '') + ' ' + f;
+  } else {
+    buffer = buffer + ' ' + f;
+  }
+  renderSaid();
+}
+
+function selectCat(c){
+  activeCat = c.id;
+  if(c.addon){
+    if(mode !== 'build') mode = 'build';
+    if(!buffer && lastSaid) buffer = lastSaid;
+  }
+  const q = document.getElementById('search');
+  if(q) q.value = '';
+  renderRail(); renderGrid(); renderSaid();
+}
+
+function renderRail(){
+  const rail = document.getElementById('rail');
+  const nav  = document.getElementById('navlist');
+  rail.innerHTML = ''; if(nav) nav.innerHTML = '';
+  CATS.forEach(c=>{
+    if(nav){
+      const n = document.createElement('button');
+      n.className = 'navitem';
+      n.setAttribute('aria-selected', c.id===activeCat);
+      n.style.setProperty('--cat', c.color);
+      const d = document.createElement('span'); d.className='dot';
+      n.appendChild(d);
+      n.appendChild(document.createTextNode(c.name));
+      n.onclick = ()=> selectCat(c);
+      nav.appendChild(n);
+    }
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = c.name; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', c.id===activeCat);
+    b.style.setProperty('--cat', c.color);
+    b.onclick = ()=>{
+      activeCat = c.id;
+      if(c.addon){
+        if(mode !== 'build') mode = 'build';
+        if(!buffer && lastSaid) buffer = lastSaid;
+      }
+      renderRail(); renderGrid(); renderSaid();
+    };
+    rail.appendChild(b);
+  });
+}
+
+function makeTile(p, cat, noDel){
+  const t = document.createElement('button');
+  t.className = 'tile' + (!cat.compact && p.length > 62 ? ' wide' : '');
+  t.style.setProperty('--cat', cat.color);
+  t.textContent = p;
+  t.onclick = ()=>{
+    if(editing) return;
+    if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
+    else { speak(p); bump(p); }
+  };
+  if(editing && activeCat !== 'recent' && !noDel){
+    const x = document.createElement('span');
+    x.className='del'; x.textContent='×'; x.setAttribute('aria-label','Remove phrase');
+    x.onclick = (e)=>{ e.stopPropagation(); removePhrase(activeCat, p); };
+    t.appendChild(x);
+  }
+  return t;
+}
+
+function renderJokes(grid, cat){
+  const warn = document.createElement('div');
+  warn.className = 'addon-note';
+  warn.textContent = 'Not for hearings. Probably not for church either.';
+  grid.appendChild(warn);
+
+  const rnd = document.createElement('button');
+  rnd.className = 'tile random';
+  rnd.textContent = 'Say a random one';
+  rnd.onclick = ()=>{
+    if(editing) return;
+    const all = phrasesFor('offduty');
+    if(!all.length) return;
+    const p = all[Math.floor(Math.random()*all.length)];
+    if(mode === 'build'){ addToBuffer(p, false); } else { speak(p); bump(p); }
+  };
+  grid.appendChild(rnd);
+
+  const gone = removed.offduty || [];
+  const groups = JOKE_GROUPS
+    .map(g=>({name:g.name, lines:g.lines.filter(l=>!gone.includes(l))}))
+    .filter(g=>g.lines.length);
+  const mine = (custom.offduty || []).filter(Boolean);
+  if(mine.length) groups.push({name:'Yours', lines:mine});
+
+  groups.forEach(g=>{
+    const h = document.createElement('div');
+    h.className = 'group-head'; h.textContent = g.name;
+    grid.appendChild(h);
+    g.lines.forEach(p=> grid.appendChild(makeTile(p, cat)));
+  });
+}
+
+function searchAll(q){
+  const needle = q.toLowerCase();
+  const out = [];
+  CATS.forEach(c=>{
+    if(c.id === 'recent') return;
+    phrasesFor(c.id).forEach(p=>{
+      if(p.toLowerCase().includes(needle)) out.push({p:p, cat:c});
+    });
+  });
+  return out;
+}
+
+function setStatus(n, what){
+  const d = document.getElementById('details');
+  if(d) d.textContent = n + ' ' + (n === 1 ? 'item' : 'items') + (what ? '  |  ' + what : '');
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const cat = CATS.find(c=>c.id===activeCat);
+  const crumb = document.getElementById('crumb');
+  const sq = document.getElementById('search');
+  const query = sq ? sq.value.trim() : '';
+  grid.innerHTML = '';
+
+  if(query){
+    grid.className = 'grid';
+    const hits = searchAll(query);
+    if(crumb) crumb.textContent = 'Search Results';
+    if(!hits.length){
+      const d = document.createElement('div');
+      d.className = 'empty-note';
+      d.textContent = 'No phrases match that search.';
+      grid.appendChild(d);
+    }
+    hits.forEach(h=> grid.appendChild(makeTile(h.p, h.cat, true)));
+    setStatus(hits.length, 'matching "' + query + '"');
+    return;
+  }
+
+  grid.className = 'grid' + (cat.compact ? ' compact' : '');
+  grid.style.setProperty('--cat', cat.color);
+  if(crumb) crumb.textContent = cat.name;
+  const list = phrasesFor(activeCat);
+  setStatus(list.length, cat.name);
+
+  if(cat.addon){
+    const n = document.createElement('div');
+    n.className = 'addon-note';
+    n.textContent = 'These attach to the end of the sentence in the bar above.';
+    grid.appendChild(n);
+  }
+
+  if(cat.jokes){
+    renderJokes(grid, cat);
+  } else {
+    if(!list.length){
+      const d = document.createElement('div');
+      d.className = 'empty-note';
+      d.textContent = activeCat==='recent'
+        ? 'Phrases you use will collect here, most-used first.'
+        : 'Nothing here yet. Add a phrase below.';
+      grid.appendChild(d);
+    }
+    list.forEach(p=> grid.appendChild(makeTile(p, cat)));
+  }
+
+  if(editing && activeCat!=='recent'){
+    const a = document.createElement('button');
+    a.className='addtile'; a.textContent='+ Add a phrase to ' + cat.name;
+    a.onclick = ()=>openAdd(activeCat);
+    grid.appendChild(a);
+  }
+}
+
+function removePhrase(cat, p){
+  if((custom[cat]||[]).includes(p)) custom[cat] = custom[cat].filter(x=>x!==p);
+  else { removed[cat] = (removed[cat]||[]).concat([p]); }
+  save(); renderGrid();
+}
+
+/* ------------------------------------------------------------- overlays */
+function fitText(spanId, containerId, text){
+  const span = document.getElementById(spanId);
+  const box  = document.getElementById(containerId);
+  span.textContent = text;
+  const w = box.clientWidth || window.innerWidth;
+  const h = box.clientHeight || window.innerHeight * 0.7;
+  const len = Math.max(text.length, 4);
+  let size = Math.sqrt((w*h*0.40)/len);
+  size = Math.max(26, Math.min(150, size));
+  span.style.fontSize = size + 'px';
+}
+function showBig(text){
+  const o = document.getElementById('bigOverlay');
+  o.classList.add('open');
+  requestAnimationFrame(()=>fitText('bigText','bigOverlay',text));
+}
+document.getElementById('bigOverlay').onclick = e => e.currentTarget.classList.remove('open');
+document.getElementById('cardOverlay').onclick = e => e.currentTarget.classList.remove('open');
+
+/* ------------------------------------------------- sentence expansion */
+const GUIDE =
+  "You help a man named Lance speak. He is an attorney in Omaha; he has cerebral " +
+  "palsy, which affects his speech, so he taps shorthand into a communication board and " +
+  "you turn it into the full sentence he means to say out loud.\n" +
+  "Rules: write in his first person. Natural spoken English, the way a capable " +
+  "professional adult talks. Warm and direct, never flowery, never childlike, never " +
+  "apologetic on his behalf. Keep it to what he actually indicated: do not invent " +
+  "names, times, facts, or reasons he did not give. If the shorthand is already a " +
+  "fine sentence, tighten it rather than padding it. No em dashes.\n" +
+  "Give three versions: one plain and complete, one shorter and blunter, one more " +
+  "formal for work or a hearing.\n" +
+  "Return ONLY a JSON array of three strings, no other text.";
+
+let sampleNS;
+async function getSample(){
+  if(sampleNS !== undefined) return sampleNS;
+  sampleNS = null;
+  try{
+    if(window.claude && typeof window.claude.use === 'function'){
+      sampleNS = await window.claude.use('sample');
+    }
+  }catch(e){ sampleNS = null; }
+  return sampleNS;
+}
+
+function coerce(out){
+  let arr = out;
+  if(typeof arr === 'string'){
+    try{ arr = JSON.parse(arr.replace(/```json|```/g,'').trim()); }catch(e){ arr = [out]; }
+  }
+  if(arr && !Array.isArray(arr) && Array.isArray(arr.options)) arr = arr.options;
+  if(!Array.isArray(arr)) return [];
+  return arr.filter(x=>typeof x === 'string' && x.trim()).slice(0,3);
+}
+
+async function makeSentences(shorthand){
+  const input = GUIDE + "\n\nShorthand: " + shorthand;
+  const s = await getSample();
+  if(s){
+    return coerce(await s.json(input, {modelTier:'quick'}));
+  }
+  // chat preview path
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model:"claude-sonnet-4-6", max_tokens:1000,
+      messages:[{role:"user", content:input}]
+    })
+  });
+  const data = await r.json();
+  const text = (data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
+  return coerce(text);
+}
+
+const optSheet = document.getElementById('optSheet');
+let optSource = '';
+
+async function openOptions(shorthand){
+  optSource = shorthand;
+  optSheet.classList.add('open');
+  const list = document.getElementById('optList');
+  const note = document.getElementById('optNote');
+  list.innerHTML = '<div class="thinking">Working on it...</div>';
+  note.textContent = '';
+  try{
+    const opts = await makeSentences(shorthand);
+    if(!opts.length) throw new Error('none');
+    list.innerHTML = '';
+    opts.forEach(o=>{
+      const b = document.createElement('button');
+      b.className = 'opt'; b.textContent = o;
+      b.onclick = ()=>{
+        buffer = o; lastSaid = o;
+        optSheet.classList.remove('open');
+        renderSaid(); speak(o); bump(o);
+      };
+      list.appendChild(b);
+    });
+    note.textContent = 'Tap one to say it. It stays in the bar, so you can show it big or add it to the board.';
+  }catch(e){
+    list.innerHTML = '<div class="thinking">Could not reach Claude just now. Your words are still in the bar, and Say it works as is.</div>';
+  }
+}
+
+document.getElementById('optCancel').onclick = ()=> optSheet.classList.remove('open');
+document.getElementById('optAgain').onclick = ()=> openOptions(optSource);
+
+/* ------------------------------------------------------------ mode wiring */
+document.getElementById('modeSpeak').onclick = ()=>{ mode='speak'; renderSaid(); };
+document.getElementById('modeBuild').onclick = ()=>{ mode='build'; renderSaid(); };
+document.getElementById('buildSay').onclick = ()=>{ if(buffer){ speak(buffer); bump(buffer); } };
+document.getElementById('buildExpand').onclick = ()=>{ if(buffer) openOptions(buffer); };
+document.getElementById('buildClear').onclick = ()=>{ buffer=''; renderSaid(); };
+document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
+document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);
+
+document.getElementById('editBtn').onclick = (e)=>{
+  editing = !editing;
+  e.currentTarget.setAttribute('aria-pressed', editing);
+  e.currentTarget.textContent = editing ? 'Done' : 'Organize';
+  renderGrid();
+};
+
+const typeSheet = document.getElementById('typeSheet');
+document.getElementById('typeBtn').onclick = ()=>{
+  typeSheet.classList.add('open');
+  const i = document.getElementById('typeInput'); i.value=''; setTimeout(()=>i.focus(),50);
+};
+document.getElementById('typeCancel').onclick = ()=> typeSheet.classList.remove('open');
+document.getElementById('typeSpeak').onclick = ()=>{
+  const v = document.getElementById('typeInput').value.trim();
+  if(v){ speak(v); bump(v); }
+  typeSheet.classList.remove('open');
+};
+document.getElementById('typeExpand').onclick = ()=>{
+  const v = document.getElementById('typeInput').value.trim();
+  if(!v) return;
+  buffer = v; mode = 'build'; renderSaid();
+  typeSheet.classList.remove('open');
+  openOptions(v);
+};
+document.getElementById('typeShow').onclick = ()=>{
+  const v = document.getElementById('typeInput').value.trim();
+  if(v){ lastSaid = v; renderSaid(); bump(v); showBig(v); }
+  typeSheet.classList.remove('open');
+};
+
+document.getElementById('cardBtn').onclick = ()=>{
+  document.getElementById('cardText').textContent = settings.card;
+  document.getElementById('cardOverlay').classList.add('open');
+};
+
+const addSheet = document.getElementById('addSheet');
+function openAdd(cat){
+  addTarget = cat;
+  document.getElementById('addTitle').textContent =
+    'Add to ' + CATS.find(c=>c.id===cat).name;
+  const i = document.getElementById('addInput'); i.value='';
+  addSheet.classList.add('open'); setTimeout(()=>i.focus(),50);
+}
+document.getElementById('addCancel').onclick = ()=> addSheet.classList.remove('open');
+document.getElementById('addSave').onclick = ()=>{
+  const v = document.getElementById('addInput').value.trim();
+  if(v && addTarget){ custom[addTarget] = (custom[addTarget]||[]).concat([v]); save(); renderGrid(); }
+  addSheet.classList.remove('open');
+};
+
+const setSheet = document.getElementById('setSheet');
+document.getElementById('setBtn').onclick = ()=>{
+  document.getElementById('rate').value = settings.rate;
+  document.getElementById('cardEdit').value = settings.card;
+  setSheet.classList.add('open');
+};
+document.getElementById('setClose').onclick = ()=>{
+  settings.card = document.getElementById('cardEdit').value;
+  save(); setSheet.classList.remove('open');
+};
+document.getElementById('setTest').onclick = ()=> speak('This is how my voice sounds.');
+document.getElementById('rate').oninput = e=>{ settings.rate = parseFloat(e.target.value); save(); };
+document.getElementById('voiceSel').onchange = e=>{ settings.voiceURI = e.target.value; save(); };
+document.getElementById('resetBtn').onclick = ()=>{
+  custom={}; removed={}; save(); renderGrid();
+  setSheet.classList.remove('open');
+};
+
+// keep the category rail pinned right under the compose bar
+function measure(){
+  const h = document.getElementById('stage').offsetHeight;
+  document.documentElement.style.setProperty('--stageH', h + 'px');
+}
+window.addEventListener('resize', measure);
+
+/* ------------------------------------------------------------------ boot */
+const fsBtn = document.getElementById('fsBtn');
+const root = document.documentElement;
+if(!(root.requestFullscreen || root.webkitRequestFullscreen)){
+  fsBtn.style.display = 'none';
+}
+fsBtn.onclick = ()=>{
+  try{
+    if(!document.fullscreenElement && !document.webkitFullscreenElement){
+      (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+      fsBtn.textContent = 'Exit full screen';
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      fsBtn.textContent = 'Full screen';
+    }
+  }catch(e){}
+};
+const searchEl = document.getElementById('search');
+if(searchEl){
+  let t;
+  searchEl.oninput = ()=>{ clearTimeout(t); t = setTimeout(renderGrid, 120); };
+}
+
+// caption buttons: maximize does the real thing, the other two are 2007 set dressing
+function applyTheme(){
+  const t = (settings.theme || 'auto');
+  const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = t === 'dark' || (t === 'auto' && sysDark);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const b = document.getElementById('themeBtn');
+  if(b) b.textContent = dark ? 'Light theme' : 'Dark theme';
+}
+document.getElementById('themeBtn').onclick = ()=>{
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  settings.theme = isDark ? 'light' : 'dark';
+  applyTheme(); save();
+};
+if(window.matchMedia){
+  try{
+    matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', ()=>{ if((settings.theme||'auto')==='auto') applyTheme(); });
+  }catch(e){}
+}
+
+function setWindowState(st){
+  document.body.className = 'state-' + st;
+  if(st === 'open'){ measure(); }
+  else if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} }
+}
+setWindowState('open');
+
+document.getElementById('maxBtn').onclick = ()=> fsBtn.click();
+document.getElementById('minBtn').onclick = ()=> setWindowState('min');
+document.getElementById('closeBtn').onclick = ()=>{
+  setWindowState('closed');
+  // a browser tab can only be script-closed if a script opened it; if this page
+  // was launched that way, honour it, otherwise the desktop below is the close
+  try{ window.close(); }catch(e){}
+};
+document.getElementById('deskIcon').onclick = ()=> setWindowState('open');
+document.getElementById('taskBtn').onclick = ()=> setWindowState('open');
+document.getElementById('orbBtn').onclick = ()=> setWindowState('open');
+
+function tickClock(){
+  const el = document.getElementById('clock');
+  if(!el) return;
+  el.textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+}
+tickClock(); setInterval(tickClock, 20000);
+document.getElementById('backBtn').onclick = ()=>{
+  const i = CATS.findIndex(c=>c.id===activeCat);
+  selectCat(CATS[(i - 1 + CATS.length) % CATS.length]);
+};
+document.getElementById('fwdBtn').onclick = ()=>{
+  const i = CATS.findIndex(c=>c.id===activeCat);
+  selectCat(CATS[(i + 1) % CATS.length]);
+};
+
+document.addEventListener('fullscreenchange', ()=>{
+  fsBtn.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+  measure();
+});
+
+(async function(){
+  applyTheme();
+  renderSaid(); renderRail(); renderGrid(); measure();
+  if(window.speechSynthesis) loadVoices();
+  await initBackend();
+  await load();
+  applyTheme();
+  renderGrid(); renderSaid(); measure();
+  if(window.speechSynthesis) loadVoices();
+})();
+</script>
+</body>
+</html>
