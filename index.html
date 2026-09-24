@@ -39,130 +39,23 @@
   body{
     margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.35;
     overscroll-behavior:none;
-    /* a sky over a rolling green hill */
-    background:
-      radial-gradient(140% 60% at 30% 108%, #3F9A1E 0%, #4DA82A 38%, #5BB935 52%, transparent 53%),
-      radial-gradient(120% 55% at 90% 112%, #2F8317 0%, #45A024 45%, transparent 46%),
-      radial-gradient(60px 26px at 22% 22%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
-      radial-gradient(140px 40px at 30% 24%, rgba(255,255,255,.85), rgba(255,255,255,0) 70%),
-      radial-gradient(200px 50px at 72% 16%, rgba(255,255,255,.75), rgba(255,255,255,0) 70%),
-      radial-gradient(120px 34px at 80% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 70%),
-      linear-gradient(180deg,#2B6CD8 0%,#4C8FEA 35%,#86B8F2 62%,#BFD9F7 78%);
-    background-attachment:fixed;
+    background:var(--face);
   }
   [hidden]{display:none !important}
   .sheet-inner > textarea,.sheet-inner > select,.sheet-inner > input{width:calc(100% - 28px)}
   button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
   :focus-visible{outline:1px dotted #000;outline-offset:-4px}
 
-  .desktop{min-height:100%;display:flex;padding:0;position:relative}
-
-  /* window states */
-  body.state-min .window,body.state-closed .window{display:none}
-  body.state-open .deskicons,body.state-open .taskbar{display:none}
-  body.state-closed .taskbtn{display:none}
-
-  .deskicons{position:absolute;top:calc(18px + env(safe-area-inset-top));left:16px;z-index:2}
-  .deskicon{display:flex;flex-direction:column;align-items:center;gap:4px;width:88px;padding:6px 4px}
-  .deskicon .ic{font-size:34px;line-height:44px;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.45))}
-  .deskicon .lbl{
-    font-size:12px;color:#fff;line-height:1.25;padding:1px 3px;
-    text-shadow:1px 1px 1px #000;
-  }
-  .deskicon:hover .lbl,.deskicon:focus .lbl{background:#316AC5;text-shadow:none}
-
-  /* ---- taskbar ---- */
-  .taskbar{
-    position:fixed;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:stretch;gap:6px;
-    height:calc(38px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
-    background:linear-gradient(180deg,#1F2F86 0%,#3165C4 3%,#3682E5 6%,#4490E6 10%,#3883E5 12%,
-               #2B71E0 15%,#2663DA 18%,#235BD6 20%,#2258D5 23%,#2157D6 38%,#245DDB 54%,
-               #2562DF 86%,#245FDC 89%,#2158D4 92%,#1D4EC0 95%,#1941A5 98%);
-  }
-  .orb{
-    display:flex;align-items:center;gap:6px;padding:0 22px 0 10px;flex:0 0 auto;
-    border-radius:0 12px 12px 0;
-    background:linear-gradient(180deg,#388E38 0%,#5DB45D 8%,#41A541 22%,#3C9D3C 50%,#358E35 80%,#2E7D2E 100%);
-    box-shadow:inset -2px 0 4px rgba(0,0,0,.35),inset 0 1px 2px rgba(255,255,255,.45);
-    color:#fff;font:italic bold 19px/1 var(--titlefont);text-shadow:1px 1px 2px rgba(0,0,0,.6);
-  }
-  .orb::before{
-    content:"";width:20px;height:20px;border-radius:3px;
-    background:
-      linear-gradient(#F35325,#F35325) 0 0/9px 9px no-repeat,
-      linear-gradient(#81BC06,#81BC06) 11px 0/9px 9px no-repeat,
-      linear-gradient(#05A6F0,#05A6F0) 0 11px/9px 9px no-repeat,
-      linear-gradient(#FFBA08,#FFBA08) 11px 11px/9px 9px no-repeat;
-    transform:skewY(-4deg);filter:drop-shadow(1px 1px 1px rgba(0,0,0,.5));
-  }
-  .orb::after{content:"start"}
-  .orb:hover{filter:brightness(1.1)}
-  .taskbtn{
-    align-self:center;height:30px;padding:0 12px;border-radius:3px;font-size:12px;color:#fff;
-    min-width:150px;max-width:220px;text-align:left;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    background:linear-gradient(180deg,#3C81F3 0%,#3169E0 100%);
-    border:1px solid #1D3F99;box-shadow:inset 1px 1px 0 rgba(255,255,255,.3);
-  }
-  .taskbtn:hover{background:linear-gradient(180deg,#5394F7,#3B78EA)}
-  .tray{
-    margin-left:auto;display:flex;align-items:center;padding:0 14px;font-size:12px;color:#fff;
-    background:linear-gradient(180deg,#0C59B9 0%,#139EE9 5%,#18B5F2 10%,#139BEB 15%,
-               #1290E8 50%,#0D8DEA 85%,#0E7AD6 100%);
-    border-left:1px solid #092E51;box-shadow:inset 1px 0 1px #18BBFF;
-  }
-
-  /* ================= the window ================= */
+  /* ================= the app ================= */
   .window{
-    flex:1;display:flex;flex-direction:column;min-height:100vh;min-height:100%;
+    display:flex;flex-direction:column;height:100vh;height:100dvh;
     background:var(--face);overflow:hidden;
   }
-  @media (min-width:900px){
-    .desktop{padding:22px 20px 30px}
-    .window{
-      max-width:1240px;margin:0 auto;min-height:0;height:calc(100vh - 52px);
-      border:3px solid var(--frame);border-top:none;border-radius:8px 8px 0 0;
-      box-shadow:2px 3px 14px rgba(0,0,0,.5);
-    }
-  }
-
-  /* ---- Luna title bar ---- */
-  .titlebar{
-    display:flex;align-items:center;gap:7px;padding:5px 5px 5px 8px;position:relative;
-    background:var(--title);border-radius:inherit;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
-    padding-top:calc(5px + env(safe-area-inset-top));
-  }
-  @media (min-width:900px){ .titlebar{margin:0 -3px;border-radius:8px 8px 0 0} }
-  .ticon{font-size:16px;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.4))}
-  .caption{
-    font:bold 15px/1.2 var(--titlefont);color:#fff;letter-spacing:.2px;
-    text-shadow:1px 1px 0 #0A1883;
-  }
-  .caps{margin-left:auto;display:flex;gap:2px}
-  .cap{
-    width:23px;height:23px;border:1px solid #fff;border-radius:3px;
-    display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(circle at 90% 90%,#0054E9 0%,#2263D5 55%,#4480F2 80%,#78A4F6 100%);
-    box-shadow:inset -1px -1px 1px rgba(0,0,0,.25);
-  }
-  .cap i{display:block;background:#fff}
-  .cap.min i{width:8px;height:3px;margin-top:9px;margin-right:4px}
-  .cap.max i{width:11px;height:11px;background:none;border:1px solid #fff;border-top-width:3px}
-  .cap.close{
-    background:radial-gradient(circle at 90% 90%,#CC4600 0%,#DC6527 55%,#E5936C 80%,#F1BDA5 100%);
-  }
-  .cap.close i{width:12px;height:12px;background:none;position:relative}
-  .cap.close i::before,.cap.close i::after{
-    content:"";position:absolute;left:-1px;top:5px;width:14px;height:2px;background:#fff;
-  }
-  .cap.close i::before{transform:rotate(45deg)}
-  .cap.close i::after{transform:rotate(-45deg)}
-  .cap:hover{filter:brightness(1.15)}
 
   /* ---- address bar ---- */
   .navbar{
     display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--face);
+    padding-top:calc(4px + env(safe-area-inset-top));
     border-bottom:1px solid #fff;box-shadow:0 1px 0 var(--face-dk);
   }
   .navbtn{
@@ -407,14 +300,8 @@
     --btn:linear-gradient(180deg,#4A4A4A 0%,#3C3C3C 45%,#333 85%,#262626 100%);
     --btnpress:linear-gradient(180deg,#1C1C1C,#2A2A2A);
   }
-  [data-theme="dark"] body{
-    color:#EDEDED;
-    background:
-      radial-gradient(140% 60% at 30% 108%, #173A0C 0%, #1E4A10 38%, #245614 52%, transparent 53%),
-      radial-gradient(120% 55% at 90% 112%, #10300A 0%, #1A4410 45%, transparent 46%),
-      linear-gradient(180deg,#040A1E 0%,#0B1A3E 50%,#1C3160 78%);
-  }
-  [data-theme="dark"] .titlebar .caption,[data-theme="dark"] .sheet h2{text-shadow:1px 1px 0 #000}
+  [data-theme="dark"] body{color:#EDEDED;background:var(--face)}
+  [data-theme="dark"] .sheet h2{text-shadow:1px 1px 0 #000}
   [data-theme="dark"] .navbar,[data-theme="dark"] .toolbar{border-color:#111;box-shadow:none}
   [data-theme="dark"] .address,[data-theme="dark"] .searchbox input,
   [data-theme="dark"] textarea,[data-theme="dark"] select,[data-theme="dark"] input[type=text]{
@@ -461,28 +348,8 @@
   [data-theme="dark"] .overlay .hint,[data-theme="dark"] .card-body p.small{color:#AAA}
 </style>
 </head>
-</head>
 <body>
-<div class="desktop">
-
-  <div class="deskicons">
-    <button class="deskicon" id="deskIcon">
-      <span class="ic" aria-hidden="true">&#128483;</span>
-      <span class="lbl">Speechy</span>
-    </button>
-  </div>
-
 <div class="window" id="app">
-
-  <div class="titlebar">
-    <span class="ticon" aria-hidden="true">&#128483;</span>
-    <span class="caption">Speechy</span>
-    <div class="caps">
-      <button class="cap min" id="minBtn" aria-label="Minimize"><i></i></button>
-      <button class="cap max" id="maxBtn" aria-label="Maximize"><i></i></button>
-      <button class="cap close" id="closeBtn" aria-label="Close"><i></i></button>
-    </div>
-  </div>
 
   <div class="navbar">
     <button class="navbtn" id="backBtn" aria-label="Back">&#9664;</button>
@@ -542,13 +409,6 @@
   </div>
 
   <div class="details" id="details"></div>
-</div>
-
-  <div class="taskbar">
-    <button class="orb" id="orbBtn" aria-label="Start"></button>
-    <button class="taskbtn" id="taskBtn"><span aria-hidden="true">&#128483;</span> Speechy</button>
-    <div class="tray"><span id="clock"></span></div>
-  </div>
 </div>
 
 <!-- show-big overlay -->
@@ -1458,7 +1318,6 @@ if(searchEl){
   searchEl.oninput = ()=>{ clearTimeout(t); t = setTimeout(renderGrid, 120); };
 }
 
-// caption buttons: maximize does the real thing, the other two are 2001 set dressing
 function applyTheme(){
   const t = (settings.theme || 'auto');
   const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1479,31 +1338,6 @@ if(window.matchMedia){
   }catch(e){}
 }
 
-function setWindowState(st){
-  document.body.className = 'state-' + st;
-  if(st === 'open'){ measure(); }
-  else if(window.speechSynthesis){ try{ speechSynthesis.cancel(); }catch(e){} }
-}
-setWindowState('open');
-
-document.getElementById('maxBtn').onclick = ()=> fsBtn.click();
-document.getElementById('minBtn').onclick = ()=> setWindowState('min');
-document.getElementById('closeBtn').onclick = ()=>{
-  setWindowState('closed');
-  // a browser tab can only be script-closed if a script opened it; if this page
-  // was launched that way, honour it, otherwise the desktop below is the close
-  try{ window.close(); }catch(e){}
-};
-document.getElementById('deskIcon').onclick = ()=> setWindowState('open');
-document.getElementById('taskBtn').onclick = ()=> setWindowState('open');
-document.getElementById('orbBtn').onclick = ()=> setWindowState('open');
-
-function tickClock(){
-  const el = document.getElementById('clock');
-  if(!el) return;
-  el.textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-}
-tickClock(); setInterval(tickClock, 20000);
 document.getElementById('backBtn').onclick = ()=>{
   const i = CATS.findIndex(c=>c.id===activeCat);
   selectCat(CATS[(i - 1 + CATS.length) % CATS.length]);
