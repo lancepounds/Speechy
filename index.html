@@ -52,40 +52,17 @@
     background:var(--face);overflow:hidden;
   }
 
-  /* ---- address bar ---- */
-  .navbar{
-    display:flex;align-items:center;gap:6px;padding:4px 8px;background:var(--face);
-    padding-top:calc(4px + env(safe-area-inset-top));
-    border-bottom:1px solid #fff;box-shadow:0 1px 0 var(--face-dk);
+  /* ---- menu bar ---- */
+  .toolbar{
+    display:flex;align-items:center;gap:0;padding:2px 4px;background:var(--face);
+    padding-top:calc(2px + env(safe-area-inset-top));flex-wrap:wrap;
   }
-  .navbtn{
-    width:28px;height:28px;border-radius:50%;font-size:11px;color:#fff;
-    background:radial-gradient(circle at 40% 30%,#B8F3A6 0%,#4DC43A 40%,#1E8C12 100%);
-    border:1px solid #1B6B11;box-shadow:inset 0 1px 1px rgba(255,255,255,.6),1px 1px 1px rgba(0,0,0,.2);
-    display:flex;align-items:center;justify-content:center;text-shadow:0 1px 1px rgba(0,0,0,.4);
-  }
-  .navbtn:hover{filter:brightness(1.12)}
-  .address{
-    flex:1;min-width:0;display:flex;align-items:center;gap:5px;overflow:hidden;
-    height:24px;padding:0 6px;background:#fff;border:1px solid #7F9DB9;font-size:13px;white-space:nowrap;
-  }
-  .address::before{content:"Address";color:#6D6D6D;padding-right:6px;margin-right:2px;border-right:1px solid #D4D0C8}
-  .crumb{color:#000}
-  .crumb.here{font-weight:bold;overflow:hidden;text-overflow:ellipsis}
-  .sep{color:#6D6D6D;font-size:12px}
-  .sep{font-size:0}.sep::after{content:"\\";font-size:13px}
-  .searchbox{width:130px;flex:0 0 auto}
+  .searchbox{margin-left:auto;width:150px;flex:0 1 auto;padding:1px 2px}
   .searchbox input{
     width:100%;height:24px;padding:0 6px;font-family:inherit;font-size:13px;
     background:#fff;border:1px solid #7F9DB9;border-radius:0;color:#000;
   }
-  @media (max-width:560px){ .searchbox{width:86px} .address{font-size:12px} .address::before{display:none} }
-
-  /* ---- menu bar ---- */
-  .toolbar{
-    display:flex;align-items:center;gap:0;padding:2px 4px;background:var(--face);
-    border-bottom:1px solid var(--face-dk);flex-wrap:wrap;
-  }
+  @media (max-width:420px){ .searchbox{width:100%;margin:2px 0 2px} }
   .tbtn{padding:4px 9px;font-size:13px;color:#000;border:1px solid transparent}
   .tbtn:hover{background:#316AC5;color:#fff}
   .tbtn[aria-pressed="true"]{
@@ -98,21 +75,15 @@
   .navpane{display:none}
   @media (min-width:980px){
     .navpane{
-      display:block;width:208px;flex:0 0 208px;overflow-y:auto;padding:12px;
-      background:linear-gradient(180deg,#7BA2E7 0%,#6375D6 100%);
+      display:block;width:200px;flex:0 0 200px;overflow-y:auto;padding:8px 6px;
+      background:var(--face);border-right:1px solid #ACA899;
     }
-    .nphead{
-      font-size:12px;font-weight:bold;color:#215DC6;padding:6px 12px;
-      border-radius:5px 5px 0 0;
-      background:linear-gradient(90deg,#FFFFFF 0%,#C6D3F7 100%);
-    }
-    #navlist{background:#D6DFF7;padding:8px 6px;border:1px solid #fff;border-top:none}
     .navitem{
       display:flex;align-items:center;gap:8px;width:100%;text-align:left;
-      padding:5px 6px;font-size:12px;color:#215DC6;
+      padding:7px 8px;font-size:13px;color:#000;
     }
-    .navitem:hover{color:#428EFF;text-decoration:underline}
-    .navitem[aria-selected="true"]{font-weight:bold;color:#0A246A}
+    .navitem:hover{background:#316AC5;color:#fff}
+    .navitem[aria-selected="true"]{font-weight:bold;background:#fff;box-shadow:inset 3px 0 0 var(--cat)}
     .navitem .dot{width:10px;height:10px;border-radius:2px;background:var(--cat);flex:0 0 auto;
                   border:1px solid rgba(0,0,0,.25)}
     .rail{display:none !important}
@@ -131,11 +102,8 @@
   }
 
   /* ---- the speak panel ---- */
-  .stage{padding:10px 12px;position:sticky;top:0;z-index:20;background:#fff}
-  .said{
-    background:var(--face);border:1px solid #fff;
-    box-shadow:0 0 0 1px #ACA899;padding:12px;border-radius:0;
-  }
+  .stage{padding:12px;position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #D6D2C2}
+  .said{padding:0}
   .said p{
     margin:0 0 10px;font-size:25px;line-height:1.22;font-weight:bold;min-height:1.22em;word-break:break-word;
     background:#fff;border:1px solid #7F9DB9;padding:10px 12px;
@@ -217,11 +185,6 @@
   .dock{display:flex;gap:7px;padding:7px 12px;background:var(--face);border-top:1px solid #ACA899}
   .dock button{flex:1;padding:10px 8px;font-size:15px;font-weight:bold}
   .dock button.card{flex:0 0 auto;padding:10px 18px}
-  .details{
-    padding:3px 10px;font-size:12px;color:#000;background:var(--face);
-    border-top:1px solid #fff;box-shadow:0 -1px 0 #ACA899;
-    padding-bottom:calc(3px + env(safe-area-inset-bottom));
-  }
 
   /* ---- overlays: readability first ---- */
   .overlay{position:fixed;inset:0;z-index:60;background:#FFFFFF;display:none;flex-direction:column;
@@ -302,23 +265,19 @@
   }
   [data-theme="dark"] body{color:#EDEDED;background:var(--face)}
   [data-theme="dark"] .sheet h2{text-shadow:1px 1px 0 #000}
-  [data-theme="dark"] .navbar,[data-theme="dark"] .toolbar{border-color:#111;box-shadow:none}
-  [data-theme="dark"] .address,[data-theme="dark"] .searchbox input,
+  [data-theme="dark"] .searchbox input,
   [data-theme="dark"] textarea,[data-theme="dark"] select,[data-theme="dark"] input[type=text]{
     background:#111;border-color:#555;color:#EDEDED;
   }
-  [data-theme="dark"] .address::before{color:#999;border-color:#444}
-  [data-theme="dark"] .crumb{color:#EDEDED}
   [data-theme="dark"] .tbtn{color:#EDEDED}
   [data-theme="dark"] .tbtn[aria-pressed="true"]{background:#111;border-color:#000 #555 #555 #000}
   [data-theme="dark"] .tsep{background:#111;border-color:#444}
   [data-theme="dark"] .frame,[data-theme="dark"] .content,[data-theme="dark"] .stage,
   [data-theme="dark"] .rail{background:#1B1B1B;border-color:#444}
-  [data-theme="dark"] .navpane{background:linear-gradient(180deg,#2A3550,#1A2238)}
-  [data-theme="dark"] .nphead{background:linear-gradient(90deg,#3B4A6E,#26314D);color:#CFE0FF}
-  [data-theme="dark"] #navlist{background:#222A3E;border-color:#3B4A6E}
-  [data-theme="dark"] .navitem{color:#A9C6FF}
-  [data-theme="dark"] .navitem[aria-selected="true"]{color:#fff}
+  [data-theme="dark"] .navpane{background:var(--face);border-color:#111}
+  [data-theme="dark"] .stage{border-color:#333}
+  [data-theme="dark"] .navitem{color:#EDEDED}
+  [data-theme="dark"] .navitem[aria-selected="true"]{color:#fff;background:#1B1B1B}
   [data-theme="dark"] .content::-webkit-scrollbar-track,
   [data-theme="dark"] .navpane::-webkit-scrollbar-track,
   [data-theme="dark"] .sheet-inner::-webkit-scrollbar-track{background:#222;border-color:#222}
@@ -327,7 +286,6 @@
   [data-theme="dark"] .sheet-inner::-webkit-scrollbar-thumb{
     border-color:#1B1B1B;background:linear-gradient(90deg,#555,#4A4A4A);box-shadow:inset 0 0 0 1px #666;
   }
-  [data-theme="dark"] .said{border-color:#3A3A3A;box-shadow:0 0 0 1px #000}
   [data-theme="dark"] .said p{background:#111;border-color:#555;color:#F5F5F5}
   [data-theme="dark"] .said p.empty{color:#9A9A9A}
   [data-theme="dark"] .mode,[data-theme="dark"] .chip{background:var(--btn);border-color:#555;color:#EDEDED}
@@ -341,7 +299,6 @@
   [data-theme="dark"] .thinking{color:#AAA}
   [data-theme="dark"] .group-head{color:#8DB2FF;border-image:linear-gradient(90deg,#8DB2FF,transparent) 1}
   [data-theme="dark"] .dock{border-color:#111}
-  [data-theme="dark"] .details{color:#CCC;border-color:#3A3A3A;box-shadow:0 -1px 0 #111}
   [data-theme="dark"] label{color:#DDD}
   [data-theme="dark"] .overlay{background:#0D0D0D}
   [data-theme="dark"] .overlay .fit span,[data-theme="dark"] .card-body p{color:#F5F5F5}
@@ -351,17 +308,6 @@
 <body>
 <div class="window" id="app">
 
-  <div class="navbar">
-    <button class="navbtn" id="backBtn" aria-label="Back">&#9664;</button>
-    <button class="navbtn" id="fwdBtn" aria-label="Forward">&#9654;</button>
-    <div class="address">
-      <span class="crumb">Lance</span><span class="sep">&#9654;</span><span class="crumb">Speechy</span><span class="sep">&#9654;</span><span class="crumb here" id="crumb">Right now</span>
-    </div>
-    <div class="searchbox">
-      <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">
-    </div>
-  </div>
-
   <div class="toolbar">
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <span class="tsep"></span>
@@ -370,11 +316,13 @@
     <button class="tbtn" id="fsBtn">Full screen</button>
     <span class="tsep"></span>
     <button class="tbtn" id="themeBtn">Dark theme</button>
+    <div class="searchbox">
+      <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">
+    </div>
   </div>
 
   <div class="frame">
     <div class="navpane">
-      <div class="nphead">Phrase Tasks</div>
       <div id="navlist"></div>
     </div>
 
@@ -408,7 +356,6 @@
     <button class="card" id="cardBtn">Card</button>
   </div>
 
-  <div class="details" id="details"></div>
 </div>
 
 <!-- show-big overlay -->
@@ -1298,8 +1245,10 @@ window.addEventListener('resize', measure);
 /* ------------------------------------------------------------------ boot */
 const fsBtn = document.getElementById('fsBtn');
 const root = document.documentElement;
-if(!(root.requestFullscreen || root.webkitRequestFullscreen)){
+let framed = false; try{ framed = window.self !== window.top; }catch(e){ framed = true; }
+if(framed || !(root.requestFullscreen || root.webkitRequestFullscreen)){
   fsBtn.style.display = 'none';
+  if(fsBtn.nextElementSibling && fsBtn.nextElementSibling.classList.contains('tsep')) fsBtn.nextElementSibling.style.display = 'none';
 }
 fsBtn.onclick = ()=>{
   try{
@@ -1338,14 +1287,6 @@ if(window.matchMedia){
   }catch(e){}
 }
 
-document.getElementById('backBtn').onclick = ()=>{
-  const i = CATS.findIndex(c=>c.id===activeCat);
-  selectCat(CATS[(i - 1 + CATS.length) % CATS.length]);
-};
-document.getElementById('fwdBtn').onclick = ()=>{
-  const i = CATS.findIndex(c=>c.id===activeCat);
-  selectCat(CATS[(i + 1) % CATS.length]);
-};
 
 document.addEventListener('fullscreenchange', ()=>{
   fsBtn.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
