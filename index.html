@@ -437,6 +437,7 @@
 <script>
 /* ------------------------------------------------------------------ data */
 const CATS = [
+  {id:'femisheart', name:"Femi's Heart", color:'var(--c-work)'},
   {id:'recent',  name:'Used most', color:'var(--c-recent)'},
   {id:'quick',   name:'Quick answers', color:'var(--c-now)'},
   {id:'addon',   name:'Add on', color:'var(--c-people)', compact:true, addon:true},
@@ -530,6 +531,21 @@ const JOKE_GROUPS = [
 ];
 
 const BASE = {
+  femisheart: [
+      "What does Femi's Heart look like day to day right now? What programs are running, who do you serve, and how many people?",
+      "Where do you want the foundation to be in one to three years?",
+      "How does Grace for Grieving Mothers fit into the wider work?",
+      "Who is on the team now? What is paid staff, what is volunteer, and what does the board look like?",
+      "What keeps you up at night about running the foundation?",
+      "How are your governance basics? Bylaws, board policies, 501(c)(3) filings, and state compliance.",
+      "What are your funding sources? Are grants a part of that, and do you have help writing them?",
+      "Are there legal or contract questions that come up often, like event agreements, releases, or volunteer waivers?",
+      "Where does it help most to have another person in the room? Board service, advisory work, one-off projects, or making introductions?",
+      "Would it be useful to connect with GriefShare at Citylight, or with other Omaha grief and mental health groups?",
+      "What did you learn from the September event that you want to build on?",
+      "What's one concrete thing I could take on in the next month?",
+      "Who should I follow up with, and what's the best way to reach you?"
+  ],
   addon:[
     "please.","thank you.","if you don't mind.","if that works for you.",
     "when you get a chance.","no rush.","as soon as you can.","one more time.",
@@ -704,7 +720,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
-let activeCat = 'now';
+let activeCat = location.hash === '#femisheart' ? 'femisheart' : 'now';
 let editing = false;
 let lastSaid = '';
 let buffer = '';
