@@ -437,6 +437,7 @@
 <script>
 /* ------------------------------------------------------------------ data */
 const CATS = [
+  {id:'cls', name:'CLS Conference', color:'var(--c-work)', groups:true},
   {id:'femisheart', name:"Femi's Heart", color:'var(--c-work)'},
   {id:'recent',  name:'Used most', color:'var(--c-recent)'},
   {id:'quick',   name:'Quick answers', color:'var(--c-now)'},
@@ -530,7 +531,204 @@ const JOKE_GROUPS = [
   ]}
 ];
 
+const CLS_GROUPS = [
+  {
+    "name": "Introductions",
+    "lines": [
+      "Hello, my name is Lance Pounds. I am an attorney based in Omaha, Nebraska.",
+      "My legal experience includes Medicaid, Social Security benefits, special needs planning, and administrative appeals.",
+      "I earned my law degree from Concordia University School of Law in 2016.",
+      "I previously practiced law in Boise, Idaho, and now live in Omaha.",
+      "I am interested in the relationship between Christian faith, legal practice, and service to people with disabilities.",
+      "I have cerebral palsy, which affects my speech and movement.",
+      "I use Speechy, a communication board, to speak prepared phrases aloud.",
+      "My speech can be harder to understand when I am tired. Please give me a moment to respond.",
+      "My wife, Janae, is also an attorney.",
+      "I am here to learn, meet other attorneys, and explore practical ways to serve."
+    ]
+  },
+  {
+    "name": "My legal background",
+    "lines": [
+      "I worked as an associate attorney at Char Quade Law in Boise from 2018 to 2023.",
+      "My work has included helping people navigate eligibility for Medicaid long-term care assistance.",
+      "I have experience with written advocacy in Social Security benefits matters.",
+      "I have worked on administrative appeals and legal research involving public benefits.",
+      "Special needs planning connects legal decisions with a person's healthcare, support needs, and financial circumstances.",
+      "I am interested in helping people understand complicated systems and make informed decisions.",
+      "I have provided pro bono legal services through programs in Idaho.",
+      "I have experience researching healthcare regulations and drafting legal documents.",
+      "I am interested in disability rights, community-based services, and access to public benefits.",
+      "I would like to learn how other attorneys organize a sustainable practice that includes service to people with limited resources."
+    ]
+  },
+  {
+    "name": "Meeting other attorneys",
+    "lines": [
+      "What is your name, and where do you practice?",
+      "What kind of legal work do you do most often?",
+      "How did you first become involved with Christian Legal Society?",
+      "What brought you to this year's conference?",
+      "How does your faith influence the way you practice law?",
+      "Do you work in private practice, legal aid, government, or another setting?",
+      "What has been most useful to you about participating in CLS?",
+      "Are there attorneys here who work in disability law or public benefits?",
+      "Is there someone you think I should meet?",
+      "Would you mind introducing me if we have a chance?",
+      "What are you hoping to learn at the conference?",
+      "Which session has been most helpful to you so far?"
+    ]
+  },
+  {
+    "name": "Christian legal aid",
+    "lines": [
+      "I am interested in using my legal background to support Christian legal aid.",
+      "What kinds of legal problems come through your clinic most often?",
+      "Does your clinic help with benefits denials, disability-related issues, or healthcare access?",
+      "How do you distinguish brief advice from ongoing representation?",
+      "How do you handle referrals when a matter is outside a volunteer's experience?",
+      "What training do you provide before a volunteer begins working with clients?",
+      "How do you arrange supervision and professional liability coverage for volunteers?",
+      "Are there opportunities to volunteer through legal research and written work?",
+      "Do you have roles that can be done remotely or with a limited weekly time commitment?",
+      "How do you make intake accessible for clients with speech, mobility, or reading disabilities?",
+      "How do you coordinate legal assistance with churches and community organizations?",
+      "How do you explain the relationship between legal services and optional spiritual support?",
+      "What is one realistic first step for someone interested in helping your program?",
+      "Who should I contact after the conference to discuss volunteering?"
+    ]
+  },
+  {
+    "name": "Disability and public benefits",
+    "lines": [
+      "I am interested in how legal aid can help people with disabilities remain involved in their communities.",
+      "Do you see clients having difficulty obtaining home and community-based services?",
+      "What barriers do clients encounter when appealing a benefits decision?",
+      "How do you help clients obtain and organize the records needed for an appeal?",
+      "Do you partner with disability organizations or benefits counselors?",
+      "How do you accommodate clients who communicate through an assistive device?",
+      "Are there gaps in services for clients who earn too much for legal aid but cannot afford private representation?",
+      "I would like to compare approaches to public benefits advocacy across different states.",
+      "I am interested in the practical relationship between disability rights and access to healthcare.",
+      "Could you recommend a practitioner or organization doing useful work in this area?",
+      "What resources would you recommend for keeping up with developments in this field?",
+      "I would want to review the facts and applicable law before offering an opinion on a particular case."
+    ]
+  },
+  {
+    "name": "Technology and AI",
+    "lines": [
+      "I am interested in how technology can make legal services more accessible.",
+      "I have worked on technology policy writing and assistive-technology evaluation.",
+      "My web projects include Speechy, a communication board, and Zombie Trails, a browser game.",
+      "Lance OS is my personal website with a desktop-style interface and links to my projects.",
+      "I am exploring how accessible interfaces can give people more ways to communicate and participate.",
+      "How are you using artificial intelligence in your practice?",
+      "How do you verify legal authorities and factual statements produced by AI?",
+      "What safeguards do you use before entering client information into an AI tool?",
+      "How do you decide when to discuss AI use with a client?",
+      "How do you account for time saved by AI when setting or billing fees?",
+      "Could AI help a small legal aid program serve more people without sacrificing accuracy?",
+      "What concerns do you have about AI's effect on democracy and the rule of law?",
+      "How do you assess whether a technology is accessible to the people it is intended to serve?",
+      "I am interested in technology that supports professional judgment and meaningful human relationships."
+    ]
+  },
+  {
+    "name": "Faith, vocation, and Anglican connections",
+    "lines": [
+      "I attend Citylight in Omaha and have an interest in the Anglican tradition.",
+      "I previously attended an Anglican Church in North America congregation in Boise.",
+      "Are you Anglican, or do you know Anglican attorneys attending this conference?",
+      "Are there opportunities for Christian attorneys to connect between conferences?",
+      "How do you maintain a spiritual life while managing the demands of legal practice?",
+      "How do you approach disagreements with colleagues whose religious or political views differ from yours?",
+      "What has helped you connect professional responsibility with Christian discipleship?",
+      "I am interested in Christian service that respects the dignity of the person receiving help.",
+      "I have an interest in prison and reentry ministry.",
+      "How can attorneys support people returning to the community after incarceration?",
+      "What have you found helpful for preventing burnout in service-oriented legal work?",
+      "Could you recommend an article or book about Christian vocation in the legal profession?"
+    ]
+  },
+  {
+    "name": "Questions for speakers",
+    "lines": [
+      "Thank you for your presentation. Could you explain how that idea applies to a small law practice?",
+      "What would you recommend as a first step for an attorney interested in this work?",
+      "What is the most common mistake you see when attorneys try to put this into practice?",
+      "How do you measure whether your work is improving people's lives?",
+      "How do you balance immediate legal needs with long-term change?",
+      "Could you say more about the connection between justice, restoration, and human dignity?",
+      "How can a lawyer pursue reconciliation while still advocating firmly for a client?",
+      "How can religious freedom advocacy protect people from a range of faith traditions?",
+      "Are your slides or supporting materials available after the session?",
+      "Could you recommend one source for learning more about this topic?",
+      "Could we continue this conversation by email?",
+      "I have a question prepared on my device. May I play it through the microphone?"
+    ]
+  },
+  {
+    "name": "Communication and accessibility",
+    "lines": [
+      "Please speak directly to me. I understand you, even when my speech is difficult to understand.",
+      "I may use my own voice, this device, or both to answer.",
+      "Please give me a little extra time to finish my thought.",
+      "If you did not understand me, please tell me which part you missed.",
+      "Would you prefer that I show you the text on my screen?",
+      "Could we move somewhere quieter so it is easier to hear each other?",
+      "Please ask one question at a time so I can respond fully.",
+      "I am still choosing my response. Thank you for waiting.",
+      "Could you repeat the last part of your question?",
+      "Could you write down that name or send it to me by email?",
+      "My hands can tire when I type, so a short written summary would help.",
+      "I need a seated break before the next session.",
+      "Could you help me find a seat with a clear route to the exit?",
+      "Where is the elevator or the accessible route to that room?",
+      "Please ask before helping me physically.",
+      "I am ready to continue. Thank you for your patience."
+    ]
+  },
+  {
+    "name": "Conference logistics",
+    "lines": [
+      "I am here for the Christian Legal Society National Conference.",
+      "Where is the registration desk?",
+      "Could you help me find the room for the next session?",
+      "Where can I find the most recent conference schedule?",
+      "Has the room or time for this workshop changed?",
+      "Where can I find the Christian Legal Aid Summit information?",
+      "How do attendees record attendance and obtain CLE documentation?",
+      "Are workshop materials available in an electronic format?",
+      "Is there a quiet seating area where I can rest between sessions?",
+      "Could you tell me when this session ends?",
+      "Is this seat available?",
+      "May I join you at this table?"
+    ]
+  },
+  {
+    "name": "Follow-up and closing",
+    "lines": [
+      "I enjoyed hearing about your work. Thank you for taking the time to talk with me.",
+      "May I have your business card or preferred email address?",
+      "My email address is lancepounds@gmail.com.",
+      "My website is lancepounds.github.io.",
+      "Email is a good way to follow up with me.",
+      "Would you be comfortable if I contacted you after the conference?",
+      "Could you remind me of your organization's name so I can make a note?",
+      "I would like to follow up about the volunteer opportunity we discussed.",
+      "I would like to learn more before committing to a particular role.",
+      "Could you send me the expected responsibilities and time commitment?",
+      "I need to head to the next session, but I am glad we met.",
+      "I am going to take a break now. I hope we can talk again later.",
+      "Thank you for the introduction. That connection was helpful.",
+      "I hope we can stay in touch after the conference."
+    ]
+  }
+];
+
 const BASE = {
+  cls: CLS_GROUPS.flatMap(g=>g.lines),
   femisheart: [
       "What does Femi's Heart look like day to day right now? What programs are running, who do you serve, and how many people?",
       "Where do you want the foundation to be in one to three years?",
@@ -720,7 +918,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
-let activeCat = location.hash === '#femisheart' ? 'femisheart' : 'now';
+let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let editing = false;
 let lastSaid = '';
 let buffer = '';
@@ -1036,7 +1234,22 @@ function renderGrid(){
     grid.appendChild(n);
   }
 
-  if(cat.jokes){
+  if(cat.groups){
+    const gone = removed[cat.id] || [];
+    CLS_GROUPS.forEach(g=>{
+      const lines = g.lines.filter(p=>!gone.includes(p));
+      if(!lines.length) return;
+      const h = document.createElement('div');
+      h.className = 'group-head'; h.textContent = g.name;
+      grid.appendChild(h);
+      lines.forEach(p=>grid.appendChild(makeTile(p, cat)));
+    });
+    if((custom[cat.id]||[]).length){
+      const h = document.createElement('div');
+      h.className='group-head'; h.textContent='Your conference phrases'; grid.appendChild(h);
+      custom[cat.id].forEach(p=>grid.appendChild(makeTile(p, cat)));
+    }
+  } else if(cat.jokes){
     renderJokes(grid, cat);
   } else {
     if(!list.length){
