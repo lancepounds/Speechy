@@ -303,6 +303,92 @@
   [data-theme="dark"] .overlay{background:#0D0D0D}
   [data-theme="dark"] .overlay .fit span,[data-theme="dark"] .card-body p{color:#F5F5F5}
   [data-theme="dark"] .overlay .hint,[data-theme="dark"] .card-body p.small{color:#AAA}
+
+  /* ================= radial phrase navigator ================= */
+  .grid.radial-mode{
+    display:block;
+    padding:10px 12px 18px;
+  }
+  .radial-board{
+    position:relative;
+    width:min(720px,100%);
+    height:540px;
+    margin:0 auto;
+  }
+  .radial-center,.radial-phrase{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-radius:7px;
+    color:var(--ink);
+    font-weight:bold;
+    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08);
+  }
+  .radial-center{
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:180px;height:92px;
+    padding:12px;
+    font-size:18px;
+    border:3px solid var(--cat);
+    box-shadow:inset 0 0 0 2px #fff,0 2px 5px rgba(0,0,0,.18);
+  }
+  .radial-phrase{
+    width:190px;
+    min-height:82px;
+    max-height:118px;
+    padding:10px 12px;
+    font-size:15px;
+    line-height:1.22;
+    overflow:hidden;
+    border-left:6px solid var(--cat);
+  }
+  .radial-phrase:hover,.radial-center:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in);
+  }
+  .radial-phrase.pos-0{left:50%;top:1%;transform:translateX(-50%)}
+  .radial-phrase.pos-1{right:2%;top:18%}
+  .radial-phrase.pos-2{right:2%;bottom:18%}
+  .radial-phrase.pos-3{left:50%;bottom:1%;transform:translateX(-50%)}
+  .radial-phrase.pos-4{left:2%;bottom:18%}
+  .radial-phrase.pos-5{left:2%;top:18%}
+  .radial-nav{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+    margin:4px auto 0;
+    max-width:620px;
+  }
+  .radial-nav button{
+    min-width:120px;
+    padding:9px 14px;
+    font-size:14px;
+    font-weight:bold;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-radius:3px;
+  }
+  .radial-page-label{min-width:110px;text-align:center;font-size:13px;color:var(--ink-soft)}
+  @media (max-width:700px){
+    .radial-board{height:500px}
+    .radial-center{width:150px;height:82px;font-size:16px}
+    .radial-phrase{width:150px;min-height:76px;font-size:13px;padding:8px}
+  }
+  @media (max-width:480px){
+    .grid.radial-mode{padding-left:6px;padding-right:6px}
+    .radial-board{height:460px}
+    .radial-center{width:132px;height:76px;font-size:15px}
+    .radial-phrase{width:132px;min-height:70px;max-height:100px;font-size:12px;padding:7px}
+    .radial-phrase.pos-1,.radial-phrase.pos-2{right:0}
+    .radial-phrase.pos-4,.radial-phrase.pos-5{left:0}
+  }
+  [data-theme="dark"] .radial-center,[data-theme="dark"] .radial-phrase,[data-theme="dark"] .radial-nav button{color:#F2F2F2}
+
 </style>
 </head>
 <body>
@@ -903,6 +989,7 @@ let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
+let radialPage = {};
 let editing = false;
 let lastSaid = '';
 let buffer = '';
@@ -1205,53 +1292,129 @@ function renderGrid(){
     return;
   }
 
-  grid.className = 'grid' + (cat.compact ? ' compact' : '');
-  grid.style.setProperty('--cat', cat.color);
-  if(crumb) crumb.textContent = cat.name;
-  const list = phrasesFor(activeCat);
-  setStatus(list.length, cat.name);
+  if(editing){
+    grid.className = 'grid' + (cat.compact ? ' compact' : '');
+    grid.style.setProperty('--cat', cat.color);
+    if(crumb) crumb.textContent = cat.name;
+    const list = phrasesFor(activeCat);
+    setStatus(list.length, cat.name);
 
-  if(cat.addon){
-    const n = document.createElement('div');
-    n.className = 'addon-note';
-    n.textContent = 'These attach to the end of the sentence in the bar above.';
-    grid.appendChild(n);
+    if(cat.groups){
+      const gone = removed[cat.id] || [];
+      CLS_GROUPS.forEach(g=>{
+        const lines = g.lines.filter(p=>!gone.includes(p));
+        if(!lines.length) return;
+        const h = document.createElement('div');
+        h.className = 'group-head'; h.textContent = g.name;
+        grid.appendChild(h);
+        lines.forEach(p=>grid.appendChild(makeTile(p, cat)));
+      });
+      if((custom[cat.id]||[]).length){
+        const h = document.createElement('div');
+        h.className='group-head'; h.textContent='Your conference phrases'; grid.appendChild(h);
+        custom[cat.id].forEach(p=>grid.appendChild(makeTile(p, cat)));
+      }
+    } else if(cat.jokes){
+      renderJokes(grid, cat);
+    } else {
+      list.forEach(p=> grid.appendChild(makeTile(p, cat)));
+    }
+
+    if(activeCat!=='recent'){
+      const a = document.createElement('button');
+      a.className='addtile'; a.textContent='+ Add a phrase to ' + cat.name;
+      a.onclick = ()=>openAdd(activeCat);
+      grid.appendChild(a);
+    }
+    return;
   }
 
+  let list;
   if(cat.groups){
     const gone = removed[cat.id] || [];
-    CLS_GROUPS.forEach(g=>{
-      const lines = g.lines.filter(p=>!gone.includes(p));
-      if(!lines.length) return;
-      const h = document.createElement('div');
-      h.className = 'group-head'; h.textContent = g.name;
-      grid.appendChild(h);
-      lines.forEach(p=>grid.appendChild(makeTile(p, cat)));
-    });
-    if((custom[cat.id]||[]).length){
-      const h = document.createElement('div');
-      h.className='group-head'; h.textContent='Your conference phrases'; grid.appendChild(h);
-      custom[cat.id].forEach(p=>grid.appendChild(makeTile(p, cat)));
-    }
-  } else if(cat.jokes){
-    renderJokes(grid, cat);
+    list = CLS_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom[cat.id]||[]);
   } else {
-    if(!list.length){
-      const d = document.createElement('div');
-      d.className = 'empty-note';
-      d.textContent = activeCat==='recent'
-        ? 'Phrases you use will collect here, most-used first.'
-        : 'Nothing here yet. Add a phrase below.';
-      grid.appendChild(d);
-    }
-    list.forEach(p=> grid.appendChild(makeTile(p, cat)));
+    list = phrasesFor(activeCat);
   }
 
-  if(editing && activeCat!=='recent'){
-    const a = document.createElement('button');
-    a.className='addtile'; a.textContent='+ Add a phrase to ' + cat.name;
-    a.onclick = ()=>openAdd(activeCat);
-    grid.appendChild(a);
+  grid.className = 'grid radial-mode';
+  grid.style.setProperty('--cat', cat.color);
+  if(crumb) crumb.textContent = cat.name;
+  setStatus(list.length, cat.name);
+
+  if(!list.length){
+    const d = document.createElement('div');
+    d.className = 'empty-note';
+    d.textContent = activeCat==='recent'
+      ? 'Phrases you use will collect here, most-used first.'
+      : 'Nothing here yet. Use Organize to add a phrase.';
+    grid.appendChild(d);
+    return;
+  }
+
+  const pageSize = 6;
+  const pages = Math.max(1, Math.ceil(list.length / pageSize));
+  let page = radialPage[activeCat] || 0;
+  if(page >= pages) page = pages - 1;
+  radialPage[activeCat] = page;
+  const slice = list.slice(page * pageSize, page * pageSize + pageSize);
+
+  const board = document.createElement('div');
+  board.className = 'radial-board';
+  board.setAttribute('role','group');
+  board.setAttribute('aria-label', cat.name + ' phrases');
+
+  const center = document.createElement('button');
+  center.className = 'radial-center';
+  center.textContent = cat.name;
+  center.title = pages > 1 ? 'Tap to see the next group of phrases' : cat.name;
+  center.onclick = ()=>{
+    if(pages > 1){
+      radialPage[activeCat] = (page + 1) % pages;
+      renderGrid();
+    }
+  };
+  board.appendChild(center);
+
+  slice.forEach((p,i)=>{
+    const b = document.createElement('button');
+    b.className = 'radial-phrase pos-' + i;
+    b.textContent = p;
+    b.title = p;
+    b.style.setProperty('--cat', cat.color);
+    b.onclick = ()=>{
+      if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
+      else { speak(p); bump(p); }
+    };
+    board.appendChild(b);
+  });
+
+  grid.appendChild(board);
+
+  if(pages > 1){
+    const nav = document.createElement('div');
+    nav.className = 'radial-nav';
+
+    const prev = document.createElement('button');
+    prev.textContent = '← Previous';
+    prev.onclick = ()=>{
+      radialPage[activeCat] = (page - 1 + pages) % pages;
+      renderGrid();
+    };
+
+    const label = document.createElement('div');
+    label.className = 'radial-page-label';
+    label.textContent = 'Group ' + (page + 1) + ' of ' + pages;
+
+    const next = document.createElement('button');
+    next.textContent = 'Next →';
+    next.onclick = ()=>{
+      radialPage[activeCat] = (page + 1) % pages;
+      renderGrid();
+    };
+
+    nav.append(prev,label,next);
+    grid.appendChild(nav);
   }
 }
 
