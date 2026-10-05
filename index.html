@@ -307,61 +307,102 @@
   /* ================= radial phrase navigator ================= */
   .grid.radial-mode{
     display:block;
-    padding:10px 12px 18px;
+    padding:8px 12px 20px;
+    overflow:visible;
   }
   .radial-board{
+    --ring-r:190px;
     position:relative;
-    width:min(720px,100%);
-    height:540px;
+    width:min(760px,100%);
+    height:500px;
     margin:0 auto;
+    overflow:visible;
   }
   .radial-center,.radial-phrase{
     position:absolute;
+    left:50%;
+    top:50%;
     display:flex;
     align-items:center;
     justify-content:center;
     text-align:center;
     background:var(--btn);
     border:1px solid var(--edge);
-    border-radius:7px;
+    border-radius:8px;
     color:var(--ink);
     font-weight:bold;
-    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08);
+    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08),0 2px 5px rgba(0,0,0,.12);
   }
   .radial-center{
-    left:50%;top:50%;
     transform:translate(-50%,-50%);
-    width:180px;height:92px;
+    width:176px;
+    height:86px;
     padding:12px;
     font-size:18px;
     border:3px solid var(--cat);
-    box-shadow:inset 0 0 0 2px #fff,0 2px 5px rgba(0,0,0,.18);
+    z-index:3;
+    box-shadow:inset 0 0 0 2px #fff,0 3px 10px rgba(0,0,0,.18);
   }
   .radial-phrase{
-    width:190px;
-    min-height:82px;
-    max-height:118px;
+    --angle:0deg;
+    width:174px;
+    min-height:74px;
+    max-height:104px;
     padding:10px 12px;
-    font-size:15px;
-    line-height:1.22;
+    font-size:14px;
+    line-height:1.2;
     overflow:hidden;
     border-left:6px solid var(--cat);
+    z-index:2;
+    opacity:0;
+    transform:
+      translate(-50%,-50%)
+      rotate(var(--angle))
+      translateY(0)
+      rotate(calc(-1 * var(--angle)))
+      scale(.72);
+    animation:radial-pop .34s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay:calc(var(--i) * 55ms);
+    transform-origin:center;
   }
   .radial-phrase:hover,.radial-center:hover{
-    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in);
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 2px 6px rgba(0,0,0,.16);
   }
-  .radial-phrase.pos-0{left:50%;top:1%;transform:translateX(-50%)}
-  .radial-phrase.pos-1{right:2%;top:18%}
-  .radial-phrase.pos-2{right:2%;bottom:18%}
-  .radial-phrase.pos-3{left:50%;bottom:1%;transform:translateX(-50%)}
-  .radial-phrase.pos-4{left:2%;bottom:18%}
-  .radial-phrase.pos-5{left:2%;top:18%}
+  @keyframes radial-pop{
+    0%{
+      opacity:0;
+      transform:
+        translate(-50%,-50%)
+        rotate(var(--angle))
+        translateY(0)
+        rotate(calc(-1 * var(--angle)))
+        scale(.72);
+    }
+    70%{
+      opacity:1;
+      transform:
+        translate(-50%,-50%)
+        rotate(var(--angle))
+        translateY(calc(-1 * (var(--ring-r) + 8px)))
+        rotate(calc(-1 * var(--angle)))
+        scale(1.04);
+    }
+    100%{
+      opacity:1;
+      transform:
+        translate(-50%,-50%)
+        rotate(var(--angle))
+        translateY(calc(-1 * var(--ring-r)))
+        rotate(calc(-1 * var(--angle)))
+        scale(1);
+    }
+  }
   .radial-nav{
     display:flex;
     gap:8px;
     justify-content:center;
     align-items:center;
-    margin:4px auto 0;
+    margin:0 auto 4px;
     max-width:620px;
   }
   .radial-nav button{
@@ -373,19 +414,33 @@
     border:1px solid var(--edge);
     border-radius:3px;
   }
-  .radial-page-label{min-width:110px;text-align:center;font-size:13px;color:var(--ink-soft)}
-  @media (max-width:700px){
-    .radial-board{height:500px}
-    .radial-center{width:150px;height:82px;font-size:16px}
-    .radial-phrase{width:150px;min-height:76px;font-size:13px;padding:8px}
+  .radial-page-label{
+    min-width:110px;
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
   }
-  @media (max-width:480px){
-    .grid.radial-mode{padding-left:6px;padding-right:6px}
-    .radial-board{height:460px}
-    .radial-center{width:132px;height:76px;font-size:15px}
-    .radial-phrase{width:132px;min-height:70px;max-height:100px;font-size:12px;padding:7px}
-    .radial-phrase.pos-1,.radial-phrase.pos-2{right:0}
-    .radial-phrase.pos-4,.radial-phrase.pos-5{left:0}
+  @media (max-width:760px){
+    .radial-board{--ring-r:160px;height:440px}
+    .radial-center{width:154px;height:80px;font-size:16px}
+    .radial-phrase{width:148px;min-height:68px;max-height:96px;font-size:13px;padding:8px 9px}
+  }
+  @media (max-width:520px){
+    .grid.radial-mode{padding-left:4px;padding-right:4px}
+    .radial-board{--ring-r:130px;height:380px}
+    .radial-center{width:132px;height:72px;font-size:15px}
+    .radial-phrase{width:122px;min-height:62px;max-height:88px;font-size:12px;padding:7px}
+    .radial-nav button{min-width:96px;padding:8px 10px;font-size:13px}
+    .radial-page-label{min-width:88px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .radial-phrase{animation:none;opacity:1;transform:
+      translate(-50%,-50%)
+      rotate(var(--angle))
+      translateY(calc(-1 * var(--ring-r)))
+      rotate(calc(-1 * var(--angle)))
+      scale(1);
+    }
   }
   [data-theme="dark"] .radial-center,[data-theme="dark"] .radial-phrase,[data-theme="dark"] .radial-nav button{color:#F2F2F2}
 
@@ -1378,10 +1433,12 @@ function renderGrid(){
 
   slice.forEach((p,i)=>{
     const b = document.createElement('button');
-    b.className = 'radial-phrase pos-' + i;
+    b.className = 'radial-phrase';
     b.textContent = p;
     b.title = p;
     b.style.setProperty('--cat', cat.color);
+    b.style.setProperty('--i', i);
+    b.style.setProperty('--angle', (i * (360 / slice.length)) + 'deg');
     b.onclick = ()=>{
       if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
       else { speak(p); bump(p); }
