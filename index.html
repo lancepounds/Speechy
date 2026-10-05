@@ -304,71 +304,128 @@
   [data-theme="dark"] .overlay .fit span,[data-theme="dark"] .card-body p{color:#F5F5F5}
   [data-theme="dark"] .overlay .hint,[data-theme="dark"] .card-body p.small{color:#AAA}
 
-  /* ================= radial phrase navigator ================= */
-  .grid.radial-mode{
-    display:block;
-    padding:8px 12px 20px;
-    overflow:visible;
+  /* ================= phrase-book nested buttons ================= */
+  .grid.phrasebook{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    padding:14px;
   }
-  .radial-board{
-    --ring-r:190px;
+  .book-button{
+    min-height:92px;
+    padding:14px 12px;
+    text-align:center;
+    font-size:16px;
+    font-weight:bold;
+    line-height:1.2;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-left:6px solid var(--cat);
+    border-radius:5px;
+    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.08);
+  }
+  .book-button:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 2px 6px rgba(0,0,0,.12);
+  }
+
+  .nested-wrap{
+    grid-column:1/-1;
     position:relative;
-    width:min(760px,100%);
-    height:500px;
-    margin:0 auto;
+    min-height:430px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     overflow:visible;
   }
-  .radial-center,.radial-phrase{
+  .nested-tab{
+    --nest-r:155px;
+    position:relative;
+    width:min(680px,100%);
+    height:410px;
+    animation:nested-panel-in .22s ease-out both;
+  }
+  .nested-center{
     position:absolute;
-    left:50%;
-    top:50%;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:190px;
+    min-height:92px;
+    padding:14px 12px;
     display:flex;
     align-items:center;
     justify-content:center;
     text-align:center;
+    font-size:17px;
+    font-weight:bold;
+    background:var(--btn);
+    border:3px solid var(--cat);
+    border-radius:7px;
+    z-index:3;
+    box-shadow:inset 0 0 0 2px #fff,0 7px 18px rgba(0,0,0,.20);
+    animation:center-pop .28s cubic-bezier(.2,.9,.2,1) both;
+  }
+  .nested-phrase{
+    --angle:0deg;
+    --i:0;
+    position:absolute;
+    left:50%;top:50%;
+    width:172px;
+    min-height:72px;
+    max-height:105px;
+    padding:9px 11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:14px;
+    font-weight:bold;
+    line-height:1.18;
+    overflow:hidden;
     background:var(--btn);
     border:1px solid var(--edge);
-    border-radius:8px;
-    color:var(--ink);
-    font-weight:bold;
-    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08),0 2px 5px rgba(0,0,0,.12);
-  }
-  .radial-center{
-    transform:translate(-50%,-50%);
-    width:176px;
-    height:86px;
-    padding:12px;
-    font-size:18px;
-    border:3px solid var(--cat);
-    z-index:3;
-    box-shadow:inset 0 0 0 2px #fff,0 3px 10px rgba(0,0,0,.18);
-  }
-  .radial-phrase{
-    --angle:0deg;
-    width:174px;
-    min-height:74px;
-    max-height:104px;
-    padding:10px 12px;
-    font-size:14px;
-    line-height:1.2;
-    overflow:hidden;
     border-left:6px solid var(--cat);
-    z-index:2;
+    border-radius:6px;
     opacity:0;
+    z-index:2;
     transform:
       translate(-50%,-50%)
       rotate(var(--angle))
       translateY(0)
       rotate(calc(-1 * var(--angle)))
-      scale(.72);
-    animation:radial-pop .34s cubic-bezier(.2,.8,.2,1) forwards;
-    animation-delay:calc(var(--i) * 55ms);
-    transform-origin:center;
+      scale(.55);
+    animation:nested-child-pop .36s cubic-bezier(.18,.9,.25,1.15) forwards;
+    animation-delay:calc(70ms + (var(--i) * 55ms));
   }
-  .radial-phrase:hover,.radial-center:hover{
-    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 2px 6px rgba(0,0,0,.16);
+  .nested-phrase:hover,.nested-center:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 3px 8px rgba(0,0,0,.14);
   }
-  @keyframes radial-pop{
+  .nested-controls{
+    position:absolute;
+    left:50%;bottom:0;
+    transform:translateX(-50%);
+    display:flex;
+    gap:8px;
+    z-index:5;
+  }
+  .nested-controls button{
+    padding:9px 13px;
+    min-width:100px;
+    font-size:13px;
+    font-weight:bold;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-radius:3px;
+  }
+  @keyframes nested-panel-in{
+    from{opacity:0;transform:scale(.96)}
+    to{opacity:1;transform:scale(1)}
+  }
+  @keyframes center-pop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.72)}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+    100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  }
+  @keyframes nested-child-pop{
     0%{
       opacity:0;
       transform:
@@ -376,73 +433,47 @@
         rotate(var(--angle))
         translateY(0)
         rotate(calc(-1 * var(--angle)))
-        scale(.72);
-    }
-    70%{
-      opacity:1;
-      transform:
-        translate(-50%,-50%)
-        rotate(var(--angle))
-        translateY(calc(-1 * (var(--ring-r) + 8px)))
-        rotate(calc(-1 * var(--angle)))
-        scale(1.04);
+        scale(.55);
     }
     100%{
       opacity:1;
       transform:
         translate(-50%,-50%)
         rotate(var(--angle))
-        translateY(calc(-1 * var(--ring-r)))
+        translateY(calc(-1 * var(--nest-r)))
         rotate(calc(-1 * var(--angle)))
         scale(1);
     }
   }
-  .radial-nav{
-    display:flex;
-    gap:8px;
-    justify-content:center;
-    align-items:center;
-    margin:0 auto 4px;
-    max-width:620px;
+  @media (min-width:700px){
+    .grid.phrasebook{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
-  .radial-nav button{
-    min-width:120px;
-    padding:9px 14px;
-    font-size:14px;
-    font-weight:bold;
-    background:var(--btn);
-    border:1px solid var(--edge);
-    border-radius:3px;
+  @media (min-width:1050px){
+    .grid.phrasebook{grid-template-columns:repeat(4,minmax(0,1fr))}
   }
-  .radial-page-label{
-    min-width:110px;
-    text-align:center;
-    font-size:13px;
-    color:var(--ink-soft);
+  @media (max-width:560px){
+    .grid.phrasebook{gap:8px;padding:10px}
+    .book-button{min-height:78px;font-size:14px;padding:10px 8px}
+    .nested-wrap{min-height:360px}
+    .nested-tab{--nest-r:124px;height:350px}
+    .nested-center{width:145px;min-height:76px;font-size:15px}
+    .nested-phrase{width:126px;min-height:62px;max-height:88px;font-size:12px;padding:7px}
   }
-  @media (max-width:760px){
-    .radial-board{--ring-r:160px;height:440px}
-    .radial-center{width:154px;height:80px;font-size:16px}
-    .radial-phrase{width:148px;min-height:68px;max-height:96px;font-size:13px;padding:8px 9px}
-  }
-  @media (max-width:520px){
-    .grid.radial-mode{padding-left:4px;padding-right:4px}
-    .radial-board{--ring-r:130px;height:380px}
-    .radial-center{width:132px;height:72px;font-size:15px}
-    .radial-phrase{width:122px;min-height:62px;max-height:88px;font-size:12px;padding:7px}
-    .radial-nav button{min-width:96px;padding:8px 10px;font-size:13px}
-    .radial-page-label{min-width:88px}
-  }
-  @media (prefers-reduced-motion: reduce){
-    .radial-phrase{animation:none;opacity:1;transform:
-      translate(-50%,-50%)
-      rotate(var(--angle))
-      translateY(calc(-1 * var(--ring-r)))
-      rotate(calc(-1 * var(--angle)))
-      scale(1);
+  @media (prefers-reduced-motion:reduce){
+    .nested-tab,.nested-center,.nested-phrase{animation:none !important;opacity:1}
+    .nested-phrase{
+      transform:
+        translate(-50%,-50%)
+        rotate(var(--angle))
+        translateY(calc(-1 * var(--nest-r)))
+        rotate(calc(-1 * var(--angle)))
+        scale(1);
     }
   }
-  [data-theme="dark"] .radial-center,[data-theme="dark"] .radial-phrase,[data-theme="dark"] .radial-nav button{color:#F2F2F2}
+  [data-theme="dark"] .book-button,
+  [data-theme="dark"] .nested-center,
+  [data-theme="dark"] .nested-phrase,
+  [data-theme="dark"] .nested-controls button{color:#F2F2F2}
 
 </style>
 </head>
@@ -1168,37 +1199,34 @@ function phrasesFor(cat){
 
 function subtopicsFor(cat, list){
   const clean = (list||[]).filter(Boolean);
-  if(clean.length <= 6) return [{name:cat.name, phrases:clean}];
+  if(!clean.length) return [];
 
   if(cat.id === 'quick'){
-    return [
+    const gs = [
       {name:'Yes / No', phrases:clean.filter(p=>/\b(yes|no|maybe|sure|okay|ok|not right now)\b/i.test(p))},
       {name:'Needs', phrases:clean.filter(p=>/need|want|please|help|moment|second|wait/i.test(p))},
-      {name:'General', phrases:clean.filter(p=>!/\b(yes|no|maybe|sure|okay|ok|not right now)\b/i.test(p) && !/need|want|please|help|moment|second|wait/i.test(p))}
+      {name:'Other quick phrases', phrases:clean.filter(p=>!/\b(yes|no|maybe|sure|okay|ok|not right now)\b/i.test(p) && !/need|want|please|help|moment|second|wait/i.test(p))}
     ].filter(g=>g.phrases.length);
+    if(gs.length>1) return gs;
   }
 
   if(cat.id === 'ask'){
-    return [
+    const gs = [
       {name:'People', phrases:clean.filter(p=>/who|name|you|your|they|them/i.test(p))},
       {name:'Details', phrases:clean.filter(p=>/what|where|when|which|how/i.test(p))},
       {name:'Follow-up', phrases:clean.filter(p=>/again|more|mean|clarify|repeat|tell me/i.test(p))}
     ].filter(g=>g.phrases.length);
+    if(gs.length>1) return gs;
   }
 
-  if(cat.id === 'work' || cat.id === 'hearing' || cat.id === 'cls'){
-    const size = Math.ceil(clean.length/3);
-    return [
-      {name:'Opening', phrases:clean.slice(0,size)},
-      {name:'Discussion', phrases:clean.slice(size,size*2)},
-      {name:'Closing', phrases:clean.slice(size*2)}
-    ].filter(g=>g.phrases.length);
-  }
-
+  const targetGroups = Math.min(4, Math.max(2, Math.ceil(clean.length/5)));
+  const size = Math.ceil(clean.length/targetGroups);
   const groups = [];
-  const per = 6;
-  for(let i=0;i<clean.length;i+=per){
-    groups.push({name:'Group ' + (groups.length+1), phrases:clean.slice(i,i+per)});
+  for(let i=0;i<clean.length;i+=size){
+    groups.push({
+      name: cat.name + ' ' + (groups.length+1),
+      phrases: clean.slice(i,i+size)
+    });
   }
   return groups;
 }
@@ -1414,9 +1442,9 @@ function renderGrid(){
     }
 
     if(activeCat!=='recent'){
-      const a = document.createElement('button');
-      a.className='addtile'; a.textContent='+ Add a phrase to ' + cat.name;
-      a.onclick = ()=>openAdd(activeCat);
+      const a=document.createElement('button');
+      a.className='addtile'; a.textContent='+ Add a phrase to '+cat.name;
+      a.onclick=()=>openAdd(activeCat);
       grid.appendChild(a);
     }
     return;
@@ -1424,45 +1452,41 @@ function renderGrid(){
 
   let list;
   if(cat.groups){
-    const gone = removed[cat.id] || [];
-    list = CLS_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom[cat.id]||[]);
-  } else {
-    list = phrasesFor(activeCat);
+    const gone=removed[cat.id]||[];
+    list=CLS_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom[cat.id]||[]);
+  }else{
+    list=phrasesFor(activeCat);
   }
 
   if(!list.length){
-    grid.className = 'grid radial-mode';
-    const d = document.createElement('div');
-    d.className = 'empty-note';
-    d.textContent = activeCat==='recent'
+    grid.className='grid phrasebook';
+    const d=document.createElement('div');
+    d.className='empty-note';
+    d.textContent=activeCat==='recent'
       ? 'Phrases you use will collect here, most-used first.'
       : 'Nothing here yet. Use Organize to add a phrase.';
     grid.appendChild(d);
     return;
   }
 
-  const groups = subtopicsFor(cat, list);
-  const chosen = activeSubtopic[activeCat];
+  const groups=subtopicsFor(cat,list);
+  grid.style.setProperty('--cat',cat.color);
 
-  if(groups.length > 1 && (chosen === undefined || chosen === null || !groups[chosen])){
-    grid.className = 'grid';
-    grid.style.setProperty('--cat', cat.color);
-    if(crumb) crumb.textContent = cat.name;
-    setStatus(groups.length, cat.name + ' groups');
-
-    const head = document.createElement('div');
-    head.className = 'group-head';
-    head.textContent = 'Choose a group';
-    grid.appendChild(head);
+  const chosen=activeSubtopic[activeCat];
+  if(chosen===undefined || chosen===null || !groups[chosen]){
+    grid.className='grid phrasebook';
+    if(crumb) crumb.textContent=cat.name;
+    setStatus(groups.length,cat.name+' buttons');
 
     groups.forEach((g,i)=>{
-      const b = document.createElement('button');
-      b.className = 'tile';
-      b.style.setProperty('--cat', cat.color);
-      b.textContent = g.name;
-      b.onclick = ()=>{
-        activeSubtopic[activeCat] = i;
-        radialPage[activeCat] = 0;
+      const b=document.createElement('button');
+      b.className='book-button';
+      b.style.setProperty('--cat',cat.color);
+      b.textContent=g.name;
+      b.setAttribute('aria-expanded','false');
+      b.onclick=()=>{
+        activeSubtopic[activeCat]=i;
+        radialPage[activeCat+':'+i]=0;
         renderGrid();
       };
       grid.appendChild(b);
@@ -1470,94 +1494,75 @@ function renderGrid(){
     return;
   }
 
-  const group = groups[Math.max(0, chosen || 0)];
-  const groupList = group.phrases;
+  const group=groups[chosen];
+  const pageKey=activeCat+':'+chosen;
+  const pageSize=6;
+  const pages=Math.max(1,Math.ceil(group.phrases.length/pageSize));
+  let page=radialPage[pageKey]||0;
+  if(page>=pages) page=pages-1;
+  radialPage[pageKey]=page;
+  const slice=group.phrases.slice(page*pageSize,page*pageSize+pageSize);
 
-  grid.className = 'grid radial-mode';
-  grid.style.setProperty('--cat', cat.color);
-  if(crumb) crumb.textContent = cat.name + (groups.length > 1 ? ' › ' + group.name : '');
-  setStatus(groupList.length, group.name);
+  grid.className='grid phrasebook';
+  if(crumb) crumb.textContent=cat.name+' › '+group.name;
+  setStatus(group.phrases.length,group.name);
 
-  const pageSize = 6;
-  const pageKey = activeCat + ':' + (chosen || 0);
-  const pages = Math.max(1, Math.ceil(groupList.length / pageSize));
-  let page = radialPage[pageKey] || 0;
-  if(page >= pages) page = pages - 1;
-  radialPage[pageKey] = page;
-  const slice = groupList.slice(page * pageSize, page * pageSize + pageSize);
+  const wrap=document.createElement('div');
+  wrap.className='nested-wrap';
 
-  const board = document.createElement('div');
-  board.className = 'radial-board';
-  board.setAttribute('role','group');
-  board.setAttribute('aria-label', group.name + ' phrases');
+  const tab=document.createElement('div');
+  tab.className='nested-tab';
+  tab.style.setProperty('--cat',cat.color);
 
-  const center = document.createElement('button');
-  center.className = 'radial-center';
-  center.textContent = group.name;
-  center.onclick = ()=>{
-    if(groups.length > 1){
-      activeSubtopic[activeCat] = null;
-      renderGrid();
-    } else if(pages > 1){
-      radialPage[pageKey] = (page + 1) % pages;
-      renderGrid();
-    }
+  const center=document.createElement('button');
+  center.className='nested-center';
+  center.textContent=group.name;
+  center.setAttribute('aria-expanded','true');
+  center.onclick=()=>{
+    activeSubtopic[activeCat]=null;
+    renderGrid();
   };
-  board.appendChild(center);
+  tab.appendChild(center);
 
   slice.forEach((p,i)=>{
-    const b = document.createElement('button');
-    b.className = 'radial-phrase';
-    b.textContent = p;
-    b.title = p;
-    b.style.setProperty('--cat', cat.color);
-    b.style.setProperty('--i', i);
-    b.style.setProperty('--angle', (i * (360 / slice.length)) + 'deg');
-    b.onclick = ()=>{
-      if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
-      else { speak(p); bump(p); }
+    const b=document.createElement('button');
+    b.className='nested-phrase';
+    b.textContent=p;
+    b.title=p;
+    b.style.setProperty('--cat',cat.color);
+    b.style.setProperty('--i',i);
+    b.style.setProperty('--angle',(i*(360/slice.length))+'deg');
+    b.onclick=()=>{
+      if(mode==='build'){ addToBuffer(p,!!cat.addon); }
+      else{ speak(p); bump(p); }
     };
-    board.appendChild(b);
+    tab.appendChild(b);
   });
 
-  grid.appendChild(board);
+  const controls=document.createElement('div');
+  controls.className='nested-controls';
 
-  const nav = document.createElement('div');
-  nav.className = 'radial-nav';
+  const back=document.createElement('button');
+  back.textContent='← Back';
+  back.onclick=()=>{
+    activeSubtopic[activeCat]=null;
+    renderGrid();
+  };
+  controls.appendChild(back);
 
-  if(groups.length > 1){
-    const back = document.createElement('button');
-    back.textContent = '← Groups';
-    back.onclick = ()=>{
-      activeSubtopic[activeCat] = null;
+  if(pages>1){
+    const next=document.createElement('button');
+    next.textContent='More →';
+    next.onclick=()=>{
+      radialPage[pageKey]=(page+1)%pages;
       renderGrid();
     };
-    nav.appendChild(back);
+    controls.appendChild(next);
   }
 
-  if(pages > 1){
-    const prev = document.createElement('button');
-    prev.textContent = '← Previous';
-    prev.onclick = ()=>{
-      radialPage[pageKey] = (page - 1 + pages) % pages;
-      renderGrid();
-    };
-
-    const label = document.createElement('div');
-    label.className = 'radial-page-label';
-    label.textContent = 'Group ' + (page + 1) + ' of ' + pages;
-
-    const next = document.createElement('button');
-    next.textContent = 'Next →';
-    next.onclick = ()=>{
-      radialPage[pageKey] = (page + 1) % pages;
-      renderGrid();
-    };
-
-    nav.append(prev,label,next);
-  }
-
-  if(nav.children.length) grid.appendChild(nav);
+  tab.appendChild(controls);
+  wrap.appendChild(tab);
+  grid.appendChild(wrap);
 }
 
 function removePhrase(cat, p){
