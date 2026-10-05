@@ -1045,6 +1045,7 @@ let counts  = {};     // {phrase: n}
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
+let activeSubtopic = {};
 let editing = false;
 let lastSaid = '';
 let buffer = '';
@@ -1163,6 +1164,43 @@ function phrasesFor(cat){
     return JOKE_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom.offduty || []);
   }
   return (BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]);
+}
+
+function subtopicsFor(cat, list){
+  const clean = (list||[]).filter(Boolean);
+  if(clean.length <= 6) return [{name:cat.name, phrases:clean}];
+
+  if(cat.id === 'quick'){
+    return [
+      {name:'Yes / No', phrases:clean.filter(p=>/\b(yes|no|maybe|sure|okay|ok|not right now)\b/i.test(p))},
+      {name:'Needs', phrases:clean.filter(p=>/need|want|please|help|moment|second|wait/i.test(p))},
+      {name:'General', phrases:clean.filter(p=>!/\b(yes|no|maybe|sure|okay|ok|not right now)\b/i.test(p) && !/need|want|please|help|moment|second|wait/i.test(p))}
+    ].filter(g=>g.phrases.length);
+  }
+
+  if(cat.id === 'ask'){
+    return [
+      {name:'People', phrases:clean.filter(p=>/who|name|you|your|they|them/i.test(p))},
+      {name:'Details', phrases:clean.filter(p=>/what|where|when|which|how/i.test(p))},
+      {name:'Follow-up', phrases:clean.filter(p=>/again|more|mean|clarify|repeat|tell me/i.test(p))}
+    ].filter(g=>g.phrases.length);
+  }
+
+  if(cat.id === 'work' || cat.id === 'hearing' || cat.id === 'cls'){
+    const size = Math.ceil(clean.length/3);
+    return [
+      {name:'Opening', phrases:clean.slice(0,size)},
+      {name:'Discussion', phrases:clean.slice(size,size*2)},
+      {name:'Closing', phrases:clean.slice(size*2)}
+    ].filter(g=>g.phrases.length);
+  }
+
+  const groups = [];
+  const per = 6;
+  for(let i=0;i<clean.length;i+=per){
+    groups.push({name:'Group ' + (groups.length+1), phrases:clean.slice(i,i+per)});
+  }
+  return groups;
 }
 
 function renderSaid(){
@@ -1392,12 +1430,8 @@ function renderGrid(){
     list = phrasesFor(activeCat);
   }
 
-  grid.className = 'grid radial-mode';
-  grid.style.setProperty('--cat', cat.color);
-  if(crumb) crumb.textContent = cat.name;
-  setStatus(list.length, cat.name);
-
   if(!list.length){
+    grid.className = 'grid radial-mode';
     const d = document.createElement('div');
     d.className = 'empty-note';
     d.textContent = activeCat==='recent'
@@ -1407,25 +1441,65 @@ function renderGrid(){
     return;
   }
 
+  const groups = subtopicsFor(cat, list);
+  const chosen = activeSubtopic[activeCat];
+
+  if(groups.length > 1 && (chosen === undefined || chosen === null || !groups[chosen])){
+    grid.className = 'grid';
+    grid.style.setProperty('--cat', cat.color);
+    if(crumb) crumb.textContent = cat.name;
+    setStatus(groups.length, cat.name + ' groups');
+
+    const head = document.createElement('div');
+    head.className = 'group-head';
+    head.textContent = 'Choose a group';
+    grid.appendChild(head);
+
+    groups.forEach((g,i)=>{
+      const b = document.createElement('button');
+      b.className = 'tile';
+      b.style.setProperty('--cat', cat.color);
+      b.textContent = g.name;
+      b.onclick = ()=>{
+        activeSubtopic[activeCat] = i;
+        radialPage[activeCat] = 0;
+        renderGrid();
+      };
+      grid.appendChild(b);
+    });
+    return;
+  }
+
+  const group = groups[Math.max(0, chosen || 0)];
+  const groupList = group.phrases;
+
+  grid.className = 'grid radial-mode';
+  grid.style.setProperty('--cat', cat.color);
+  if(crumb) crumb.textContent = cat.name + (groups.length > 1 ? ' › ' + group.name : '');
+  setStatus(groupList.length, group.name);
+
   const pageSize = 6;
-  const pages = Math.max(1, Math.ceil(list.length / pageSize));
-  let page = radialPage[activeCat] || 0;
+  const pageKey = activeCat + ':' + (chosen || 0);
+  const pages = Math.max(1, Math.ceil(groupList.length / pageSize));
+  let page = radialPage[pageKey] || 0;
   if(page >= pages) page = pages - 1;
-  radialPage[activeCat] = page;
-  const slice = list.slice(page * pageSize, page * pageSize + pageSize);
+  radialPage[pageKey] = page;
+  const slice = groupList.slice(page * pageSize, page * pageSize + pageSize);
 
   const board = document.createElement('div');
   board.className = 'radial-board';
   board.setAttribute('role','group');
-  board.setAttribute('aria-label', cat.name + ' phrases');
+  board.setAttribute('aria-label', group.name + ' phrases');
 
   const center = document.createElement('button');
   center.className = 'radial-center';
-  center.textContent = cat.name;
-  center.title = pages > 1 ? 'Tap to see the next group of phrases' : cat.name;
+  center.textContent = group.name;
   center.onclick = ()=>{
-    if(pages > 1){
-      radialPage[activeCat] = (page + 1) % pages;
+    if(groups.length > 1){
+      activeSubtopic[activeCat] = null;
+      renderGrid();
+    } else if(pages > 1){
+      radialPage[pageKey] = (page + 1) % pages;
       renderGrid();
     }
   };
@@ -1448,14 +1522,24 @@ function renderGrid(){
 
   grid.appendChild(board);
 
-  if(pages > 1){
-    const nav = document.createElement('div');
-    nav.className = 'radial-nav';
+  const nav = document.createElement('div');
+  nav.className = 'radial-nav';
 
+  if(groups.length > 1){
+    const back = document.createElement('button');
+    back.textContent = '← Groups';
+    back.onclick = ()=>{
+      activeSubtopic[activeCat] = null;
+      renderGrid();
+    };
+    nav.appendChild(back);
+  }
+
+  if(pages > 1){
     const prev = document.createElement('button');
     prev.textContent = '← Previous';
     prev.onclick = ()=>{
-      radialPage[activeCat] = (page - 1 + pages) % pages;
+      radialPage[pageKey] = (page - 1 + pages) % pages;
       renderGrid();
     };
 
@@ -1466,13 +1550,14 @@ function renderGrid(){
     const next = document.createElement('button');
     next.textContent = 'Next →';
     next.onclick = ()=>{
-      radialPage[activeCat] = (page + 1) % pages;
+      radialPage[pageKey] = (page + 1) % pages;
       renderGrid();
     };
 
     nav.append(prev,label,next);
-    grid.appendChild(nav);
   }
+
+  if(nav.children.length) grid.appendChild(nav);
 }
 
 function removePhrase(cat, p){
