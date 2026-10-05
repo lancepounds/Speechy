@@ -483,6 +483,8 @@
   <div class="toolbar">
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <span class="tsep"></span>
+    <button class="tbtn" id="styleBtn" aria-pressed="false">Old style</button>
+    <span class="tsep"></span>
     <button class="tbtn" id="setBtn">Voice</button>
     <span class="tsep"></span>
     <button class="tbtn" id="fsBtn">Full screen</button>
@@ -1073,7 +1075,7 @@ const RETIRED_PHRASES = ["I had a brain injury last year, and my speech is still
 let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto'};
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested'};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -1390,6 +1392,49 @@ function setStatus(n, what){
   if(d) d.textContent = n + ' ' + (n === 1 ? 'item' : 'items') + (what ? '  |  ' + what : '');
 }
 
+function renderClassicGrid(grid, cat){
+  grid.className = 'grid' + (cat.compact ? ' compact' : '');
+  grid.style.setProperty('--cat', cat.color);
+  const list = phrasesFor(activeCat);
+  setStatus(list.length, cat.name);
+
+  if(cat.addon){
+    const n = document.createElement('div');
+    n.className = 'addon-note';
+    n.textContent = 'These attach to the end of the sentence in the bar above.';
+    grid.appendChild(n);
+  }
+
+  if(cat.groups){
+    const gone = removed[cat.id] || [];
+    CLS_GROUPS.forEach(g=>{
+      const lines = g.lines.filter(p=>!gone.includes(p));
+      if(!lines.length) return;
+      const h = document.createElement('div');
+      h.className = 'group-head'; h.textContent = g.name;
+      grid.appendChild(h);
+      lines.forEach(p=>grid.appendChild(makeTile(p, cat)));
+    });
+    if((custom[cat.id]||[]).length){
+      const h = document.createElement('div');
+      h.className='group-head'; h.textContent='Your conference phrases'; grid.appendChild(h);
+      custom[cat.id].forEach(p=>grid.appendChild(makeTile(p, cat)));
+    }
+  } else if(cat.jokes){
+    renderJokes(grid, cat);
+  } else {
+    if(!list.length){
+      const d = document.createElement('div');
+      d.className = 'empty-note';
+      d.textContent = activeCat==='recent'
+        ? 'Phrases you use will collect here, most-used first.'
+        : 'Nothing here yet. Use Organize to add a phrase.';
+      grid.appendChild(d);
+    }
+    list.forEach(p=> grid.appendChild(makeTile(p, cat)));
+  }
+}
+
 function renderGrid(){
   const grid = document.getElementById('grid');
   const cat = CATS.find(c=>c.id===activeCat);
@@ -1410,6 +1455,12 @@ function renderGrid(){
     }
     hits.forEach(h=> grid.appendChild(makeTile(h.p, h.cat, true)));
     setStatus(hits.length, 'matching "' + query + '"');
+    return;
+  }
+
+  if(settings.uiStyle === 'classic' && !editing){
+    if(crumb) crumb.textContent = cat.name;
+    renderClassicGrid(grid, cat);
     return;
   }
 
@@ -1798,6 +1849,22 @@ function applyTheme(){
   const b = document.getElementById('themeBtn');
   if(b) b.textContent = dark ? 'Light theme' : 'Dark theme';
 }
+function updateStyleButton(){
+  const b = document.getElementById('styleBtn');
+  if(!b) return;
+  const classic = settings.uiStyle === 'classic';
+  b.textContent = classic ? 'Nested style' : 'Old style';
+  b.setAttribute('aria-pressed', classic ? 'true' : 'false');
+}
+document.getElementById('styleBtn').onclick = ()=>{
+  settings.uiStyle = settings.uiStyle === 'classic' ? 'nested' : 'classic';
+  activeSubtopic = {};
+  radialPage = {};
+  updateStyleButton();
+  save();
+  renderGrid();
+};
+
 document.getElementById('themeBtn').onclick = ()=>{
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   settings.theme = isDark ? 'light' : 'dark';
@@ -1817,12 +1884,12 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 (async function(){
-  applyTheme();
+  applyTheme(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
-  applyTheme();
+  applyTheme(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
 })();
