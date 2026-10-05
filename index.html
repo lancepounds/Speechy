@@ -160,6 +160,32 @@
   .grid.compact{grid-template-columns:repeat(3,1fr);gap:7px}
   .grid.compact .tile{min-height:56px;font-size:15px;padding:9px 6px;
                       align-items:center;justify-content:center;text-align:center;border-left-width:4px}
+  .star-btn{
+    position:absolute;
+    top:6px;
+    right:7px;
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:4px;
+    font-size:22px;
+    line-height:1;
+    color:#B07206;
+    background:rgba(255,255,255,.92);
+    border:1px solid #B9B4A5;
+    box-shadow:0 1px 2px rgba(0,0,0,.12);
+  }
+  .star-btn:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in);
+  }
+  [data-theme="dark"] .star-btn{
+    background:#2E2E2E;
+    border-color:#555;
+    color:#FFD65A;
+  }
+
   .tile .del{
     position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:3px;
     background:radial-gradient(circle at 90% 90%,#CC4600 0%,#DC6527 55%,#E5936C 80%,#F1BDA5 100%);
@@ -652,6 +678,7 @@
 <script>
 /* ------------------------------------------------------------------ data */
 const CATS = [
+  {id:'starred', name:'★ Starred', color:'var(--c-joke)'},
   {id:'cls', name:'CLS Conference', color:'var(--c-work)', groups:true},
   {id:'femisheart', name:"Femi's Heart", color:'var(--c-work)'},
   {id:'recent',  name:'Used most', color:'var(--c-recent)'},
@@ -1116,6 +1143,7 @@ const RETIRED_PHRASES = ["I had a brain injury last year, and my speech is still
 let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
+let starred = [];      // favorite phrases
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested'};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
@@ -1230,6 +1258,9 @@ function bump(p){ counts[p] = (counts[p]||0)+1; save(); }
 
 /* ---------------------------------------------------------------- render */
 function phrasesFor(cat){
+  if(cat === 'starred'){
+    return starred.slice();
+  }
   if(cat === 'recent'){
     return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,12);
   }
@@ -1364,6 +1395,14 @@ function renderRail(){
   });
 }
 
+function toggleStar(p){
+  if(starred.includes(p)) starred = starred.filter(x=>x!==p);
+  else starred = starred.concat([p]);
+  save();
+  renderGrid();
+}
+function isStarred(p){ return starred.includes(p); }
+
 function makeTile(p, cat, noDel){
   const t = document.createElement('button');
   t.className = 'tile' + (!cat.compact && p.length > 62 ? ' wide' : '');
@@ -1374,7 +1413,21 @@ function makeTile(p, cat, noDel){
     if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
     else { speak(p); bump(p); }
   };
-  if(editing && activeCat !== 'recent' && !noDel){
+
+  if(settings.uiStyle === 'classic' && !editing){
+    const star = document.createElement('span');
+    star.className = 'star-btn';
+    star.textContent = isStarred(p) ? '★' : '☆';
+    star.setAttribute('aria-label', isStarred(p) ? 'Unstar phrase' : 'Star phrase');
+    star.title = isStarred(p) ? 'Unstar phrase' : 'Star phrase';
+    star.onclick = (e)=>{
+      e.stopPropagation();
+      toggleStar(p);
+    };
+    t.appendChild(star);
+  }
+
+  if(editing && activeCat !== 'recent' && activeCat !== 'starred' && !noDel){
     const x = document.createElement('span');
     x.className='del'; x.textContent='×'; x.setAttribute('aria-label','Remove phrase');
     x.onclick = (e)=>{ e.stopPropagation(); removePhrase(activeCat, p); };
@@ -1469,7 +1522,9 @@ function renderClassicGrid(grid, cat){
       d.className = 'empty-note';
       d.textContent = activeCat==='recent'
         ? 'Phrases you use will collect here, most-used first.'
-        : 'Nothing here yet. Use Organize to add a phrase.';
+        : activeCat==='starred'
+          ? 'Star phrases in Old Style and they will collect here.'
+          : 'Nothing here yet. Use Organize to add a phrase.';
       grid.appendChild(d);
     }
     list.forEach(p=> grid.appendChild(makeTile(p, cat)));
