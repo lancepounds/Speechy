@@ -507,6 +507,7 @@
             <button id="modeSpeak" class="mode" aria-pressed="true">Tap speaks</button>
             <button id="modeBuild" class="mode" aria-pressed="false">Tap builds</button>
           </div>
+          <button id="styleSwitchMain" class="act" style="width:100%;margin:0 0 10px;padding:9px 10px;font-size:14px">Switch to Old Style</button>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
           <div class="actions" id="speakActions">
             <button class="act" id="sayAgain" disabled>Say again</button>
@@ -1850,20 +1851,28 @@ function applyTheme(){
   if(b) b.textContent = dark ? 'Light theme' : 'Dark theme';
 }
 function updateStyleButton(){
-  const b = document.getElementById('styleBtn');
-  if(!b) return;
   const classic = settings.uiStyle === 'classic';
-  b.textContent = classic ? 'Nested style' : 'Old style';
-  b.setAttribute('aria-pressed', classic ? 'true' : 'false');
+  const b = document.getElementById('styleBtn');
+  if(b){
+    b.textContent = classic ? 'Nested style' : 'Old style';
+    b.setAttribute('aria-pressed', classic ? 'true' : 'false');
+  }
+  const main = document.getElementById('styleSwitchMain');
+  if(main){
+    main.textContent = classic ? 'Switch to Nested Style' : 'Switch to Old Style';
+    main.setAttribute('aria-pressed', classic ? 'true' : 'false');
+  }
 }
-document.getElementById('styleBtn').onclick = ()=>{
+function toggleUiStyle(){
   settings.uiStyle = settings.uiStyle === 'classic' ? 'nested' : 'classic';
   activeSubtopic = {};
   radialPage = {};
   updateStyleButton();
   save();
   renderGrid();
-};
+}
+document.getElementById('styleBtn').onclick = toggleUiStyle;
+document.getElementById('styleSwitchMain').onclick = toggleUiStyle;
 
 document.getElementById('themeBtn').onclick = ()=>{
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
