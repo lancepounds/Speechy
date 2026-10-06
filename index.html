@@ -334,211 +334,202 @@
   .grid.phrasebook{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:12px;
-    padding:14px;
+    gap:14px;
+    padding:16px;
     align-items:stretch;
   }
   .book-button{
-    min-height:104px;
-    padding:14px 14px;
+    min-height:112px;
+    padding:16px 14px;
     text-align:center;
-    font-size:15px;
-    font-weight:bold;
-    line-height:1.32;
-    white-space:normal;
-    overflow-wrap:anywhere;
-    background:var(--btn);
-    border:1px solid var(--edge);
-    border-left:6px solid var(--cat);
-    border-radius:5px;
-    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.08);
-  }
-  .book-button:hover{
-    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 2px 6px rgba(0,0,0,.12);
-  }
-
-  .nested-wrap{
-    grid-column:1/-1;
-    position:relative;
-    min-height:500px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:visible;
-  }
-  .nested-tab{
-    --nest-r:145px;
-    position:relative;
-    width:min(680px,100%);
-    height:470px;
-    animation:nested-panel-in .22s ease-out both;
-  }
-  .nested-center{
-    position:absolute;
-    left:50%;top:50%;
-    transform:translate(-50%,-50%);
-    width:190px;
-    min-height:92px;
-    padding:14px 12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    font-size:17px;
-    font-weight:bold;
-    background:var(--btn);
-    border:3px solid var(--cat);
-    border-radius:7px;
-    z-index:3;
-    box-shadow:inset 0 0 0 2px #fff,0 7px 18px rgba(0,0,0,.20);
-    animation:center-pop .28s cubic-bezier(.2,.9,.2,1) both;
-  }
-  .nested-phrase{
-    --angle:0deg;
-    --i:0;
-    position:absolute;
-    left:50%;top:50%;
-    width:186px;
-    min-height:84px;
-    max-height:122px;
-    padding:11px 13px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    font-size:14px;
+    font-size:16px;
     font-weight:bold;
     line-height:1.3;
     white-space:normal;
     overflow-wrap:anywhere;
-    overflow:hidden;
     background:var(--btn);
     border:1px solid var(--edge);
-    border-left:6px solid var(--cat);
-    border-radius:6px;
-    opacity:0;
-    z-index:2;
-    transform:
-      translate(-50%,-50%)
-      rotate(var(--angle))
-      translateY(0)
-      rotate(calc(-1 * var(--angle)))
-      scale(.55);
-    animation:nested-child-pop .36s cubic-bezier(.18,.9,.25,1.15) forwards;
-    animation-delay:calc(70ms + (var(--i) * 55ms));
+    border-left:7px solid var(--cat);
+    border-radius:7px;
+    box-shadow:inset -1px -1px 0 rgba(0,0,0,.08),0 3px 7px rgba(0,0,0,.10);
   }
-  .nested-phrase:hover,.nested-center:hover{
-    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 3px 8px rgba(0,0,0,.14);
+  .book-button:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 4px 10px rgba(0,0,0,.14);
   }
-  .nested-controls{
-    position:absolute;
-    left:50%;bottom:0;
-    transform:translateX(-50%);
+
+  .nested-wrap{
+    grid-column:1/-1;
+    width:100%;
+    padding:4px 0 10px;
+  }
+  .nested-tab{
+    width:min(760px,100%);
+    margin:0 auto;
+    padding:16px;
+    background:var(--face);
+    border:1px solid #ACA899;
+    border-radius:8px;
+    box-shadow:0 5px 16px rgba(0,0,0,.14);
+    animation:nested-panel-in .22s ease-out both;
+  }
+  .nested-head{
     display:flex;
-    gap:8px;
-    z-index:5;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
   }
-  .nested-controls button{
-    padding:9px 13px;
-    min-width:100px;
-    font-size:13px;
+  .nested-center{
+    flex:1;
+    min-height:74px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+    line-height:1.25;
+    background:var(--btn);
+    border:3px solid var(--cat);
+    border-radius:7px;
+    box-shadow:inset 0 0 0 2px #fff,0 3px 8px rgba(0,0,0,.15);
+    animation:center-pop .24s cubic-bezier(.2,.9,.2,1) both;
+  }
+  .nested-back{
+    flex:0 0 auto;
+    min-width:96px;
+    min-height:54px;
+    padding:10px 13px;
+    font-size:14px;
     font-weight:bold;
     background:var(--btn);
     border:1px solid var(--edge);
-    border-radius:3px;
+    border-radius:5px;
+  }
+  .nested-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+  .nested-phrase{
+    min-height:104px;
+    padding:15px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:15px;
+    font-weight:bold;
+    line-height:1.3;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-left:7px solid var(--cat);
+    border-radius:7px;
+    opacity:0;
+    transform:translateY(14px) scale(.96);
+    animation:nested-child-pop .3s cubic-bezier(.18,.9,.25,1.08) forwards;
+    animation-delay:calc(45ms + (var(--i) * 55ms));
+  }
+  .nested-phrase:hover,.nested-center:hover,.nested-back:hover{
+    box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 3px 8px rgba(0,0,0,.14);
+  }
+  .nested-controls{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:14px;
+  }
+  .nested-controls button{
+    min-width:120px;
+    min-height:46px;
+    padding:9px 14px;
+    font-size:14px;
+    font-weight:bold;
+    background:var(--btn);
+    border:1px solid var(--edge);
+    border-radius:4px;
   }
   @keyframes nested-panel-in{
-    from{opacity:0;transform:scale(.96)}
-    to{opacity:1;transform:scale(1)}
+    from{opacity:0;transform:translateY(8px) scale(.985)}
+    to{opacity:1;transform:translateY(0) scale(1)}
   }
   @keyframes center-pop{
-    0%{opacity:0;transform:translate(-50%,-50%) scale(.72)}
-    70%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
-    100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    0%{opacity:0;transform:scale(.92)}
+    70%{opacity:1;transform:scale(1.035)}
+    100%{opacity:1;transform:scale(1)}
   }
   @keyframes nested-child-pop{
-    0%{
-      opacity:0;
-      transform:
-        translate(-50%,-50%)
-        rotate(var(--angle))
-        translateY(0)
-        rotate(calc(-1 * var(--angle)))
-        scale(.55);
-    }
-    100%{
-      opacity:1;
-      transform:
-        translate(-50%,-50%)
-        rotate(var(--angle))
-        translateY(calc(-1 * var(--nest-r)))
-        rotate(calc(-1 * var(--angle)))
-        scale(1);
-    }
+    from{opacity:0;transform:translateY(14px) scale(.96)}
+    to{opacity:1;transform:translateY(0) scale(1)}
   }
   @media (min-width:700px){
     .grid.phrasebook{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (min-width:1050px){
     .grid.phrasebook{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .nested-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
   @media (max-width:560px){
     .grid.phrasebook{
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+      grid-template-columns:1fr;
+      gap:12px;
       padding:12px;
     }
     .book-button{
-      min-height:96px;
-      font-size:14px;
-      line-height:1.3;
-      padding:12px 10px;
-    }
-    .nested-wrap{min-height:470px}
-    .nested-tab{--nest-r:132px;height:450px}
-    .nested-center{
-      width:156px;
-      min-height:82px;
+      min-height:90px;
       font-size:15px;
-      line-height:1.25;
+      line-height:1.3;
+      padding:13px 12px;
+    }
+    .nested-tab{
+      padding:12px;
+      border-radius:6px;
+    }
+    .nested-head{
+      align-items:stretch;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .nested-center{
+      min-height:70px;
+      font-size:16px;
       padding:12px;
     }
+    .nested-back{
+      min-width:82px;
+      min-height:50px;
+      font-size:13px;
+      padding:8px 10px;
+    }
+    .nested-grid{
+      grid-template-columns:1fr;
+      gap:10px;
+    }
     .nested-phrase{
-      width:158px;
-      min-height:78px;
-      max-height:108px;
-      font-size:13px;
-      line-height:1.28;
-      padding:9px 10px;
+      min-height:86px;
+      font-size:14px;
+      line-height:1.32;
+      padding:12px;
     }
-    .nested-controls{bottom:4px}
+    .nested-controls{
+      margin-top:12px;
+    }
     .nested-controls button{
-      min-width:92px;
-      padding:9px 11px;
+      min-width:104px;
+      min-height:44px;
       font-size:13px;
     }
-  }
-  @media (max-width:390px){
-    .grid.phrasebook{grid-template-columns:1fr}
-    .book-button{min-height:78px}
-    .nested-wrap{min-height:520px}
-    .nested-tab{--nest-r:125px;height:500px}
-    .nested-phrase{width:150px}
   }
   @media (prefers-reduced-motion:reduce){
-    .nested-tab,.nested-center,.nested-phrase{animation:none !important;opacity:1}
-    .nested-phrase{
-      transform:
-        translate(-50%,-50%)
-        rotate(var(--angle))
-        translateY(calc(-1 * var(--nest-r)))
-        rotate(calc(-1 * var(--angle)))
-        scale(1);
-    }
+    .nested-tab,.nested-center,.nested-phrase{animation:none !important;opacity:1;transform:none !important}
   }
   [data-theme="dark"] .book-button,
   [data-theme="dark"] .nested-center,
   [data-theme="dark"] .nested-phrase,
+  [data-theme="dark"] .nested-back,
   [data-theme="dark"] .nested-controls button{color:#F2F2F2}
 
 </style>
@@ -1661,6 +1652,9 @@ function renderGrid(){
   tab.className='nested-tab';
   tab.style.setProperty('--cat',cat.color);
 
+  const head=document.createElement('div');
+  head.className='nested-head';
+
   const center=document.createElement('button');
   center.className='nested-center';
   center.textContent=group.name;
@@ -1669,7 +1663,20 @@ function renderGrid(){
     activeSubtopic[activeCat]=null;
     renderGrid();
   };
-  tab.appendChild(center);
+
+  const back=document.createElement('button');
+  back.className='nested-back';
+  back.textContent='← Back';
+  back.onclick=()=>{
+    activeSubtopic[activeCat]=null;
+    renderGrid();
+  };
+
+  head.append(center,back);
+  tab.appendChild(head);
+
+  const nestedGrid=document.createElement('div');
+  nestedGrid.className='nested-grid';
 
   slice.forEach((p,i)=>{
     const b=document.createElement('button');
@@ -1678,36 +1685,37 @@ function renderGrid(){
     b.title=p;
     b.style.setProperty('--cat',cat.color);
     b.style.setProperty('--i',i);
-    b.style.setProperty('--angle',(i*(360/slice.length))+'deg');
     b.onclick=()=>{
       if(mode==='build'){ addToBuffer(p,!!cat.addon); }
       else{ speak(p); bump(p); }
     };
-    tab.appendChild(b);
+    nestedGrid.appendChild(b);
   });
 
-  const controls=document.createElement('div');
-  controls.className='nested-controls';
-
-  const back=document.createElement('button');
-  back.textContent='← Back';
-  back.onclick=()=>{
-    activeSubtopic[activeCat]=null;
-    renderGrid();
-  };
-  controls.appendChild(back);
+  tab.appendChild(nestedGrid);
 
   if(pages>1){
+    const controls=document.createElement('div');
+    controls.className='nested-controls';
+
+    const prev=document.createElement('button');
+    prev.textContent='← Previous';
+    prev.onclick=()=>{
+      radialPage[pageKey]=(page-1+pages)%pages;
+      renderGrid();
+    };
+
     const next=document.createElement('button');
-    next.textContent='More →';
+    next.textContent='Next →';
     next.onclick=()=>{
       radialPage[pageKey]=(page+1)%pages;
       renderGrid();
     };
-    controls.appendChild(next);
+
+    controls.append(prev,next);
+    tab.appendChild(controls);
   }
 
-  tab.appendChild(controls);
   wrap.appendChild(tab);
   grid.appendChild(wrap);
 }
