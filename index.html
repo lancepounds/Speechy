@@ -357,6 +357,50 @@
     box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 4px 10px rgba(0,0,0,.14);
   }
 
+  .book-button{position:relative}
+  .book-preview{
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%) translateY(4px);
+    width:min(320px,90vw);
+    padding:10px 12px;
+    background:var(--face);
+    color:var(--ink);
+    border:1px solid #7F9DB9;
+    border-radius:5px;
+    box-shadow:0 6px 16px rgba(0,0,0,.18);
+    font-size:12px;
+    line-height:1.35;
+    text-align:left;
+    opacity:0;
+    pointer-events:none;
+    visibility:hidden;
+    z-index:50;
+    transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
+  }
+  .book-preview strong{
+    display:block;
+    margin-bottom:5px;
+    font-size:12px;
+  }
+  .book-preview ul{
+    margin:0;
+    padding-left:18px;
+  }
+  .book-preview li+li{margin-top:3px}
+  .book-button:hover .book-preview,
+  .book-button:focus-visible .book-preview{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(-50%) translateY(0);
+  }
+  [data-theme="dark"] .book-preview{
+    background:#222;
+    color:#F2F2F2;
+    border-color:#555;
+  }
+
   .nested-wrap{
     grid-column:1/-1;
     width:100%;
@@ -1627,6 +1671,24 @@ function renderGrid(){
       b.className='book-button';
       b.style.setProperty('--cat',cat.color);
       b.textContent=g.name;
+      const preview=document.createElement('div');
+      preview.className='book-preview';
+      const ptitle=document.createElement('strong');
+      ptitle.textContent='Preview';
+      preview.appendChild(ptitle);
+      const ul=document.createElement('ul');
+      g.phrases.slice(0,4).forEach(p=>{
+        const li=document.createElement('li');
+        li.textContent=p;
+        ul.appendChild(li);
+      });
+      if(g.phrases.length>4){
+        const li=document.createElement('li');
+        li.textContent='…and '+(g.phrases.length-4)+' more';
+        ul.appendChild(li);
+      }
+      preview.appendChild(ul);
+      b.appendChild(preview);
       b.setAttribute('aria-expanded','false');
       b.onclick=()=>{
         activeSubtopic[activeCat]=i;
