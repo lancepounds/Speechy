@@ -357,49 +357,49 @@
     box-shadow:inset 0 0 0 2px var(--hot),inset 0 0 0 3px var(--hot-in),0 4px 10px rgba(0,0,0,.14);
   }
 
-  .book-button{position:relative}
-  .book-preview{
-    position:absolute;
-    left:50%;
-    bottom:calc(100% + 8px);
-    transform:translateX(-50%) translateY(4px);
-    width:min(320px,90vw);
-    padding:10px 12px;
+  .book-preview-panel{
+    grid-column:1/-1;
+    min-height:92px;
+    padding:12px 14px;
+    margin:0 0 2px;
     background:var(--face);
     color:var(--ink);
     border:1px solid #7F9DB9;
-    border-radius:5px;
-    box-shadow:0 6px 16px rgba(0,0,0,.18);
-    font-size:12px;
+    border-left:6px solid var(--cat);
+    border-radius:6px;
+    box-shadow:0 3px 10px rgba(0,0,0,.10);
+    font-size:13px;
     line-height:1.35;
-    text-align:left;
-    opacity:0;
-    pointer-events:none;
-    visibility:hidden;
-    z-index:50;
-    transition:opacity .14s ease,transform .14s ease,visibility .14s ease;
   }
-  .book-preview strong{
+  .book-preview-panel strong{
     display:block;
-    margin-bottom:5px;
-    font-size:12px;
+    margin-bottom:6px;
+    font-size:14px;
   }
-  .book-preview ul{
+  .book-preview-panel ul{
     margin:0;
     padding-left:18px;
+    columns:2;
+    column-gap:22px;
   }
-  .book-preview li+li{margin-top:3px}
-  .book-button:hover .book-preview,
-  .book-button:focus-visible .book-preview{
-    opacity:1;
-    visibility:visible;
-    transform:translateX(-50%) translateY(0);
+  .book-preview-panel li{
+    break-inside:avoid;
+    margin-bottom:3px;
   }
-  [data-theme="dark"] .book-preview{
+  .book-preview-panel.empty{
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  [data-theme="dark"] .book-preview-panel{
     background:#222;
     color:#F2F2F2;
     border-color:#555;
   }
+  [data-theme="dark"] .book-preview-panel.empty{color:#AAA}
+  @media (max-width:560px){
+    .book-preview-panel ul{columns:1}
+  }
+
 
   .nested-wrap{
     grid-column:1/-1;
@@ -1666,30 +1666,42 @@ function renderGrid(){
     if(crumb) crumb.textContent=cat.name;
     setStatus(groups.length,cat.name+' buttons');
 
+    const previewPanel=document.createElement('div');
+    previewPanel.id='bookPreviewPanel';
+    previewPanel.className='book-preview-panel empty';
+    previewPanel.style.setProperty('--cat',cat.color);
+    previewPanel.textContent='Hover over a button to preview the phrases inside.';
+    grid.appendChild(previewPanel);
+
     groups.forEach((g,i)=>{
       const b=document.createElement('button');
       b.className='book-button';
       b.style.setProperty('--cat',cat.color);
       b.textContent=g.name;
-      const preview=document.createElement('div');
-      preview.className='book-preview';
-      const ptitle=document.createElement('strong');
-      ptitle.textContent='Preview';
-      preview.appendChild(ptitle);
-      const ul=document.createElement('ul');
-      g.phrases.slice(0,4).forEach(p=>{
-        const li=document.createElement('li');
-        li.textContent=p;
-        ul.appendChild(li);
-      });
-      if(g.phrases.length>4){
-        const li=document.createElement('li');
-        li.textContent='…and '+(g.phrases.length-4)+' more';
-        ul.appendChild(li);
-      }
-      preview.appendChild(ul);
-      b.appendChild(preview);
       b.setAttribute('aria-expanded','false');
+      const showPreview=()=>{
+        const panel=document.getElementById('bookPreviewPanel');
+        if(!panel) return;
+        panel.classList.remove('empty');
+        panel.innerHTML='';
+        const title=document.createElement('strong');
+        title.textContent=g.name+' — preview';
+        panel.appendChild(title);
+        const ul=document.createElement('ul');
+        g.phrases.slice(0,6).forEach(p=>{
+          const li=document.createElement('li');
+          li.textContent=p;
+          ul.appendChild(li);
+        });
+        if(g.phrases.length>6){
+          const li=document.createElement('li');
+          li.textContent='…and '+(g.phrases.length-6)+' more';
+          ul.appendChild(li);
+        }
+        panel.appendChild(ul);
+      };
+      b.addEventListener('mouseenter',showPreview);
+      b.addEventListener('focus',showPreview);
       b.onclick=()=>{
         activeSubtopic[activeCat]=i;
         radialPage[activeCat+':'+i]=0;
