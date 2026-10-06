@@ -507,14 +507,14 @@
       padding:8px 10px;
     }
     .nested-grid{
-      grid-template-columns:repeat(2,minmax(0,1fr));
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:7px;
     }
     .nested-phrase{
       min-height:78px;
-      font-size:13px;
-      line-height:1.28;
-      padding:10px 9px;
+      font-size:12px;
+      line-height:1.25;
+      padding:9px 7px;
     }
     .nested-controls{
       margin-top:12px;
@@ -524,6 +524,10 @@
       min-height:44px;
       font-size:13px;
     }
+  }
+  @media (max-width:390px){
+    .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .nested-phrase{font-size:12px;padding:9px 8px}
   }
   @media (prefers-reduced-motion:reduce){
     .nested-tab,.nested-center,.nested-phrase{animation:none !important;opacity:1;transform:none !important}
@@ -1636,7 +1640,7 @@ function renderGrid(){
 
   const group=groups[chosen];
   const pageKey=activeCat+':'+chosen;
-  const pageSize = window.innerWidth <= 620 ? 6 : 8;
+  const pageSize = window.innerWidth <= 620 ? 6 : 9;
   const pages=Math.max(1,Math.ceil(group.phrases.length/pageSize));
   let page=radialPage[pageKey]||0;
   if(page>=pages) page=pages-1;
