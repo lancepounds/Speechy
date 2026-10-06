@@ -333,16 +333,16 @@
   /* ================= phrase-book nested buttons ================= */
   .grid.phrasebook{
     display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:14px;
-    padding:16px;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    padding:12px;
     align-items:stretch;
   }
   .book-button{
-    min-height:112px;
-    padding:16px 14px;
+    min-height:104px;
+    padding:13px 10px;
     text-align:center;
-    font-size:16px;
+    font-size:15px;
     font-weight:bold;
     line-height:1.3;
     white-space:normal;
@@ -396,6 +396,18 @@
     border-color:#555;
   }
   [data-theme="dark"] .book-preview-panel.empty{color:#AAA}
+  @media (max-width:760px) and (min-width:561px){
+    .grid.phrasebook{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      padding:12px;
+    }
+    .book-button{
+      min-height:98px;
+      font-size:14px;
+      padding:12px 9px;
+    }
+  }
   @media (max-width:560px){
     .book-preview-panel ul{columns:1}
   }
@@ -511,18 +523,18 @@
     to{opacity:1;transform:translateY(0) scale(1)}
   }
   @media (min-width:700px){
-    .grid.phrasebook{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid.phrasebook{grid-template-columns:repeat(4,minmax(0,1fr))}
     .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
   @media (min-width:1050px){
-    .grid.phrasebook{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .grid.phrasebook{grid-template-columns:repeat(5,minmax(0,1fr))}
     .nested-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   }
   @media (max-width:560px){
     .grid.phrasebook{
-      grid-template-columns:1fr;
-      gap:12px;
-      padding:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+      padding:10px;
     }
     .book-button{
       min-height:90px;
@@ -572,6 +584,9 @@
   @media (max-width:390px){
     .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     .nested-phrase{font-size:12px;padding:9px 8px}
+  }
+  @media (max-width:360px){
+    .grid.phrasebook{grid-template-columns:1fr}
   }
   @media (prefers-reduced-motion:reduce){
     .nested-tab,.nested-center,.nested-phrase{animation:none !important;opacity:1;transform:none !important}
