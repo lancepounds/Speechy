@@ -507,14 +507,14 @@
       padding:8px 10px;
     }
     .nested-grid{
-      grid-template-columns:1fr;
+      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:7px;
     }
     .nested-phrase{
-      min-height:82px;
-      font-size:14px;
-      line-height:1.3;
-      padding:11px 12px;
+      min-height:78px;
+      font-size:13px;
+      line-height:1.28;
+      padding:10px 9px;
     }
     .nested-controls{
       margin-top:12px;
@@ -1636,7 +1636,7 @@ function renderGrid(){
 
   const group=groups[chosen];
   const pageKey=activeCat+':'+chosen;
-  const pageSize = window.innerWidth <= 620 ? 4 : 6;
+  const pageSize = window.innerWidth <= 620 ? 6 : 8;
   const pages=Math.max(1,Math.ceil(group.phrases.length/pageSize));
   let page=radialPage[pageKey]||0;
   if(page>=pages) page=pages-1;
