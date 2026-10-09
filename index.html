@@ -1200,7 +1200,7 @@ const RETIRED_PHRASES = ["I had a brain injury last year, and my speech is still
 let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
-let starred = [];      // favorite phrases
+let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
 let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested'};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
@@ -1234,7 +1234,7 @@ async function initBackend(){
 function apply(raw){
   if(!raw) return;
   custom = raw.custom || {}; removed = raw.removed || {};
-  counts = raw.counts || {}; settings = Object.assign(settings, raw.settings || {});
+  counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set([...raw.starred, "How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"])] : starred; settings = Object.assign(settings, raw.settings || {});
   // the saved card still carries the old "injury" wording unless he edited it himself
   let changed = false;
   if(settings.card === CARD_OLD){ settings.card = CARD_DEFAULT; changed = true; }
@@ -1261,7 +1261,7 @@ let saveTimer;
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = {custom, removed, counts, settings};
+    const payload = {custom, removed, counts, starred, settings};
     try{
       if(backend === 'db') await dbDoc.set(payload);
       else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
