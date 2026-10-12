@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Speechy</title>
+<title>Speechy | Personal AAC phraseboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -597,12 +597,83 @@
   [data-theme="dark"] .nested-back,
   [data-theme="dark"] .nested-controls button{color:#F2F2F2}
 
+  /* SLP showcase refinements */
+  .app-identity{display:flex;flex-direction:column;padding:1px 12px 1px 6px;border-right:1px solid #ACA899;margin-right:6px;line-height:1.2}
+  .app-identity strong{font:700 18px var(--titlefont)}
+  .app-identity span{font-size:11px;color:var(--ink-soft)}
+  .toolbar{row-gap:3px}
+  .toolbar .tbtn{min-height:38px;padding:6px 10px}
+  .stop-voice{font-weight:bold}
+  .searchbox input{height:38px;font-size:14px}
+  .actions.speak-three{grid-template-columns:1fr 1fr .82fr}
+  .actions.speak-three .act{min-width:0;min-height:52px;padding:9px 5px;font-size:clamp(13px,1.7vw,17px)}
+  .chip{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  .dock button{min-height:50px}
+  .nested-wrap,.nested-tab,.nested-grid,.nested-phrase,.book-button{min-width:0}
+  .grid.phrasebook{align-content:start}
+  .book-item{min-width:0;display:flex;flex-direction:column;gap:5px}
+  .book-item .book-button{width:100%;flex:1;min-height:92px}
+  .book-preview-trigger{width:100%;min-height:38px;padding:7px 8px;font-size:13px;color:var(--ink);background:var(--face);border:1px solid #919B9C;border-radius:4px}
+  .book-preview-trigger:hover{box-shadow:inset 0 0 0 2px var(--hot)}
+  .book-preview-panel{min-height:76px;margin-bottom:4px}
+  .nested-phrase{opacity:1;transform:none;animation:none;min-height:90px;font-size:clamp(14px,1.4vw,17px);padding:12px 10px;line-height:1.35}
+  .nested-tab,.nested-center{animation:none}
+  .nested-controls{justify-content:space-between;align-items:center}
+  .nested-page-indicator{font-size:13px;font-weight:bold;color:var(--ink-soft);white-space:nowrap}
+  .nested-controls button{min-width:88px;min-height:48px}
+  .demo-content{padding:6px 0 0;line-height:1.55;font-size:15px}
+  .demo-content ol{padding-left:25px}
+  .demo-content li{margin:10px 0}
+  .demo-content p{margin:12px 0}
+  .demo-content .note{font-size:13px}
+  .demo-sheet .sheet-inner{max-width:660px}
+  .demo-sheet .sheet-inner>.demo-content{margin:0 18px}
+  :focus-visible{outline:3px solid #FF9D00 !important;outline-offset:2px !important}
+  [data-theme="dark"] .app-identity span,[data-theme="dark"] .nested-page-indicator{color:#CCC}
+  [data-theme="dark"] .book-preview-trigger{color:#F2F2F2;background:#303030;border-color:#666}
+  @media (max-width:699px){
+    .toolbar{padding:4px 5px;gap:2px}
+    .toolbar .tbtn{font-size:12px;padding:5px 7px}
+    .app-identity{padding:2px 8px 2px 3px}
+    .app-identity strong{font-size:16px}
+    .app-identity span,.tsep{display:none}
+    .searchbox{flex:1 1 125px;width:auto;margin:0 2px}
+    .grid.phrasebook,.nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .nested-grid{gap:9px}
+    .nested-phrase{font-size:15px;min-height:94px;padding:12px 10px}
+    .book-button{font-size:15px}
+    .nested-back{min-width:76px}
+    .nested-controls{gap:4px}
+    .nested-controls button{min-width:75px;font-size:12px;padding:8px 5px}
+  }
+  @media (max-width:370px){
+    .app-identity{width:100%;border:0;margin:0}
+    .nested-phrase{font-size:14px}
+    .actions.speak-three .act{font-size:12px}
+  }
+
+  .access-toggle{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px}
+  .access-toggle input{width:22px;height:22px;accent-color:#316AC5}
+  .book-preview-trigger{min-height:44px}
+  [data-large-targets="true"] .grid.phrasebook{grid-template-columns:repeat(2,minmax(0,1fr))}
+  [data-large-targets="true"] .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  [data-large-targets="true"] .nested-phrase{min-height:126px;font-size:19px;padding:16px 12px}
+  [data-large-targets="true"] .book-button{min-height:120px;font-size:19px}
+  [data-large-targets="true"] .tile{min-height:118px;font-size:19px}
+  [data-large-targets="true"] .grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+  [data-large-targets="true"] .chip{min-height:54px;font-size:15px}
+  @media(max-width:560px){
+    [data-large-targets="true"] .nested-grid{grid-template-columns:1fr}
+    [data-large-targets="true"] .grid.phrasebook{grid-template-columns:1fr 1fr}
+  }
+
 </style>
 </head>
 <body>
 <div class="window" id="app">
 
   <div class="toolbar">
+    <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <span class="tsep"></span>
     <button class="tbtn" id="styleBtn" aria-pressed="false">Old style</button>
@@ -612,6 +683,8 @@
     <button class="tbtn" id="fsBtn">Full screen</button>
     <span class="tsep"></span>
     <button class="tbtn" id="themeBtn">Dark theme</button>
+    <button class="tbtn" id="demoBtn" aria-haspopup="dialog">Demo guide</button>
+    <button class="tbtn stop-voice" id="stopBtn">■ Stop voice</button>
     <div class="searchbox">
       <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">
     </div>
@@ -629,12 +702,13 @@
             <button id="modeSpeak" class="mode" aria-pressed="true">Tap speaks</button>
             <button id="modeBuild" class="mode" aria-pressed="false">Tap builds</button>
           </div>
-          <button id="styleSwitchMain" class="act" style="width:100%;margin:0 0 10px;padding:9px 10px;font-size:14px">Switch to Old Style</button>
+          <button id="styleSwitchMain" class="act" style="width:100%;margin:0 0 7px;padding:7px 10px;font-size:13px">Switch to Old Style</button>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
-          <div class="actions" id="speakActions">
-            <button class="act" id="sayAgain" disabled>Say again</button>
-            <button class="act secondary" id="showBig" disabled>Show big</button>
-          </div>
+          <div class="actions speak-three" id="speakActions">
+             <button class="act" id="sayAgain" disabled>Say again</button>
+             <button class="act secondary" id="showBig" disabled>Show big</button>
+             <button class="act" id="favCurrent" disabled aria-label="Star last spoken phrase">☆ Star</button>
+           </div>
           <div class="actions three" id="buildActions" hidden>
             <button class="act" id="buildSay" disabled>Say it</button>
             <button class="act secondary" id="buildExpand" disabled>Make a sentence</button>
@@ -644,7 +718,7 @@
       </div>
 
       <div class="rail" id="rail" role="tablist"></div>
-      <div class="grid" id="grid"></div>
+      <div class="grid" id="grid" aria-label="Communication phrases"></div>
     </div>
   </div>
 
@@ -665,12 +739,12 @@
 <div class="overlay" id="cardOverlay" role="dialog" aria-label="Explainer card">
   <div class="card-body">
     <p id="cardText"></p>
-    <p class="small">Tap anywhere to close. Hold Edit on the board to change this.</p>
+    <p class="small">Tap anywhere to close. Change this card under Voice.</p>
   </div>
 </div>
 
 <!-- sentence options sheet -->
-<div class="sheet" id="optSheet" role="dialog" aria-label="Sentence options">
+<div class="sheet" id="optSheet" role="dialog" aria-modal="true" aria-label="Sentence options">
   <div class="sheet-inner">
     <h2>Pick a sentence</h2>
     <div id="optList"></div>
@@ -683,10 +757,10 @@
 </div>
 
 <!-- type sheet -->
-<div class="sheet" id="typeSheet" role="dialog" aria-label="Type a message">
+<div class="sheet" id="typeSheet" role="dialog" aria-modal="true" aria-label="Type a message">
   <div class="sheet-inner">
     <h2>Type a message</h2>
-    <textarea id="typeInput" placeholder="Write what you want to say" autocomplete="off"></textarea>
+    <textarea id="typeInput" aria-label="Message to speak" placeholder="Write what you want to say" autocomplete="off"></textarea>
     <div class="sheet-actions">
       <button id="typeCancel">Cancel</button>
       <button class="primary" id="typeSpeak">Say it</button>
@@ -699,10 +773,10 @@
 </div>
 
 <!-- add phrase sheet -->
-<div class="sheet" id="addSheet" role="dialog" aria-label="Add a phrase">
+<div class="sheet" id="addSheet" role="dialog" aria-modal="true" aria-label="Add a phrase">
   <div class="sheet-inner">
     <h2 id="addTitle">Add a phrase</h2>
-    <textarea id="addInput" placeholder="Write it out the way you'd say it, as a full sentence"></textarea>
+    <textarea id="addInput" aria-label="New phrase" placeholder="Write it out the way you'd say it, as a full sentence"></textarea>
     <div class="sheet-actions">
       <button id="addCancel">Cancel</button>
       <button class="primary" id="addSave">Save</button>
@@ -711,13 +785,15 @@
 </div>
 
 <!-- settings sheet -->
-<div class="sheet" id="setSheet" role="dialog" aria-label="Voice settings">
+<div class="sheet" id="setSheet" role="dialog" aria-modal="true" aria-label="Voice settings">
   <div class="sheet-inner">
     <h2>Voice</h2>
     <label for="voiceSel">Which voice</label>
     <select id="voiceSel"></select>
-    <label for="rate">Speed</label>
+    <label for="rate">Speaking speed <output id="rateLabel" for="rate">0.95×</output></label>
     <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
+    <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
+    <p class="note" style="margin-top:4px">Uses fewer columns and bigger phrase targets. This setting stays on this device.</p>
     <label for="cardEdit">Card for handing to someone</label>
     <textarea id="cardEdit"></textarea>
     <div class="sheet-actions">
@@ -728,6 +804,25 @@
     <div class="sheet-actions" style="grid-template-columns:1fr;margin-top:10px">
       <button id="resetBtn">Reset board to the original phrases</button>
     </div>
+  </div>
+</div>
+
+<!-- Optional walkthrough for SLPs and visitors -->
+<div class="sheet demo-sheet" id="demoSheet" role="dialog" aria-modal="true" aria-labelledby="demoTitle">
+  <div class="sheet-inner">
+    <h2 id="demoTitle">Speechy — demonstration guide</h2>
+    <div class="demo-content">
+      <p><strong>A personal AAC phraseboard, written for an adult communicator.</strong> Speechy prioritizes meaningful, ready-to-say language and the user's own voice.</p>
+      <ol>
+        <li><strong>Speak immediately:</strong> choose Quick answers, open a topic, and tap a phrase.</li>
+        <li><strong>Build a message:</strong> choose Tap builds, combine phrases or add-ons, then Say it.</li>
+        <li><strong>Find useful phrases:</strong> preview topics, star spoken phrases, use Used most, or switch navigation styles.</li>
+        <li><strong>Communicate without sound:</strong> use Show big or the customizable Card.</li>
+        <li><strong>Personalize:</strong> use Organize and Voice to customize the board and speech rate.</li>
+      </ol>
+      <p class="note">A personal communication prototype, not a standardized AAC assessment. Speech is produced by the browser/device. On the public website, edits stay in this browser; AI sentence suggestions require a supported runtime.</p>
+    </div>
+    <div class="sheet-actions"><button id="demoClose">Close</button><button id="demoStart" class="primary">Start with Quick answers</button></div>
   </div>
 </div>
 
@@ -1201,7 +1296,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested'};
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -1277,9 +1372,11 @@ function loadVoices(){
   voices = speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
   const sel = document.getElementById('voiceSel');
   sel.innerHTML = '';
-  if(!voices.length){
-    sel.innerHTML = '<option>Device default</option>';
-  } else {
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = 'Device default';
+  sel.appendChild(defaultOption);
+  if(voices.length){
     voices.forEach(v=>{
       const o = document.createElement('option');
       o.value = v.voiceURI; o.textContent = v.name;
@@ -1288,7 +1385,7 @@ function loadVoices(){
     });
   }
   document.getElementById('voiceNote').textContent = window.speechSynthesis
-    ? 'If the room is loud, Show big works better than the voice.'
+    ? 'Test the voice before presenting. The voices available here depend on this device and browser. For a loud room, Show big may work better.'
     : 'This device will not play a voice. Show big and the card still work.';
 }
 if(window.speechSynthesis){
@@ -1379,6 +1476,10 @@ function renderSaid(){
     el.classList.add('empty');
   }
   document.getElementById('sayAgain').disabled = !lastSaid;
+  const fav = document.getElementById('favCurrent');
+  fav.disabled = !lastSaid;
+  fav.textContent = lastSaid && isStarred(lastSaid) ? '★ Starred' : '☆ Star';
+  fav.setAttribute('aria-label', lastSaid && isStarred(lastSaid) ? 'Remove last spoken phrase from favorites' : 'Save last spoken phrase to favorites');
   document.getElementById('showBig').disabled  = !lastSaid;
   document.getElementById('buildSay').disabled    = !buffer;
   document.getElementById('buildExpand').disabled = !buffer;
@@ -1457,6 +1558,7 @@ function toggleStar(p){
   else starred = starred.concat([p]);
   save();
   renderGrid();
+  renderSaid();
 }
 function isStarred(p){ return starred.includes(p); }
 
@@ -1686,10 +1788,12 @@ function renderGrid(){
     previewPanel.id='bookPreviewPanel';
     previewPanel.className='book-preview-panel empty';
     previewPanel.style.setProperty('--cat',cat.color);
-    previewPanel.textContent='Hover over a button to preview the phrases inside.';
+    previewPanel.textContent='Use Preview under any topic to see its phrases before opening it.';
     grid.appendChild(previewPanel);
 
     groups.forEach((g,i)=>{
+      const item=document.createElement('div');
+      item.className='book-item';
       const b=document.createElement('button');
       b.className='book-button';
       b.style.setProperty('--cat',cat.color);
@@ -1723,7 +1827,14 @@ function renderGrid(){
         radialPage[activeCat+':'+i]=0;
         renderGrid();
       };
-      grid.appendChild(b);
+      const preview=document.createElement('button');
+      preview.type='button';
+      preview.className='book-preview-trigger';
+      preview.textContent='Preview '+g.phrases.length+' phrases';
+      preview.setAttribute('aria-label','Preview phrases in '+g.name);
+      preview.onclick=showPreview;
+      item.append(b,preview);
+      grid.appendChild(item);
     });
     return;
   }
@@ -1808,7 +1919,10 @@ function renderGrid(){
       renderGrid();
     };
 
-    controls.append(prev,next);
+    const indicator=document.createElement('span');
+    indicator.className='nested-page-indicator';
+    indicator.textContent='Page '+(page+1)+' of '+pages;
+    controls.append(prev,indicator,next);
     tab.appendChild(controls);
   }
 
@@ -1884,18 +1998,9 @@ async function makeSentences(shorthand){
   if(s){
     return coerce(await s.json(input, {modelTier:'quick'}));
   }
-  // chat preview path
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"claude-sonnet-4-6", max_tokens:1000,
-      messages:[{role:"user", content:input}]
-    })
-  });
-  const data = await r.json();
-  const text = (data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
-  return coerce(text);
+  // GitHub Pages has no authenticated AI endpoint. Never send private
+  // communication content to an unauthenticated API from the browser.
+  return [shorthand];
 }
 
 const optSheet = document.getElementById('optSheet');
@@ -1922,7 +2027,9 @@ async function openOptions(shorthand){
       };
       list.appendChild(b);
     });
-    note.textContent = 'Tap one to say it. It stays in the bar, so you can show it big or add it to the board.';
+    note.textContent = await getSample()
+      ? 'Choose the wording you prefer. You remain in control of what is spoken.'
+      : 'AI sentence suggestions are unavailable on this website. Your original words are available here, without sending them to an AI service.';
   }catch(e){
     list.innerHTML = '<div class="thinking">Could not reach Claude just now. Your words are still in the bar, and Say it works as is.</div>';
   }
@@ -1938,6 +2045,8 @@ document.getElementById('buildSay').onclick = ()=>{ if(buffer){ speak(buffer); b
 document.getElementById('buildExpand').onclick = ()=>{ if(buffer) openOptions(buffer); };
 document.getElementById('buildClear').onclick = ()=>{ buffer=''; renderSaid(); };
 document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
+document.getElementById('favCurrent').onclick = ()=>{ if(lastSaid) toggleStar(lastSaid); };
+document.getElementById('stopBtn').onclick = ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); };
 document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);
 
 document.getElementById('editBtn').onclick = (e)=>{
@@ -1994,7 +2103,9 @@ document.getElementById('addSave').onclick = ()=>{
 const setSheet = document.getElementById('setSheet');
 document.getElementById('setBtn').onclick = ()=>{
   document.getElementById('rate').value = settings.rate;
+  document.getElementById('rateLabel').textContent = Number(settings.rate).toFixed(2) + '×';
   document.getElementById('cardEdit').value = settings.card;
+  document.getElementById('largeTargets').checked = !!settings.largeTargets;
   setSheet.classList.add('open');
 };
 document.getElementById('setClose').onclick = ()=>{
@@ -2002,9 +2113,18 @@ document.getElementById('setClose').onclick = ()=>{
   save(); setSheet.classList.remove('open');
 };
 document.getElementById('setTest').onclick = ()=> speak('This is how my voice sounds.');
-document.getElementById('rate').oninput = e=>{ settings.rate = parseFloat(e.target.value); save(); };
-document.getElementById('voiceSel').onchange = e=>{ settings.voiceURI = e.target.value; save(); };
+document.getElementById('rate').oninput = e=>{
+  settings.rate = parseFloat(e.target.value);
+  document.getElementById('rateLabel').textContent = settings.rate.toFixed(2) + '×';
+  save();
+};
+document.getElementById('voiceSel').onchange = e=>{ settings.voiceURI = e.target.value || null; save(); };
+document.getElementById('largeTargets').onchange = e=>{
+  settings.largeTargets = e.target.checked;
+  applyAccessSettings(); save(); renderGrid(); measure();
+};
 document.getElementById('resetBtn').onclick = ()=>{
+  if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.')) return;
   custom={}; removed={}; save(); renderGrid();
   setSheet.classList.remove('open');
 };
@@ -2015,6 +2135,45 @@ function measure(){
   document.documentElement.style.setProperty('--stageH', h + 'px');
 }
 window.addEventListener('resize', measure);
+
+/* ---------------------------------------------------------- demo & keys */
+const demoSheet = document.getElementById('demoSheet');
+document.getElementById('demoBtn').onclick = ()=>{
+  demoSheet.classList.add('open');
+  document.getElementById('demoStart').focus();
+};
+document.getElementById('demoClose').onclick = ()=>{
+  demoSheet.classList.remove('open'); document.getElementById('demoBtn').focus();
+};
+document.getElementById('demoStart').onclick = ()=>{
+  demoSheet.classList.remove('open');
+  mode='speak';
+  activeSubtopic.quick=null;
+  selectCat(CATS.find(c=>c.id==='quick'));
+  document.getElementById('modeSpeak').focus();
+};
+document.addEventListener('keydown',e=>{
+  const openSheet=[...document.querySelectorAll('.sheet.open')].at(-1);
+  if(e.key==='Escape'){
+    if(openSheet){openSheet.classList.remove('open');e.preventDefault();document.getElementById('demoBtn').focus();return;}
+    const overlay=document.querySelector('.overlay.open');
+    if(overlay){overlay.classList.remove('open');e.preventDefault();document.getElementById('typeBtn').focus();return;}
+    if(settings.uiStyle!=='classic' && activeSubtopic[activeCat]!=null){
+      activeSubtopic[activeCat]=null;renderGrid();e.preventDefault();
+    }
+  }
+  if(e.key==='Tab' && openSheet){
+    const controls=[...openSheet.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled])')]
+      .filter(x=>x.getClientRects().length);
+    if(!controls.length)return;
+    const first=controls[0], last=controls[controls.length-1];
+    if(e.shiftKey && (document.activeElement===first || !openSheet.contains(document.activeElement))){
+      last.focus();e.preventDefault();
+    }else if(!e.shiftKey && (document.activeElement===last || !openSheet.contains(document.activeElement))){
+      first.focus();e.preventDefault();
+    }
+  }
+});
 
 /* ------------------------------------------------------------------ boot */
 const fsBtn = document.getElementById('fsBtn');
@@ -2041,6 +2200,9 @@ if(searchEl){
   searchEl.oninput = ()=>{ clearTimeout(t); t = setTimeout(renderGrid, 120); };
 }
 
+function applyAccessSettings(){
+  document.documentElement.setAttribute('data-large-targets', settings.largeTargets ? 'true' : 'false');
+}
 function applyTheme(){
   const t = (settings.theme || 'auto');
   const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
@@ -2092,12 +2254,12 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 (async function(){
-  applyTheme(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
-  applyTheme(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
 })();

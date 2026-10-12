@@ -1,77 +1,59 @@
 # Speechy
 
-A single-file AAC (augmentative and alternative communication) board, styled after Windows Vista.
+**Speechy is a personal, browser-based augmentative and alternative communication (AAC) phraseboard.** It emphasizes complete, natural-sounding adult language and fast participation in everyday conversations, meetings, appointments, and community life. Its visual design takes inspiration from Windows XP.
 
-Tap a sentence and the phone says it out loud. No install, no account, no build step. The whole
-application is one HTML file.
+**Open the live board:** https://lancepounds.github.io/Speechy/
 
-## Why it exists
+Speechy is a personal prototype, not a standardized AAC assessment or a clinically validated replacement for a person's prescribed communication system.
 
-Most AAC boards are built around single words and short fragments, which makes an adult sound
-clipped. Every tile in Speechy is a complete, natural sentence in the voice of a working
-professional.
+## Five-minute SLP demonstration
 
-## Features
+Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors through the following workflow:
 
-- **220+ sentences** across 13 categories: quick answers, questions, meeting people, work,
-  hearings and calls, church, eating out, getting around, appointments, and an off-duty joke set.
-- **Tap speaks** for one-tap output, or **Tap builds** to assemble a longer sentence from parts.
-- **Add on** fragments ("before Friday", "if that works for you", "with my co-counsel") attach to
-  the end of a sentence and fix the punctuation as they go.
-- **Make a sentence** turns typed shorthand into three finished sentences. Requires the Claude
-  runtime; see Limitations.
-- **Show big** fills the screen with the sentence, auto-sized, for loud rooms or quiet ones where
-  a synthetic voice would be awkward.
-- **Card** is a full-screen explainer to hand to a stranger. Editable.
-- **Used most** self-populates by frequency, so your real vocabulary rises to the top.
-- **Search** across every phrase at once.
-- **Edit** to delete tiles you would never say and add your own.
-- Light and dark themes, following the system by default.
-- Everything persists. Custom phrases, deletions, voice settings, theme.
+1. **Immediate communication:** Select **Quick answers**, open a topic, and tap a complete phrase. The device speaks it aloud.
+2. **Message composition:** Select **Tap builds**, combine phrases and the **Add on** category, and use **Say it**.
+3. **Navigation and efficiency:** Preview a topic without opening it, use **☆ Star** after speaking a phrase, and visit **★ Starred** or **Used most**. Switch between **Nested style** and **Old style**.
+4. **Communication alternatives:** Use **Show big** for large-text communication, or **Card** to show a customizable introduction to another person.
+5. **Personalization and motor access:** Open **Voice** to select an available device voice, change speaking speed, and turn on **Larger buttons (motor access)**. Use **Organize** to add or remove phrase tiles.
 
-## Where it lives
+Use **■ Stop voice** to interrupt speech at any point. The entire demo works without an account or a clinical setup. Allow sound and test a phrase before a presentation; browser and device speech voices vary.
 
-This folder sits inside the `lancepounds.github.io` repository, so GitHub Pages serves it
-automatically at:
+## Design principles
 
-    https://lancepounds.github.io/speechy/
+- **User-authored adult language.** An AAC user decides what is communicated; phrase buttons are complete utterances, not automatic interpretations of intent.
+- **Multiple access paths.** Touch, mouse, keyboard focus, visible button labels, and an opt-in large-target layout.
+- **Discoverable navigation.** Explicit topic previews work on touch devices, not only with mouse hover. Nested and classic layouts coexist.
+- **Multimodal output.** Built-in device speech, a large visual message, and a customizable communication card.
+- **Personalization without losing continuity.** Custom phrases, phrase removals, favorites, speaking rate, theme, access settings, and usage counts persist in the current browser when storage is available. The two board styles remain available.
+- **Optional generative wording.** Where the supported Claude runtime is present, the Make a sentence button may suggest language for user review. On public GitHub Pages it displays the user's original wording instead of making an unsupported external API request. No AI suggestion is spoken without being selected.
 
-No build step and no Pages configuration. Committing the folder is the whole deployment.
+## Running and deployment
 
-To run it locally, open `index.html` in a browser.
+The application is the single `index.html` file in this repository. There is no install, account requirement, bundler, or build step. This repository's GitHub Pages URL is:
 
-On a phone, open the URL and use **Add to Home Screen** so it launches full screen with its own
-icon.
+https://lancepounds.github.io/Speechy/
 
-## How it stores things
+Open `index.html` in a modern browser for local testing. The project is also linked from the Speechy desktop icon in Lance OS at https://lancepounds.github.io/.
 
-Speechy writes to whichever backend it finds, in this order:
+## Storage and privacy limitations
 
-1. The Claude artifact database, which syncs across the user's own devices.
-2. `window.storage`, when running inside a Claude artifact preview.
-3. `localStorage`, which is what a plain web host such as GitHub Pages will use.
-4. Memory only, if all of the above are unavailable. The board still works; nothing is kept.
+Speechy chooses the available storage backend: a supported Claude artifact database, `window.storage` in a compatible preview, browser `localStorage` on a standalone website, or in-memory state if storage is blocked. **GitHub Pages does not provide cross-device synchronization.** Customizations in one browser do not automatically appear on another, and browser data clearing can erase local customizations.
 
-## Limitations
+Browser speech synthesis runs through the browser's `SpeechSynthesis` API; voices and actual speech output are device-dependent. Text-to-speech may behave differently across platforms and browser permissions. AI suggestion processing is only attempted when a supported AI runtime is available; do not enter sensitive clinical information into an external feature without understanding that service's privacy practices.
 
-- **Speech depends on the device.** Speechy uses the browser's built-in `SpeechSynthesis` API.
-  Voice quality and availability vary, and some devices have none. Show big and the card are the
-  fallback and need no voice at all.
-- **Make a sentence needs Claude.** Hosted on GitHub Pages, that button has nothing to call and
-  will report that it could not connect. Everything else works normally.
-- **localStorage does not sync.** On a plain web host, phrases added on a laptop will not appear
-  on a phone.
+This project does not claim HIPAA compliance, clinical validation, switch scanning, eye-gaze support, or formal AAC assessment features. Its accessibility settings support demonstration and personalization but are not substitutes for individualized access evaluation.
 
-## Customising
+## Manual smoke test before presenting
 
-The content lives in three arrays near the top of the `<script>` block in `index.html`:
-
-- `CATS` — the categories, their colors, and their behaviour flags
-- `BASE` — the sentences, keyed by category id
-- `JOKE_GROUPS` — the off-duty set
-
-Edit those and the interface rebuilds itself. No tooling required.
+- On phone-width and desktop-width screens, open nested categories and move between pages; read phrases without clipped text.
+- Use Preview under a category on touchscreen or with keyboard focus, then open and close it.
+- Speak a phrase, Stop voice, Say again, Star it, and open the Starred category.
+- Toggle Tap builds, combine phrases, Say it, and Clear.
+- Test Show big, Card, Type something, Organize, and settings.
+- Enable Larger buttons, test light/dark theme, and reload to confirm settings persist.
+- Open Make a sentence on GitHub Pages and verify it offers the original wording without an API error.
+- Use Escape to dismiss dialogs and confirm keyboard focus stays inside an open dialog.
 
 ## License
 
-MIT, under the license at the root of this site's repository.
+MIT, as specified by the hosting project's licensing terms.
