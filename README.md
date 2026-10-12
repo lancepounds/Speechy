@@ -18,6 +18,17 @@ Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors 
 
 Use **■ Stop voice** to interrupt speech at any point. The entire demo works without an account or a clinical setup. Allow sound and test a phrase before a presentation; browser and device speech voices vary.
 
+## Adjustable Old Style button size
+
+Select **Old style** (or **Switch to Old Style**). A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
+
+- The range is **60%–150%**; the more compact default is **80%**.
+- Slider changes update the visible board immediately without interrupting speech or changing any phrases.
+- **Reset size** returns the board to 80%.
+- The chosen size is saved locally with the existing Speechy preferences and is restored when you reopen the page.
+- This control applies only to Old Style; the Nested style stays unchanged.
+- The **Larger buttons (motor access)** preference under Voice remains available and works together with this control.
+
 ## Design principles
 
 - **User-authored adult language.** An AAC user decides what is communicated; phrase buttons are complete utterances, not automatic interpretations of intent.
