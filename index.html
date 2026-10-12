@@ -1457,6 +1457,10 @@ function renderSaid(){
     el.classList.add('empty');
   }
   document.getElementById('sayAgain').disabled = !lastSaid;
+  const fav = document.getElementById('favCurrent');
+  fav.disabled = !lastSaid;
+  fav.textContent = lastSaid && isStarred(lastSaid) ? '★ Starred' : '☆ Star';
+  fav.setAttribute('aria-label', lastSaid && isStarred(lastSaid) ? 'Remove last spoken phrase from favorites' : 'Save last spoken phrase to favorites');
   document.getElementById('showBig').disabled  = !lastSaid;
   document.getElementById('buildSay').disabled    = !buffer;
   document.getElementById('buildExpand').disabled = !buffer;
@@ -1535,6 +1539,7 @@ function toggleStar(p){
   else starred = starred.concat([p]);
   save();
   renderGrid();
+  renderSaid();
 }
 function isStarred(p){ return starred.includes(p); }
 
@@ -1764,10 +1769,12 @@ function renderGrid(){
     previewPanel.id='bookPreviewPanel';
     previewPanel.className='book-preview-panel empty';
     previewPanel.style.setProperty('--cat',cat.color);
-    previewPanel.textContent='Hover over a button to preview the phrases inside.';
+    previewPanel.textContent='Use Preview under any topic to see its phrases before opening it.';
     grid.appendChild(previewPanel);
 
     groups.forEach((g,i)=>{
+      const item=document.createElement('div');
+      item.className='book-item';
       const b=document.createElement('button');
       b.className='book-button';
       b.style.setProperty('--cat',cat.color);
@@ -1801,7 +1808,14 @@ function renderGrid(){
         radialPage[activeCat+':'+i]=0;
         renderGrid();
       };
-      grid.appendChild(b);
+      const preview=document.createElement('button');
+      preview.type='button';
+      preview.className='book-preview-trigger';
+      preview.textContent='Preview '+g.phrases.length+' phrases';
+      preview.setAttribute('aria-label','Preview phrases in '+g.name);
+      preview.onclick=showPreview;
+      item.append(b,preview);
+      grid.appendChild(item);
     });
     return;
   }
@@ -1886,7 +1900,10 @@ function renderGrid(){
       renderGrid();
     };
 
-    controls.append(prev,next);
+    const indicator=document.createElement('span');
+    indicator.className='nested-page-indicator';
+    indicator.textContent='Page '+(page+1)+' of '+pages;
+    controls.append(prev,indicator,next);
     tab.appendChild(controls);
   }
 
@@ -1962,18 +1979,9 @@ async function makeSentences(shorthand){
   if(s){
     return coerce(await s.json(input, {modelTier:'quick'}));
   }
-  // chat preview path
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"claude-sonnet-4-6", max_tokens:1000,
-      messages:[{role:"user", content:input}]
-    })
-  });
-  const data = await r.json();
-  const text = (data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
-  return coerce(text);
+  // GitHub Pages has no authenticated AI endpoint. Never send private
+  // communication content to an unauthenticated API from the browser.
+  return [shorthand];
 }
 
 const optSheet = document.getElementById('optSheet');
@@ -2000,7 +2008,9 @@ async function openOptions(shorthand){
       };
       list.appendChild(b);
     });
-    note.textContent = 'Tap one to say it. It stays in the bar, so you can show it big or add it to the board.';
+    note.textContent = await getSample()
+      ? 'Choose the wording you prefer. You remain in control of what is spoken.'
+      : 'AI sentence suggestions are unavailable on this website. Your original words are available here, without sending them to an AI service.';
   }catch(e){
     list.innerHTML = '<div class="thinking">Could not reach Claude just now. Your words are still in the bar, and Say it works as is.</div>';
   }
@@ -2016,6 +2026,8 @@ document.getElementById('buildSay').onclick = ()=>{ if(buffer){ speak(buffer); b
 document.getElementById('buildExpand').onclick = ()=>{ if(buffer) openOptions(buffer); };
 document.getElementById('buildClear').onclick = ()=>{ buffer=''; renderSaid(); };
 document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
+document.getElementById('favCurrent').onclick = ()=>{ if(lastSaid) toggleStar(lastSaid); };
+document.getElementById('stopBtn').onclick = ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); };
 document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);
 
 document.getElementById('editBtn').onclick = (e)=>{
@@ -2093,6 +2105,45 @@ function measure(){
   document.documentElement.style.setProperty('--stageH', h + 'px');
 }
 window.addEventListener('resize', measure);
+
+/* ---------------------------------------------------------- demo & keys */
+const demoSheet = document.getElementById('demoSheet');
+document.getElementById('demoBtn').onclick = ()=>{
+  demoSheet.classList.add('open');
+  document.getElementById('demoStart').focus();
+};
+document.getElementById('demoClose').onclick = ()=>{
+  demoSheet.classList.remove('open'); document.getElementById('demoBtn').focus();
+};
+document.getElementById('demoStart').onclick = ()=>{
+  demoSheet.classList.remove('open');
+  mode='speak';
+  activeSubtopic.quick=null;
+  selectCat(CATS.find(c=>c.id==='quick'));
+  document.getElementById('modeSpeak').focus();
+};
+document.addEventListener('keydown',e=>{
+  const openSheet=[...document.querySelectorAll('.sheet.open')].at(-1);
+  if(e.key==='Escape'){
+    if(openSheet){openSheet.classList.remove('open');e.preventDefault();document.getElementById('demoBtn').focus();return;}
+    const overlay=document.querySelector('.overlay.open');
+    if(overlay){overlay.classList.remove('open');e.preventDefault();document.getElementById('typeBtn').focus();return;}
+    if(settings.uiStyle!=='classic' && activeSubtopic[activeCat]!=null){
+      activeSubtopic[activeCat]=null;renderGrid();e.preventDefault();
+    }
+  }
+  if(e.key==='Tab' && openSheet){
+    const controls=[...openSheet.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled])')]
+      .filter(x=>x.getClientRects().length);
+    if(!controls.length)return;
+    const first=controls[0], last=controls[controls.length-1];
+    if(e.shiftKey && (document.activeElement===first || !openSheet.contains(document.activeElement))){
+      last.focus();e.preventDefault();
+    }else if(!e.shiftKey && (document.activeElement===last || !openSheet.contains(document.activeElement))){
+      first.focus();e.preventDefault();
+    }
+  }
+});
 
 /* ------------------------------------------------------------------ boot */
 const fsBtn = document.getElementById('fsBtn');
