@@ -18,6 +18,16 @@ Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors 
 
 Use **■ Stop voice** to interrupt speech at any point. The entire demo works without an account or a clinical setup. Allow sound and test a phrase before a presentation; browser and device speech voices vary.
 
+## Topic row: show, hide, pin, or unpin
+
+Below **Tap speaks** / **Tap builds** are compact controls for the current board layout and topic navigation:
+
+- **Hide topics** collapses the entire horizontal topic row, giving the phrase editor more space. **Show topics** restores it without changing the selected category or any saved phrases.
+- **Unpin row** allows the topic row to scroll away when you browse phrases. **Pin row** makes it stay immediately below the message composer while scrolling.
+- The composer controls remain accessible even when the topic row is hidden or unpinned, so you can always show and pin it again.
+- On wide desktop screens, where categories appear in the left sidebar instead of a horizontal row, **Hide topics** collapses that sidebar to widen the workspace. Pinning applies to the horizontal topic row.
+- Both choices are remembered in this browser with the existing Speechy settings. New users keep the original behavior: topics visible and pinned.
+
 ## Adjustable Old Style button size
 
 Select **Old style** (or **Switch to Old Style**). A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
