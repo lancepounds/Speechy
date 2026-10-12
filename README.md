@@ -23,6 +23,7 @@ Use **■ Stop voice** to interrupt speech at any point. The entire demo works w
 Select **Old style** (or **Switch to Old Style**). A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
 
 - The range is **60%–150%**; the more compact default is **80%**.
+- Use **−** and **+** beside the slider to decrease or increase button size by exactly **5%** per tap. These controls and the slider always stay synchronized; the controls disable automatically at 60% and 150%.
 - Slider changes update the visible board immediately without interrupting speech or changing any phrases.
 - **Reset size** returns the board to 80%.
 - The chosen size is saved locally with the existing Speechy preferences and is restored when you reopen the page.

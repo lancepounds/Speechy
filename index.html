@@ -729,6 +729,23 @@
     .classic-size-bar button{font-size:12px;padding:5px 8px;min-height:36px}
   }
 
+  /* Precise 5% size adjustments, with touch-friendly controls. */
+  .classic-size-bar button.size-step{
+    flex:0 0 44px;min-width:44px;min-height:44px;padding:3px;
+    font-size:24px;font-weight:700;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .classic-size-bar button:disabled{
+    cursor:default;opacity:.48;box-shadow:none;
+  }
+  .classic-size-bar button.size-step:focus-visible{
+    outline:3px solid #FF9D00;outline-offset:2px;
+  }
+  @media (max-width:560px){
+    .classic-size-bar button.size-step{min-width:44px;min-height:44px;flex-basis:44px}
+    .classic-size-bar input[type=range]{min-width:80px;flex:1 1 120px}
+  }
+
 </style>
 </head>
 <body>
@@ -782,9 +799,9 @@
       <div class="rail" id="rail" role="tablist"></div>
       <div class="classic-size-bar" id="classicSizeBar" hidden role="group" aria-label="Old Style button sizing">
         <label for="classicButtonSize">Button size <output id="classicButtonSizeValue" for="classicButtonSize">80%</output></label>
-        <span class="size-end" aria-hidden="true">Smaller</span>
+        <button type="button" class="size-step" id="classicSizeDecrease" aria-label="Decrease Old Style button size by 5 percent" title="Decrease button size (5%)">−</button>
         <input type="range" id="classicButtonSize" min="60" max="150" step="5" value="80" aria-label="Old Style button size">
-        <span class="size-end" aria-hidden="true">Larger</span>
+        <button type="button" class="size-step" id="classicSizeIncrease" aria-label="Increase Old Style button size by 5 percent" title="Increase button size (5%)">+</button>
         <button type="button" id="classicSizeReset" title="Restore the default button size">Reset size</button>
       </div>
       <div class="grid" id="grid" aria-label="Communication phrases"></div>
@@ -2282,16 +2299,26 @@ function applyClassicButtonSize(){
   const value = document.getElementById('classicButtonSizeValue');
   if(control) control.value = String(normalized);
   if(value) value.textContent = normalized + '%';
+  document.getElementById('classicSizeDecrease').disabled = normalized <= 60;
+  document.getElementById('classicSizeIncrease').disabled = normalized >= 150;
+  document.getElementById('classicSizeReset').disabled = normalized === CLASSIC_SIZE_DEFAULT;
+}
+function changeClassicButtonSize(nextSize){
+  settings.classicButtonSize = nextSize;
+  applyClassicButtonSize();
+  save();
 }
 document.getElementById('classicButtonSize').addEventListener('input', event => {
-  settings.classicButtonSize = Number(event.target.value);
-  applyClassicButtonSize();
-  save();
+  changeClassicButtonSize(Number(event.target.value));
+});
+document.getElementById('classicSizeDecrease').addEventListener('click', () => {
+  changeClassicButtonSize(settings.classicButtonSize - 5);
+});
+document.getElementById('classicSizeIncrease').addEventListener('click', () => {
+  changeClassicButtonSize(settings.classicButtonSize + 5);
 });
 document.getElementById('classicSizeReset').addEventListener('click', () => {
-  settings.classicButtonSize = CLASSIC_SIZE_DEFAULT;
-  applyClassicButtonSize();
-  save();
+  changeClassicButtonSize(CLASSIC_SIZE_DEFAULT);
 });
 
 function applyAccessSettings(){
