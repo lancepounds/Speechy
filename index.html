@@ -652,6 +652,21 @@
     .actions.speak-three .act{font-size:12px}
   }
 
+  .access-toggle{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px}
+  .access-toggle input{width:22px;height:22px;accent-color:#316AC5}
+  .book-preview-trigger{min-height:44px}
+  [data-large-targets="true"] .grid.phrasebook{grid-template-columns:repeat(2,minmax(0,1fr))}
+  [data-large-targets="true"] .nested-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  [data-large-targets="true"] .nested-phrase{min-height:126px;font-size:19px;padding:16px 12px}
+  [data-large-targets="true"] .book-button{min-height:120px;font-size:19px}
+  [data-large-targets="true"] .tile{min-height:118px;font-size:19px}
+  [data-large-targets="true"] .grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+  [data-large-targets="true"] .chip{min-height:54px;font-size:15px}
+  @media(max-width:560px){
+    [data-large-targets="true"] .nested-grid{grid-template-columns:1fr}
+    [data-large-targets="true"] .grid.phrasebook{grid-template-columns:1fr 1fr}
+  }
+
 </style>
 </head>
 <body>
@@ -724,7 +739,7 @@
 <div class="overlay" id="cardOverlay" role="dialog" aria-label="Explainer card">
   <div class="card-body">
     <p id="cardText"></p>
-    <p class="small">Tap anywhere to close. Hold Edit on the board to change this.</p>
+    <p class="small">Tap anywhere to close. Change this card under Voice.</p>
   </div>
 </div>
 
@@ -777,6 +792,8 @@
     <select id="voiceSel"></select>
     <label for="rate">Speed</label>
     <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
+    <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
+    <p class="note" style="margin-top:4px">Uses fewer columns and bigger phrase targets. This setting stays on this device.</p>
     <label for="cardEdit">Card for handing to someone</label>
     <textarea id="cardEdit"></textarea>
     <div class="sheet-actions">
@@ -1279,7 +1296,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested'};
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -2085,6 +2102,7 @@ const setSheet = document.getElementById('setSheet');
 document.getElementById('setBtn').onclick = ()=>{
   document.getElementById('rate').value = settings.rate;
   document.getElementById('cardEdit').value = settings.card;
+  document.getElementById('largeTargets').checked = !!settings.largeTargets;
   setSheet.classList.add('open');
 };
 document.getElementById('setClose').onclick = ()=>{
@@ -2094,7 +2112,12 @@ document.getElementById('setClose').onclick = ()=>{
 document.getElementById('setTest').onclick = ()=> speak('This is how my voice sounds.');
 document.getElementById('rate').oninput = e=>{ settings.rate = parseFloat(e.target.value); save(); };
 document.getElementById('voiceSel').onchange = e=>{ settings.voiceURI = e.target.value; save(); };
+document.getElementById('largeTargets').onchange = e=>{
+  settings.largeTargets = e.target.checked;
+  applyAccessSettings(); save(); renderGrid(); measure();
+};
 document.getElementById('resetBtn').onclick = ()=>{
+  if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.')) return;
   custom={}; removed={}; save(); renderGrid();
   setSheet.classList.remove('open');
 };
@@ -2170,6 +2193,9 @@ if(searchEl){
   searchEl.oninput = ()=>{ clearTimeout(t); t = setTimeout(renderGrid, 120); };
 }
 
+function applyAccessSettings(){
+  document.documentElement.setAttribute('data-large-targets', settings.largeTargets ? 'true' : 'false');
+}
 function applyTheme(){
   const t = (settings.theme || 'auto');
   const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
@@ -2221,12 +2247,12 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 (async function(){
-  applyTheme(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
-  applyTheme(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
 })();
