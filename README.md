@@ -6,6 +6,21 @@
 
 Speechy is a personal prototype, not a standardized AAC assessment or a clinically validated replacement for a person's prescribed communication system.
 
+## Train Talk — a simple train-themed communication page
+
+Open **[🚂 Train Talk](https://lancepounds.github.io/Speechy/train-talk.html)** for a child-friendly communication page to share with family and caregivers. The page is separate from Speechy's more detailed adult phrase board so there are fewer distractions. A **Train Talk** shortcut in Speechy's top toolbar also opens it.
+
+The page contains **16 large, readable, tappable choices** across four small sections:
+
+- **My answers:** Yes, No, Help, Stop
+- **How I feel:** Happy, Sad, Too loud, Break
+- **With you:** Love you, Hug?, No hug, Play?
+- **Train time:** Trains!, Look!, More, All done
+
+Each button shows a short label with an icon and says a plain-language phrase aloud using the browser's speech engine. The chosen phrase stays visible for showing to someone even if audio is unavailable. **Say again** repeats it and **Stop voice** stops speech. It works with ordinary touch, mouse clicks, and keyboard activation; it has no account, advertising, data collection, flashing animations, or automatic playback.
+
+The choices support **self-directed communication**, including communicating preferences and boundaries. Children should be free to say no, decline physical contact, or ask for a break. It is a flexible communication aid, not an autism therapy or a substitute for a personalized AAC assessment.
+
 ## MMI technology visit board
 
 Open **[MMI Tech Visit](https://lancepounds.github.io/Speechy/?v=20261014-mmi-tech-visit#mmi)** to prepare for a technology visit to the **Munroe-Meyer Institute (MMI)** in Omaha. It includes **66 ready-to-speak phrases** in seven groups:
