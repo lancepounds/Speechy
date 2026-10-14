@@ -6,6 +6,22 @@
 
 Speechy is a personal prototype, not a standardized AAC assessment or a clinically validated replacement for a person's prescribed communication system.
 
+## MMI technology visit board
+
+Open **[MMI Tech Visit](https://lancepounds.github.io/Speechy/?v=20261014-mmi-tech-visit#mmi)** to prepare for a technology visit to the **Munroe-Meyer Institute (MMI)** in Omaha. It includes **66 ready-to-speak phrases** in seven groups:
+
+1. Getting started
+2. Controls and accessibility
+3. Communication and AAC
+4. Games, VR and making things
+5. What I think of it
+6. Questions for the team
+7. Breaks and wrapping up
+
+**Old Style** shows group headings with phrase buttons; **Nested Style** presents each group as a topic that opens to its phrases. The board also works with search, favorites, voice output, Dwell to Tap, and saved custom phrases. Use **Organize** to add personal questions or remove phrases you do not need. The visit board does not modify other categories.
+
+Questions about eye tracking, switch scanning, accessible gaming, VR, and maker technology are included as possibilities, not assertions that particular devices will be available at the visit. Existing Quick answers remain available for immediate Yes/No and other brief responses.
+
 ## Five-minute SLP demonstration
 
 Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors through the following workflow:
