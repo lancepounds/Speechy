@@ -834,6 +834,31 @@
     min-height:68px;padding:9px 9px;line-height:1.25;
   }
 
+  /* Dwell-to-tap: obvious on/off state and nonblocking progress on pointer targets. */
+  .toolbar .dwell-toggle{
+    margin:2px 4px;min-height:40px;border:1px solid #316AC5;border-radius:4px;
+    font-weight:700;background:var(--btn);
+  }
+  .toolbar .dwell-toggle[aria-pressed="true"]{
+    background:#DBEAFE;color:#103D87;box-shadow:inset 0 0 0 2px #316AC5;
+  }
+  .dwell-charging{position:relative;outline:3px solid #F9A826!important;outline-offset:-3px!important}
+  .dwell-charging::after{
+    content:"";position:absolute;pointer-events:none;z-index:5;
+    bottom:2px;left:3px;right:3px;height:5px;border-radius:3px;
+    background:#1C68CB;transform-origin:left center;
+    animation:dwell-progress var(--dwell-ms,1500ms) linear forwards;
+  }
+  @keyframes dwell-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  [data-theme="dark"] .toolbar .dwell-toggle[aria-pressed="true"]{
+    background:#264B88;color:#fff;border-color:#99B7FF;
+  }
+  [data-theme="dark"] .dwell-charging::after{background:#FFCA5E}
+  @media(prefers-reduced-motion:reduce){
+    .dwell-charging{outline:4px solid #F9A826!important}
+    .dwell-charging::after{animation:none!important;transform:scaleX(1)}
+  }
+
 </style>
 </head>
 <body>
@@ -850,6 +875,7 @@
     <button class="tbtn" id="styleBtn" aria-pressed="false">Old style</button>
     <span class="tsep"></span>
     <button class="tbtn" id="setBtn">Voice</button>
+    <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by resting the mouse or eye-tracking pointer over them">Dwell: Off</button>
     <span class="tsep"></span>
     <button class="tbtn" id="fsBtn">Full screen</button>
     <span class="tsep"></span>
@@ -971,6 +997,9 @@
     <label for="rate">Speaking speed <output id="rateLabel" for="rate">0.95×</output></label>
     <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
     <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
+    <label for="dwellDuration">Dwell to tap delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
+    <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
+    <p class="note">Turn on <strong>Dwell: On</strong> in the top toolbar. Rest a mouse or eye-tracking pointer over a button until the progress bar fills to activate it without clicking. Moving away cancels it. Touch still uses normal taps; keyboard activation continues to work.</p>
     <p class="note" style="margin-top:4px">Uses fewer columns and larger targets. In Old Style, the Button size slider also adjusts their scale. This setting stays on this device.</p>
     <label for="cardEdit">Card for handing to someone</label>
     <textarea id="cardEdit"></textarea>
@@ -1474,7 +1503,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true};
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, dwellEnabled:false, dwellMs:1500};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -2413,6 +2442,111 @@ document.getElementById('classicSizeReset').addEventListener('click', () => {
   changeClassicButtonSize(CLASSIC_SIZE_DEFAULT);
 });
 
+
+/* ------------------------------------------------------ dwell-to-tap access
+   Pointer dwell activates the same click handlers used by manual taps.
+   It deliberately avoids repeating a click while the pointer remains in place.
+   Touch taps and keyboard operation are unaffected. */
+let dwellTimer = null;
+let dwellTarget = null;
+let dwellBlocked = null;
+let dwellPointer = {x:0,y:0};
+
+function applyDwellSettings(){
+  const duration = Number(settings.dwellMs);
+  settings.dwellMs = Number.isFinite(duration)
+    ? Math.min(3000,Math.max(800,Math.round(duration / 100) * 100))
+    : 1500;
+  settings.dwellEnabled = settings.dwellEnabled === true;
+  document.documentElement.style.setProperty('--dwell-ms', settings.dwellMs + 'ms');
+  const button = document.getElementById('dwellToggle');
+  button.setAttribute('aria-pressed', String(settings.dwellEnabled));
+  button.textContent = settings.dwellEnabled ? 'Dwell: On' : 'Dwell: Off';
+  button.title = settings.dwellEnabled ? 'Turn off dwell-to-tap' : 'Turn on dwell-to-tap (mouse or gaze pointer)';
+  document.getElementById('dwellDuration').value = String(settings.dwellMs);
+  document.getElementById('dwellDurationLabel').textContent = (settings.dwellMs / 1000).toFixed(1) + ' seconds';
+  if(!settings.dwellEnabled) cancelDwell();
+}
+function cancelDwell(){
+  if(dwellTimer !== null) clearTimeout(dwellTimer);
+  dwellTimer = null;
+  if(dwellTarget) dwellTarget.classList.remove('dwell-charging');
+  dwellTarget = null;
+}
+function dwellCandidate(element){
+  if(!(element instanceof Element)) return null;
+  // The star/remove glyph is inside a phrase button. Do not accidentally speak
+  // the phrase when the pointer rests over one of these independent controls.
+  if(element.closest('.star-btn,.del')) return null;
+  const button = element.closest('button');
+  if(!button || button.disabled || !button.isConnected) return null;
+  // Keep a guaranteed conventional way to disable dwell. Reset stays manual.
+  if(button.id === 'dwellToggle' || button.id === 'resetBtn') return null;
+  if(button.closest('[hidden]') || !button.getClientRects().length) return null;
+  const openSheet = document.querySelector('.sheet.open');
+  if(openSheet && !openSheet.contains(button)) return null;
+  if(document.querySelector('.overlay.open')) return null;
+  return button;
+}
+function armDwell(candidate){
+  if(!settings.dwellEnabled || !candidate || dwellBlocked || candidate === dwellTarget) return;
+  cancelDwell();
+  dwellTarget = candidate;
+  candidate.classList.add('dwell-charging');
+  dwellTimer = setTimeout(() => {
+    const button = dwellTarget;
+    const point = document.elementFromPoint(dwellPointer.x,dwellPointer.y);
+    const stillOverButton = dwellCandidate(point) === button;
+    cancelDwell();
+    if(!settings.dwellEnabled || !stillOverButton || !button.isConnected || button.disabled) return;
+    // Arming another target requires moving the pointer; prevents accidental
+    // repeat speech after the board re-renders under a stationary cursor.
+    dwellBlocked = {x:dwellPointer.x,y:dwellPointer.y,target:button};
+    button.click();
+  },settings.dwellMs);
+}
+document.addEventListener('pointerover',event => {
+  if(!settings.dwellEnabled || event.pointerType === 'touch') return;
+  dwellPointer = {x:event.clientX,y:event.clientY};
+  const candidate = dwellCandidate(event.target);
+  if(!candidate){ cancelDwell(); return; }
+  if(candidate !== dwellTarget) armDwell(candidate);
+},true);
+document.addEventListener('pointerout',event => {
+  if(!dwellTarget) return;
+  if(dwellTarget.contains(event.target) &&
+     (!event.relatedTarget || !dwellTarget.contains(event.relatedTarget))) cancelDwell();
+},true);
+document.addEventListener('pointermove',event => {
+  if(!settings.dwellEnabled || event.pointerType === 'touch') return;
+  dwellPointer = {x:event.clientX,y:event.clientY};
+  const candidate = dwellCandidate(event.target);
+  if(dwellBlocked && Math.hypot(event.clientX-dwellBlocked.x,event.clientY-dwellBlocked.y) >= 24 &&
+     candidate !== dwellBlocked.target) dwellBlocked = null;
+  if(!candidate){ cancelDwell(); return; }
+  if(candidate !== dwellTarget) armDwell(candidate);
+},true);
+document.addEventListener('pointerdown',event => {
+  cancelDwell();
+  if(settings.dwellEnabled && event.pointerType !== 'touch')
+    dwellBlocked = {x:event.clientX,y:event.clientY,target:dwellCandidate(event.target)};
+},true);
+document.addEventListener('scroll',cancelDwell,true);
+document.addEventListener('visibilitychange',() => { if(document.hidden) cancelDwell(); });
+window.addEventListener('blur',cancelDwell);
+document.getElementById('dwellToggle').addEventListener('click',() => {
+  settings.dwellEnabled = !settings.dwellEnabled;
+  dwellBlocked = null;
+  applyDwellSettings();
+  save();
+});
+document.getElementById('dwellDuration').addEventListener('input',event => {
+  settings.dwellMs = Number(event.target.value);
+  cancelDwell();
+  applyDwellSettings();
+  save();
+});
+
 function applyAccessSettings(){
   document.documentElement.setAttribute('data-large-targets', settings.largeTargets ? 'true' : 'false');
 }
@@ -2496,12 +2630,12 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 (async function(){
-  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyDwellSettings(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
-  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyDwellSettings(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
 })();
