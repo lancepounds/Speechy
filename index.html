@@ -1389,7 +1389,116 @@ const CLS_GROUPS = [
   }
 ];
 
+const MMI_GROUPS = [
+  {
+    "name": "Getting started",
+    "lines": [
+      "Hi! I'm here to have fun trying out some technology.",
+      "I'm especially interested in accessible and adaptive technology.",
+      "I use a communication board to help me speak. Please give me time to respond.",
+      "Can you show me what we're going to try today?",
+      "That looks interesting. I'd like to try it.",
+      "Could you show me how the controls work?",
+      "Can we start with something simple?",
+      "Please speak to me directly. I understand you."
+    ]
+  },
+  {
+    "name": "Controls and accessibility",
+    "lines": [
+      "Can we make the buttons or targets bigger?",
+      "Could we adjust the sensitivity?",
+      "Can I try using this without a precise finger tap?",
+      "Could we try dwell-to-click or a switch?",
+      "Could I try eye tracking if it is available?",
+      "Can we make the controls respond more slowly?",
+      "Can we reduce accidental selections?",
+      "Could you move the screen closer?",
+      "Could we adjust my arm support or position?",
+      "I want to try that again with a different control method."
+    ]
+  },
+  {
+    "name": "Communication and AAC",
+    "lines": [
+      "Can we test a speech-generating device?",
+      "Can I use my own words and phrases on this?",
+      "How would I customize the communication buttons?",
+      "Could I hear the different speech voices?",
+      "Can I use this with a mouse or another pointing device?",
+      "How many steps does it take to say a sentence?",
+      "Can I save a phrase and find it again quickly?",
+      "Can it work without internet access?",
+      "Can we compare this with the communication board I already use?"
+    ]
+  },
+  {
+    "name": "Games, VR and making things",
+    "lines": [
+      "Is there an accessible game I can try?",
+      "Can I try an adaptive game controller?",
+      "Can we change the controls to fit my movement?",
+      "Is there a virtual reality experience I could try, if available?",
+      "Can we pause the game or experience for a moment?",
+      "Could you show me something made in the maker space?",
+      "Could a device like this be customized for my grip?",
+      "That was fun! Can I try another one?"
+    ]
+  },
+  {
+    "name": "What I think of it",
+    "lines": [
+      "This is easier to use than I expected.",
+      "This is harder than it looks.",
+      "I like this control method better.",
+      "I'm selecting the wrong button by accident.",
+      "The response is too fast for me.",
+      "The response is too slow for me.",
+      "The screen or text is hard to read.",
+      "My hand or arm is getting tired.",
+      "This could be useful in everyday life.",
+      "I like the idea, but I would change the setup.",
+      "I'd like to try it one more time before we move on."
+    ]
+  },
+  {
+    "name": "Questions for the team",
+    "lines": [
+      "What is this device called?",
+      "What problem was it designed to solve?",
+      "Who developed this technology?",
+      "Is this commercially available or still being researched?",
+      "Could someone try this at home before deciding?",
+      "How much would something like this cost?",
+      "Does it work with a computer, tablet, or phone?",
+      "Can it be personalized for different movement needs?",
+      "Are there any research projects I could learn about?",
+      "What's the best way to send you feedback after today?"
+    ]
+  },
+  {
+    "name": "Breaks and wrapping up",
+    "lines": [
+      "I need a short break, please.",
+      "Can we slow down a little?",
+      "Could we turn the volume down?",
+      "Could we move somewhere quieter?",
+      "I'd like to stop this test for now.",
+      "Could you write down the name of that device?",
+      "Is it okay if I take a picture of the setup?",
+      "Thank you for giving me a chance to try this.",
+      "I really enjoyed the visit.",
+      "Who should I contact if I have more questions?"
+    ]
+  }
+];
+
+function visitGroupsFor(cat){
+  return cat.id === 'mmi' ? MMI_GROUPS : CLS_GROUPS;
+}
+
 const BASE = {
+  mmi: MMI_GROUPS.flatMap(g=>g.lines),
   cls: CLS_GROUPS.flatMap(g=>g.lines),
   femisheart: [
       "What does Femi's Heart look like day to day right now? What programs are running, who do you serve, and how many people?",
