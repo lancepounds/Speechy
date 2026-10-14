@@ -798,6 +798,42 @@
     .toolbar-topic-tools .topic-tbtn{flex:1}
   }
 
+  /* Denser phrase buttons: minimize blank padding without truncating messages. */
+  html[data-ui-style="classic"] #grid.grid:not(.phrasebook){
+    gap:clamp(4px,calc(7px * var(--classic-button-scale,.8)),11px);
+    padding:clamp(6px,calc(9px * var(--classic-button-scale,.8)),13px);
+  }
+  html[data-ui-style="classic"] #grid.grid:not(.phrasebook) .tile:not(.random){
+    min-height:max(44px,calc(58px * var(--classic-button-scale,.8)));
+    padding-top:clamp(5px,calc(7px * var(--classic-button-scale,.8)),12px);
+    padding-bottom:clamp(5px,calc(7px * var(--classic-button-scale,.8)),12px);
+    line-height:1.22;
+  }
+  html[data-ui-style="classic"] #grid.grid.compact .tile:not(.random){
+    min-height:max(44px,calc(53px * var(--classic-button-scale,.8)));
+    padding-top:clamp(5px,calc(6px * var(--classic-button-scale,.8)),10px);
+    padding-bottom:clamp(5px,calc(6px * var(--classic-button-scale,.8)),10px);
+  }
+  /* Very long phrases need room to wrap, but no longer occupy a whole wide desktop row. */
+  @media (min-width:700px){
+    html[data-ui-style="classic"] #grid.grid:not(.phrasebook) .tile.wide{
+      grid-column:span 2;
+    }
+  }
+  /* Retain larger motor-access targets, but remove surplus interior padding. */
+  html[data-ui-style="classic"][data-large-targets="true"] #grid.grid:not(.phrasebook) .tile:not(.random){
+    min-height:max(76px,calc(104px * var(--classic-button-scale,.8)));
+    padding-top:clamp(9px,calc(11px * var(--classic-button-scale,.8)),17px);
+    padding-bottom:clamp(9px,calc(11px * var(--classic-button-scale,.8)),17px);
+  }
+  html[data-ui-style="classic"][data-large-targets="true"] #grid.grid.compact .tile:not(.random){
+    min-height:max(74px,calc(94px * var(--classic-button-scale,.8)));
+  }
+  /* Nested-style speech choices also fit their content more closely. */
+  html:not([data-large-targets="true"]) .nested-phrase{
+    min-height:68px;padding:9px 9px;line-height:1.25;
+  }
+
 </style>
 </head>
 <body>
