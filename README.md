@@ -46,6 +46,17 @@ Phrase buttons now use less vertical padding and a smaller minimum height, espec
 
 The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Nested-style spoken phrase choices also have less unused padding without changing the topic buttons.
 
+## Dwell to tap (mouse or eye-tracking pointer)
+
+Use the **Dwell: Off / Dwell: On** toggle in Speechy's main toolbar. When enabled, hold the pointer over a speech or navigation button until its progress bar fills; it activates the same action as a click, without physically clicking.
+
+- Default is **Off**, so existing clicking, tapping, and keyboard use are unchanged.
+- The delay defaults to **1.5 seconds**. Under **Voice**, adjust **Dwell to tap delay** from **0.8 to 3.0 seconds**.
+- Moving away from a button before the delay expires cancels that selection. After an activation, move deliberately to another button before another dwell selection can begin, preventing accidental repeat speech when the board re-renders.
+- **Dwell: Off** can always be clicked normally. The destructive **Reset board** action is deliberately excluded from dwell activation.
+- Dwell is intended for mouse-compatible pointers, including assistive pointing devices that emulate a mouse. Touch continues to use regular taps. It is **not a built-in camera eye-tracking system** and has not been clinically validated.
+- The on/off preference and delay are saved with other board settings on this device; phrase data is unchanged.
+
 ## Design principles
 
 - **User-authored adult language.** An AAC user decides what is communicated; phrase buttons are complete utterances, not automatic interpretations of intent.
