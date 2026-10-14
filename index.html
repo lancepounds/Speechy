@@ -921,6 +921,18 @@
     .topic-width-panel .topic-width-done{margin-left:auto}
   }
 
+  /* Link to the distraction-reduced, train-themed communication board. */
+  .toolbar a.train-talk-shortcut{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:40px;padding:7px 11px;margin:2px 3px;
+    border:1px solid #2d6476;border-radius:4px;
+    background:var(--btn);color:var(--ink);font-weight:700;font-size:13px;
+    text-decoration:none;white-space:nowrap;
+  }
+  .toolbar a.train-talk-shortcut:hover{background:#316AC5;color:#fff}
+  .toolbar a.train-talk-shortcut:focus-visible{outline:3px solid #FF9D00!important;outline-offset:2px!important}
+  @media(max-width:699px){.toolbar a.train-talk-shortcut{min-height:44px}}
+
 </style>
 </head>
 <body>
@@ -944,6 +956,7 @@
     <span class="tsep"></span>
     <button class="tbtn" id="themeBtn">Dark theme</button>
     <button class="tbtn" id="demoBtn" aria-haspopup="dialog">Demo guide</button>
+    <a class="tbtn train-talk-shortcut" href="./train-talk.html" title="Open simple Train Talk communication page">🚂 Train Talk</a>
     <button class="tbtn stop-voice" id="stopBtn">■ Stop voice</button>
     <div class="searchbox">
       <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">

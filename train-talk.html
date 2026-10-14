@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#204F78">
+<title>Train Talk — Simple communication board</title>
+<style>
+  :root{color-scheme:light;--ink:#132739;--blue:#204f78;--line:#bacad7;--bg:#f5f8fb}
+  *{box-sizing:border-box}
+  html{font-family:system-ui,-apple-system,"Segoe UI",Verdana,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.3}
+  button,a{font:inherit}
+  button{cursor:pointer}
+  button:disabled{cursor:default;opacity:.5}
+  :focus-visible{outline:4px solid #F4A900;outline-offset:3px}
+  .top{background:var(--blue);color:#fff;padding:12px max(15px,env(safe-area-inset-left));display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .top a{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:4px;padding:8px}
+  .brand{font-size:clamp(23px,4vw,32px);font-weight:800;letter-spacing:.01em}
+  main{max-width:1130px;margin:0 auto;padding:15px 15px 30px}
+  .intro{font-size:clamp(16px,2vw,19px);margin:0 0 12px}
+  .track{height:10px;margin:10px 0 17px;border-top:3px solid #5a7080;border-bottom:3px solid #5a7080;
+    background:repeating-linear-gradient(90deg,transparent 0 22px,#5a7080 22px 27px,transparent 27px 44px)}
+  .messagebar{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-bottom:16px}
+  .message{flex:2 1 330px;min-height:66px;background:#fff;border:3px solid #204f78;border-radius:12px;
+    padding:12px 15px;font-weight:700;font-size:clamp(17px,2.5vw,24px);display:flex;align-items:center;overflow-wrap:anywhere}
+  .utility{min-height:54px;padding:10px 17px;border:2px solid #37576d;border-radius:10px;background:#fff;color:#173d5b;font-weight:750}
+  .utility:hover:not(:disabled){background:#e8f2f9}
+  .station{margin:0 0 15px;background:#fff;border:2px solid var(--line);border-radius:15px;padding:11px}
+  .station h2{font-size:clamp(17px,2.2vw,22px);margin:0 0 10px}
+  .choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .phrase{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;text-align:center;
+    background:#edf4fb;color:#142f48;border:3px solid #477ba2;border-radius:13px;min-width:0;min-height:100px;
+    padding:9px 6px;font-weight:800;font-size:clamp(17px,2.3vw,23px);box-shadow:0 3px 0 #b6cad8}
+  .phrase:hover{filter:brightness(.97)}
+  .phrase:active{transform:translateY(2px);box-shadow:0 1px 0 #b6cad8}
+  .phrase .symbol{font-size:clamp(25px,4vw,35px);line-height:1.2}
+  .phrase .label{overflow-wrap:anywhere}
+  .green .phrase{background:#eaf8ee;border-color:#487c5f;color:#214e36}
+  .purple .phrase{background:#f3edfa;border-color:#8669a4;color:#44285f}
+  .amber .phrase{background:#fff3dc;border-color:#a77526;color:#62400d}
+  .foot{font-size:14px;color:#3a4d5b;margin:16px 3px 0;line-height:1.5}
+  @media(max-width:720px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}.phrase{min-height:98px}.station{padding:9px}.top{padding:10px 12px}}
+  @media(max-width:340px){.phrase{font-size:16px}.choices{gap:7px}.messagebar{gap:7px}}
+  @media(prefers-reduced-motion:reduce){.phrase:active{transform:none}}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">🚂 Train Talk</div>
+    <a href="./index.html" aria-label="Return to Speechy">← Speechy</a>
+  </header>
+  <main>
+    <p class="intro">Tap a button to say it. You can also point to the words.</p>
+    <div class="track" aria-hidden="true"></div>
+    <div class="messagebar">
+      <div class="message" id="message" role="status" aria-live="polite">Choose a button to talk.</div>
+      <button type="button" id="again" class="utility" disabled>Say again</button>
+      <button type="button" id="stop" class="utility">Stop voice</button>
+    </div>
+    <section class="station blue" aria-labelledby="heading-blue">
+        <h2 id="heading-blue">My answers</h2>
+        <div class="choices">
+          <button type="button" class="phrase" data-say="Yes." aria-label="Yes."><span class="symbol" aria-hidden="true">✅</span><span class="label">Yes</span></button>
+          <button type="button" class="phrase" data-say="No." aria-label="No."><span class="symbol" aria-hidden="true">✋</span><span class="label">No</span></button>
+          <button type="button" class="phrase" data-say="Help me, please." aria-label="Help me, please."><span class="symbol" aria-hidden="true">🤝</span><span class="label">Help</span></button>
+          <button type="button" class="phrase" data-say="Please stop." aria-label="Please stop."><span class="symbol" aria-hidden="true">🛑</span><span class="label">Stop</span></button>
+        </div>
+      </section>
+      <section class="station green" aria-labelledby="heading-green">
+        <h2 id="heading-green">How I feel</h2>
+        <div class="choices">
+          <button type="button" class="phrase" data-say="I feel happy." aria-label="I feel happy."><span class="symbol" aria-hidden="true">😊</span><span class="label">Happy</span></button>
+          <button type="button" class="phrase" data-say="I feel sad." aria-label="I feel sad."><span class="symbol" aria-hidden="true">😢</span><span class="label">Sad</span></button>
+          <button type="button" class="phrase" data-say="It's too loud." aria-label="It's too loud."><span class="symbol" aria-hidden="true">🔈</span><span class="label">Too loud</span></button>
+          <button type="button" class="phrase" data-say="I need a break." aria-label="I need a break."><span class="symbol" aria-hidden="true">🌿</span><span class="label">Break</span></button>
+        </div>
+      </section>
+      <section class="station purple" aria-labelledby="heading-purple">
+        <h2 id="heading-purple">With you</h2>
+        <div class="choices">
+          <button type="button" class="phrase" data-say="I love you." aria-label="I love you."><span class="symbol" aria-hidden="true">❤️</span><span class="label">Love you</span></button>
+          <button type="button" class="phrase" data-say="Can I have a hug?" aria-label="Can I have a hug?"><span class="symbol" aria-hidden="true">🤗</span><span class="label">Hug?</span></button>
+          <button type="button" class="phrase" data-say="No hug right now, please." aria-label="No hug right now, please."><span class="symbol" aria-hidden="true">✋</span><span class="label">No hug</span></button>
+          <button type="button" class="phrase" data-say="Will you play with me?" aria-label="Will you play with me?"><span class="symbol" aria-hidden="true">🧩</span><span class="label">Play?</span></button>
+        </div>
+      </section>
+      <section class="station amber" aria-labelledby="heading-amber">
+        <h2 id="heading-amber">Train time</h2>
+        <div class="choices">
+          <button type="button" class="phrase" data-say="Let's play with trains!" aria-label="Let's play with trains!"><span class="symbol" aria-hidden="true">🚂</span><span class="label">Trains!</span></button>
+          <button type="button" class="phrase" data-say="Look at the train!" aria-label="Look at the train!"><span class="symbol" aria-hidden="true">👀</span><span class="label">Look!</span></button>
+          <button type="button" class="phrase" data-say="More trains, please." aria-label="More trains, please."><span class="symbol" aria-hidden="true">➕</span><span class="label">More</span></button>
+          <button type="button" class="phrase" data-say="I'm all done." aria-label="I'm all done."><span class="symbol" aria-hidden="true">🏁</span><span class="label">All done</span></button>
+        </div>
+      </section>
+    <p class="foot">This page is for talking and connecting. There are no right or wrong answers. The child chooses what to say. Voice depends on the browser and device; words remain visible even if sound is unavailable.</p>
+  </main>
+<script>
+(function(){
+  'use strict';
+  const message = document.getElementById('message');
+  const again = document.getElementById('again');
+  const stop = document.getElementById('stop');
+  const hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let last = '';
+  function say(phrase){
+    if(!phrase) return;
+    last = phrase;
+    message.textContent = phrase;
+    again.disabled = false;
+    if(!hasSpeech) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(phrase);
+      utterance.rate = 0.95;
+      utterance.lang = document.documentElement.lang || 'en';
+      window.speechSynthesis.speak(utterance);
+    } catch(err) {
+      // The words stay visible when speech is unavailable on the device.
+    }
+  }
+  document.querySelectorAll('button.phrase').forEach(function(button){
+    button.addEventListener('click',function(){say(button.dataset.say)});
+  });
+  again.addEventListener('click',function(){say(last)});
+  stop.addEventListener('click',function(){
+    if(hasSpeech) window.speechSynthesis.cancel();
+  });
+  window.addEventListener('pagehide',function(){
+    if(hasSpeech) window.speechSynthesis.cancel();
+  });
+})();
+</script>
+</body>
+</html>
