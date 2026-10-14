@@ -905,7 +905,7 @@
     box-shadow:inset 0 0 0 2px #316AC5;background:#DBEAFE;color:#143A78;
   }
   .topic-width-adjust{display:flex;align-items:center;flex:1 1 280px;min-width:180px;gap:10px;flex-wrap:wrap}
-  .topic-width-adjust label{display:flex;align-items:center;gap:8px;margin:0;white-space:nowrap;font-size:13px}
+  .topic-width-adjust label{display:flex;align-items:center;gap:8px;margin:0;flex-wrap:wrap;font-size:13px}
   .topic-width-adjust output{font-variant-numeric:tabular-nums;min-width:55px}
   .topic-width-adjust input[type=range]{width:auto;flex:1 1 135px;max-width:420px;min-width:110px;height:38px;cursor:pointer}
   .topic-width-hint{width:100%;font-size:12px;color:var(--ink-soft)}
@@ -957,7 +957,7 @@
       <button type="button" class="topic-preset" data-topic-width="280" aria-pressed="false">Large</button>
     </div>
     <div class="topic-width-adjust">
-      <label for="topicWidthSlider">Topic width <output id="topicWidthValue" for="topicWidthSlider">200 px</output></label>
+      <label for="topicWidthSlider">Topic width <output id="topicWidthValue" for="topicWidthSlider">200px sidebar / 130px tabs</output></label>
       <input id="topicWidthSlider" type="range" min="140" max="300" step="10" value="200" aria-label="Adjust topic sidebar or tab width">
       <span class="topic-width-hint" id="topicWidthHint">Sidebar width on desktop; topic-tab width on smaller screens</span>
     </div>
@@ -2657,7 +2657,7 @@ function applyTopicWidth(){
   document.documentElement.style.setProperty('--topic-sidebar-width',n+'px');
   document.documentElement.style.setProperty('--topic-tab-width',tabWidth+'px');
   document.getElementById('topicWidthSlider').value=String(n);
-  document.getElementById('topicWidthValue').textContent=n+' px';
+  document.getElementById('topicWidthValue').textContent=n+'px sidebar / '+tabWidth+'px tabs';
   document.querySelectorAll('.topic-preset').forEach(button=>{
     button.setAttribute('aria-pressed',String(Number(button.dataset.topicWidth)===n));
   });
