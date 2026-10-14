@@ -859,6 +859,68 @@
     .dwell-charging::after{animation:none!important;transform:scaleX(1)}
   }
 
+  /* Adjustable topic navigation widths, independent of phrase button sizes. */
+  @media(min-width:980px){
+    .frame .navpane{
+      width:var(--topic-sidebar-width,200px);
+      flex:0 0 var(--topic-sidebar-width,200px);
+      min-width:0;
+    }
+    .frame .navpane .navitem{
+      overflow-wrap:anywhere;white-space:normal;min-width:0;
+    }
+  }
+  @media(max-width:979px){
+    .content .rail{
+      align-items:stretch;column-gap:4px;padding-bottom:3px;
+    }
+    .content .rail .chip{
+      flex:0 0 var(--topic-tab-width,130px);width:var(--topic-tab-width,130px);
+      max-width:none;min-height:48px;
+      white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.25;
+      align-items:center;justify-content:center;padding:7px 9px;
+    }
+  }
+  .toolbar .topic-tbtn#topicWidthToggle{
+    border-color:#316AC5;font-weight:bold;min-height:40px;
+  }
+  .toolbar .topic-tbtn#topicWidthToggle[aria-expanded="true"]{
+    box-shadow:inset 0 0 0 2px #316AC5;background:#E5EEFF;
+  }
+  .topic-width-panel[hidden]{display:none!important}
+  .topic-width-panel{
+    display:flex;align-items:center;flex-wrap:wrap;gap:9px 15px;
+    padding:8px 13px;background:var(--face);
+    border-top:1px solid #B1AFA5;border-bottom:1px solid #ACA899;
+  }
+  .topic-width-presets{display:flex;gap:4px;flex-wrap:wrap}
+  .topic-width-presets .topic-preset,
+  .topic-width-panel .topic-width-done{
+    min-height:44px;min-width:74px;padding:7px 11px;
+    font-family:inherit;font-weight:bold;font-size:13px;
+    background:var(--btn);color:var(--ink);
+    border:1px solid #7E8F9E;border-radius:4px;
+  }
+  .topic-width-presets .topic-preset[aria-pressed="true"]{
+    box-shadow:inset 0 0 0 2px #316AC5;background:#DBEAFE;color:#143A78;
+  }
+  .topic-width-adjust{display:flex;align-items:center;flex:1 1 280px;min-width:180px;gap:10px;flex-wrap:wrap}
+  .topic-width-adjust label{display:flex;align-items:center;gap:8px;margin:0;white-space:nowrap;font-size:13px}
+  .topic-width-adjust output{font-variant-numeric:tabular-nums;min-width:55px}
+  .topic-width-adjust input[type=range]{width:auto;flex:1 1 135px;max-width:420px;min-width:110px;height:38px;cursor:pointer}
+  .topic-width-hint{width:100%;font-size:12px;color:var(--ink-soft)}
+  .topic-width-panel button:hover{box-shadow:inset 0 0 0 2px var(--hot)}
+  [data-theme="dark"] .topic-width-panel{border-color:#444}
+  [data-theme="dark"] .topic-width-presets .topic-preset[aria-pressed="true"]{background:#24509A;color:#fff}
+  [data-theme="dark"] .toolbar .topic-tbtn#topicWidthToggle[aria-expanded="true"]{background:#264B88;color:#fff}
+  @media(max-width:560px){
+    .topic-width-panel{gap:9px;padding:8px}
+    .topic-width-presets{width:100%}
+    .topic-width-presets .topic-preset{flex:1 1 0;min-width:0}
+    .topic-width-adjust{flex:1 1 100%;gap:5px}
+    .topic-width-panel .topic-width-done{margin-left:auto}
+  }
+
 </style>
 </head>
 <body>
@@ -869,6 +931,7 @@
     <div class="toolbar-topic-tools" role="group" aria-label="Topic navigation controls">
       <button class="tbtn topic-tbtn" id="topicsToggle" type="button" aria-controls="rail navlist" aria-expanded="true" title="Hide or show topic navigation">▴ Hide topics</button>
       <button class="tbtn topic-tbtn" id="topicsPin" type="button" aria-pressed="true" title="Keep the topic row visible while scrolling">Unpin topics</button>
+      <button class="tbtn topic-tbtn" id="topicWidthToggle" type="button" aria-controls="topicWidthPanel" aria-expanded="false" title="Make the topic sidebar or tabs wider or narrower">Topic size</button>
     </div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <span class="tsep"></span>
@@ -885,6 +948,20 @@
     <div class="searchbox">
       <input type="text" id="search" placeholder="Search" autocomplete="off" aria-label="Search all phrases">
     </div>
+  </div>
+
+  <div class="topic-width-panel" id="topicWidthPanel" role="region" aria-label="Topic size settings" hidden>
+    <div class="topic-width-presets" role="group" aria-label="Topic width presets">
+      <button type="button" class="topic-preset" data-topic-width="140" aria-pressed="false">Compact</button>
+      <button type="button" class="topic-preset" data-topic-width="200" aria-pressed="true">Standard</button>
+      <button type="button" class="topic-preset" data-topic-width="280" aria-pressed="false">Large</button>
+    </div>
+    <div class="topic-width-adjust">
+      <label for="topicWidthSlider">Topic width <output id="topicWidthValue" for="topicWidthSlider">200 px</output></label>
+      <input id="topicWidthSlider" type="range" min="140" max="300" step="10" value="200" aria-label="Adjust topic sidebar or tab width">
+      <span class="topic-width-hint" id="topicWidthHint">Sidebar width on desktop; topic-tab width on smaller screens</span>
+    </div>
+    <button class="topic-width-done" type="button" id="topicWidthDone">Done</button>
   </div>
 
   <div class="frame">
@@ -1503,7 +1580,7 @@ let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, dwellEnabled:false, dwellMs:1500};
+let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, topicWidth:200, dwellEnabled:false, dwellMs:1500};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -2363,6 +2440,9 @@ document.addEventListener('keydown',e=>{
   const openSheet=[...document.querySelectorAll('.sheet.open')].at(-1);
   if(e.key==='Escape'){
     if(openSheet){openSheet.classList.remove('open');e.preventDefault();document.getElementById('demoBtn').focus();return;}
+    if(!document.getElementById('topicWidthPanel').hidden){
+      setTopicWidthPanel(false);e.preventDefault();document.getElementById('topicWidthToggle').focus();return;
+    }
     const overlay=document.querySelector('.overlay.open');
     if(overlay){overlay.classList.remove('open');e.preventDefault();document.getElementById('typeBtn').focus();return;}
     if(settings.uiStyle!=='classic' && activeSubtopic[activeCat]!=null){
@@ -2558,6 +2638,53 @@ function applyTheme(){
   const b = document.getElementById('themeBtn');
   if(b) b.textContent = dark ? 'Light theme' : 'Dark theme';
 }
+
+/* ----------------------------------------------------- topic width settings
+   One preference controls the desktop sidebar and narrower-screen topic tabs.
+   Categories, phrase text, and active selection are never modified. */
+const TOPIC_WIDTH_PRESETS = [140,200,280];
+function normalizeTopicWidth(value){
+  const n=Number(value);
+  return Number.isFinite(n)
+    ? Math.min(300,Math.max(140,Math.round(n/10)*10))
+    : 200;
+}
+function applyTopicWidth(){
+  const n=normalizeTopicWidth(settings.topicWidth);
+  settings.topicWidth=n;
+  // Tab widths map to the narrower viewport: 140->90, 200->130, 280->180.
+  const tabWidth=Math.round(n*0.65/5)*5;
+  document.documentElement.style.setProperty('--topic-sidebar-width',n+'px');
+  document.documentElement.style.setProperty('--topic-tab-width',tabWidth+'px');
+  document.getElementById('topicWidthSlider').value=String(n);
+  document.getElementById('topicWidthValue').textContent=n+' px';
+  document.querySelectorAll('.topic-preset').forEach(button=>{
+    button.setAttribute('aria-pressed',String(Number(button.dataset.topicWidth)===n));
+  });
+}
+function setTopicWidth(n){
+  settings.topicWidth=n;
+  applyTopicWidth();
+  save();
+}
+function setTopicWidthPanel(open){
+  document.getElementById('topicWidthPanel').hidden=!open;
+  document.getElementById('topicWidthToggle').setAttribute('aria-expanded',String(open));
+}
+document.getElementById('topicWidthToggle').addEventListener('click',()=>{
+  setTopicWidthPanel(document.getElementById('topicWidthPanel').hidden);
+});
+document.getElementById('topicWidthDone').addEventListener('click',()=>{
+  setTopicWidthPanel(false);
+  document.getElementById('topicWidthToggle').focus();
+});
+document.getElementById('topicWidthSlider').addEventListener('input',event=>{
+  setTopicWidth(Number(event.target.value));
+});
+document.querySelectorAll('.topic-preset').forEach(button=>{
+  button.addEventListener('click',()=>setTopicWidth(Number(button.dataset.topicWidth)));
+});
+
 function applyTopicSettings(){
   const visible = settings.topicsVisible !== false;
   const pinned = settings.topicsPinned !== false;
@@ -2630,12 +2757,12 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 (async function(){
-  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyDwellSettings(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
-  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyDwellSettings(); updateStyleButton();
+  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
 })();
