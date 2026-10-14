@@ -40,6 +40,12 @@ Select **Old style** (or **Switch to Old Style**). A **Button size** slider appe
 - This control applies only to Old Style; the Nested style stays unchanged.
 - The **Larger buttons (motor access)** preference under Voice remains available and works together with this control.
 
+## Compact phrase buttons
+
+Phrase buttons now use less vertical padding and a smaller minimum height, especially in **Old Style**. The layout keeps phrase text visible and allows longer messages to wrap instead of clipping them. On wider screens, longer Old Style phrases use up to two grid columns rather than automatically occupying an entire row.
+
+The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Nested-style spoken phrase choices also have less unused padding without changing the topic buttons.
+
 ## Design principles
 
 - **User-authored adult language.** An AAC user decides what is communicated; phrase buttons are complete utterances, not automatic interpretations of intent.
