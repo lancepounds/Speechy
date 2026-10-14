@@ -746,7 +746,7 @@
     .classic-size-bar input[type=range]{min-width:80px;flex:1 1 120px}
   }
 
-  /* Topic navigation can be completely collapsed, while controls remain in the composer. */
+  /* Topic navigation remains accessible in the main toolbar, even when collapsed. */
   .stage-utilities{
     display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,.82fr);
     gap:6px;margin-bottom:8px;
@@ -773,6 +773,31 @@
     box-shadow:inset 0 0 0 2px #3F6FC0
   }
 
+  /* Prominent, permanently accessible topic controls (not hidden by the grid). */
+  .toolbar-topic-tools{
+    display:flex;align-items:center;flex-wrap:nowrap;gap:5px;margin:2px 8px 2px 2px;
+    padding-right:9px;border-right:1px solid #ACA899;
+  }
+  .toolbar .topic-tbtn{
+    border:1px solid #316AC5;border-radius:4px;background:var(--btn);
+    font-weight:700;min-height:40px;padding:7px 11px;
+    box-shadow:inset 0 0 0 1px #fff;
+  }
+  .toolbar .topic-tbtn:hover{background:#316AC5;color:#fff}
+  .toolbar .topic-tbtn:focus-visible{outline-offset:2px!important}
+  .style-switch{width:100%;margin:0 0 8px;padding:8px 10px;font-size:14px;min-height:40px}
+  [data-theme="dark"] .toolbar .topic-tbtn{color:#F2F2F2;border-color:#759AE2;box-shadow:none}
+  [data-theme="dark"] .toolbar .topic-tbtn:hover{color:#fff}
+  @media (min-width:980px){.toolbar-topic-tools #topicsPin{display:none}}
+  @media (max-width:699px){
+    .toolbar-topic-tools{order:-1;flex:1 0 auto;margin:3px 4px 2px 0;padding-right:6px}
+    .toolbar .topic-tbtn{min-height:44px;font-size:13px;padding:7px 10px}
+  }
+  @media (max-width:370px){
+    .toolbar-topic-tools{width:100%;order:0;border-right:0}
+    .toolbar-topic-tools .topic-tbtn{flex:1}
+  }
+
 </style>
 </head>
 <body>
@@ -780,6 +805,10 @@
 
   <div class="toolbar">
     <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
+    <div class="toolbar-topic-tools" role="group" aria-label="Topic navigation controls">
+      <button class="tbtn topic-tbtn" id="topicsToggle" type="button" aria-controls="rail navlist" aria-expanded="true" title="Hide or show topic navigation">▴ Hide topics</button>
+      <button class="tbtn topic-tbtn" id="topicsPin" type="button" aria-pressed="true" title="Keep the topic row visible while scrolling">Unpin topics</button>
+    </div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <span class="tsep"></span>
     <button class="tbtn" id="styleBtn" aria-pressed="false">Old style</button>
@@ -808,11 +837,7 @@
             <button id="modeSpeak" class="mode" aria-pressed="true">Tap speaks</button>
             <button id="modeBuild" class="mode" aria-pressed="false">Tap builds</button>
           </div>
-          <div class="stage-utilities" role="group" aria-label="Layout and topic navigation">
-             <button id="styleSwitchMain" class="act" title="Switch phrase layout">Old style</button>
-             <button id="topicsToggle" class="act" type="button" aria-controls="rail navlist" aria-expanded="true">Hide topics</button>
-             <button id="topicsPin" class="act" type="button" aria-pressed="true" title="Keep topics visible while scrolling">Unpin row</button>
-           </div>
+          <button id="styleSwitchMain" class="act style-switch" title="Switch phrase layout">Old style</button>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
           <div class="actions speak-three" id="speakActions">
              <button class="act" id="sayAgain" disabled>Say again</button>
@@ -2370,11 +2395,11 @@ function applyTopicSettings(){
   document.documentElement.setAttribute('data-topics-pinned', String(pinned));
   document.getElementById('rail').hidden = !visible;
   const toggle = document.getElementById('topicsToggle');
-  toggle.textContent = visible ? 'Hide topics' : 'Show topics';
+  toggle.textContent = visible ? '▴ Hide topics' : '▾ Show topics';
   toggle.setAttribute('aria-expanded', String(visible));
   toggle.setAttribute('aria-label', visible ? 'Hide topic navigation' : 'Show topic navigation');
   const pin = document.getElementById('topicsPin');
-  pin.textContent = pinned ? 'Unpin row' : 'Pin row';
+  pin.textContent = pinned ? 'Unpin topics' : 'Pin topics';
   pin.setAttribute('aria-pressed', String(pinned));
   pin.setAttribute('aria-label', pinned ? 'Unpin topic row so it scrolls away' : 'Pin topic row below the message area');
   pin.title = pinned ? 'Let the topic row scroll with the page' : 'Keep the topic row visible while scrolling';

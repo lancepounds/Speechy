@@ -20,7 +20,7 @@ Use **■ Stop voice** to interrupt speech at any point. The entire demo works w
 
 ## Topic row: show, hide, pin, or unpin
 
-Below **Tap speaks** / **Tap builds** are compact controls for the current board layout and topic navigation:
+**At the top of Speechy, next to its name in the main toolbar**, are the clearly labeled **Hide topics / Show topics** controls and, on smaller screens, **Pin topics / Unpin topics**. They stay visible even when all topic navigation is hidden. The Old Style / Nested style switch remains immediately below **Tap speaks / Tap builds**.
 
 - **Hide topics** collapses the entire horizontal topic row, giving the phrase editor more space. **Show topics** restores it without changing the selected category or any saved phrases.
 - **Unpin row** allows the topic row to scroll away when you browse phrases. **Pin row** makes it stay immediately below the message composer while scrolling.
