@@ -950,6 +950,11 @@
   .toolbar a.train-talk-shortcut:focus-visible{outline:3px solid #FF9D00!important;outline-offset:2px!important}
   @media(max-width:699px){.toolbar a.train-talk-shortcut{min-height:44px}}
 
+.tile.phrase-large{grid-column:span 2;min-height:120px}
+.phrase-edit-controls{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;width:100%;margin-top:8px}
+.phrase-edit-controls button{font:inherit;font-size:13px;min-width:38px;min-height:36px;padding:5px 8px;border:1px solid #777;border-radius:5px;background:#fff;color:#111;cursor:pointer}
+.tile:has(.phrase-edit-controls){height:auto;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+@media(max-width:480px){.tile.phrase-large{grid-column:span 2}.phrase-edit-controls button{min-width:34px}}
 </style>
 </head>
 <body>
@@ -1752,6 +1757,40 @@ const CARD_DEFAULT =
   "My speech is affected by cerebral palsy.\n\nI understand you completely. Please talk to me normally, and give me a moment to answer.\n\nThank you.";
 const RETIRED_PHRASES = ["I had a brain injury last year, and my speech is still coming back."];
 
+let phraseOrder = {};
+let phraseSizes = {};
+function orderedPhrases(cat, list){
+ const order=phraseOrder[cat]||[];
+ return list.slice().sort((a,b)=>{
+  const ai=order.indexOf(a),bi=order.indexOf(b);
+  return (ai<0?list.length+list.indexOf(a):ai)-(bi<0?list.length+list.indexOf(b):bi);
+ });
+}
+function movePhrase(cat,p,delta){
+ const list=phrasesFor(cat),i=list.indexOf(p),j=i+delta;
+ if(i<0||j<0||j>=list.length)return;
+ [list[i],list[j]]=[list[j],list[i]];
+ phraseOrder[cat]=list;save();renderGrid();
+}
+function editPhrase(cat,old){
+ const value=prompt('Edit phrase:',old);
+ if(value===null)return;
+ const next=value.trim();
+ if(!next||next===old)return;
+ if(phrasesFor(cat).includes(next)){alert('This phrase already exists in this topic.');return;}
+ if((custom[cat]||[]).includes(old)){
+  custom[cat]=custom[cat].map(p=>p===old?next:p);
+ }else{
+  removed[cat]=[...new Set([...(removed[cat]||[]),old])];
+  custom[cat]=[...(custom[cat]||[]),next];
+ }
+ phraseOrder[cat]=(phraseOrder[cat]||phrasesFor(cat)).map(p=>p===old?next:p);
+ if(phraseSizes[old]){phraseSizes[next]=phraseSizes[old];delete phraseSizes[old];}
+ if(gifs[old]){gifs[next]=gifs[old];delete gifs[old];}
+ if(gifUploads[old]){gifUploads[next]=gifUploads[old];delete gifUploads[old];}
+ starred=starred.map(p=>p===old?next:p);
+ save();renderGrid();
+}
 let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
@@ -1824,6 +1863,7 @@ async function initBackend(){
 function apply(raw){
   if(!raw) return;
   custom = raw.custom || {}; removed = raw.removed || {};
+  phraseOrder = raw.phraseOrder || {}; phraseSizes = raw.phraseSizes || {};
   gifs = raw.gifs && typeof raw.gifs==='object' && !Array.isArray(raw.gifs) ? raw.gifs : {};
   gifUploads = raw.gifUploads && typeof raw.gifUploads==='object' ? raw.gifUploads : {};
   counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set([...raw.starred, "How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"])] : starred; settings = Object.assign(settings, raw.settings || {});
@@ -1853,7 +1893,7 @@ let saveTimer;
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = {custom, removed, counts, starred, settings, gifs, gifUploads};
+    const payload = {custom, removed, counts, starred, settings, gifs, gifUploads, phraseOrder, phraseSizes};
     try{
       if(backend === 'db') await dbDoc.set(payload);
       else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
@@ -1922,9 +1962,9 @@ function phrasesFor(cat){
   }
   const gone = removed[cat] || [];
   if(cat === 'offduty'){
-    return JOKE_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom.offduty || []);
+    return orderedPhrases(cat,JOKE_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom.offduty || []));
   }
-  return (BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]);
+  return orderedPhrases(cat,(BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]));
 }
 
 function subtopicsFor(cat, list){
@@ -2080,7 +2120,7 @@ function isStarred(p){ return starred.includes(p); }
 
 function makeTile(p, cat, noDel){
   const t = document.createElement('button');
-  t.className = 'tile' + (!cat.compact && p.length > 62 ? ' wide' : '');
+  t.className = 'tile' + (!cat.compact && p.length > 62 ? ' wide' : '') + (phraseSizes[p]===2?' phrase-large':'');
   t.style.setProperty('--cat', cat.color);
   t.textContent = p;
   if(gifFor(p)) addGifMarker(t);
@@ -2104,6 +2144,12 @@ function makeTile(p, cat, noDel){
   }
 
   if(editing && activeCat !== 'recent' && activeCat !== 'starred' && !noDel){
+    const controls=document.createElement('span');controls.className='phrase-edit-controls';
+    [['Edit',()=>editPhrase(activeCat,p)],['↑',()=>movePhrase(activeCat,p,-1)],['↓',()=>movePhrase(activeCat,p,1)],['Size',()=>{phraseSizes[p]=phraseSizes[p]===2?1:2;save();renderGrid();}]].forEach(([label,fn])=>{
+      const b=document.createElement('button');b.type='button';b.textContent=label;b.setAttribute('aria-label',label+' '+p);
+      b.onclick=e=>{e.stopPropagation();fn();};controls.appendChild(b);
+    });
+    t.appendChild(controls);
     const x = document.createElement('span');
     x.className='del'; x.textContent='×'; x.setAttribute('aria-label','Remove phrase');
     x.onclick = (e)=>{ e.stopPropagation(); removePhrase(activeCat, p); };
@@ -2237,6 +2283,7 @@ function renderGrid(){
   }
 
   if(editing){
+    if(crumb) crumb.textContent = cat.name + ' · Edit, move, resize or remove phrases';
     grid.className = 'grid' + (cat.compact ? ' compact' : '');
     grid.style.setProperty('--cat', cat.color);
     if(crumb) crumb.textContent = cat.name;
