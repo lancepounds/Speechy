@@ -1116,7 +1116,10 @@
     <select id="gifCategory"></select>
     <label for="gifPhrase">Phrase</label>
     <select id="gifPhrase"></select>
-    <label for="gifUrl">Direct GIF link</label>
+    <label for="gifUpload">Upload GIF from your iPad</label>
+    <input id="gifUpload" type="file" accept="image/gif,.gif">
+    <p class="note">Choose a GIF from Files or your photo library. Uploads are stored on this device, not sent to a server.</p>
+    <label for="gifUrl">Or paste a direct GIF link</label>
     <input id="gifUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://example.com/animation.gif">
     <p class="note" id="gifMessage" role="status" aria-live="polite"></p>
     <div class="sheet-actions gif-sheet-actions">
@@ -1764,12 +1767,33 @@ let mode = 'speak';
 let addTarget = null;
 let gifs = {}; // { phrase text: direct GIF URL }
 let gifPreviousFocus = null;
+let gifUploads = {}; // {phrase: IndexedDB key}
+const gifDbPromise = new Promise(resolve=>{
+  if(!window.indexedDB){resolve(null);return;}
+  const request=indexedDB.open('speechy-gifs',1);
+  request.onupgradeneeded=()=>request.result.createObjectStore('images');
+  request.onsuccess=()=>resolve(request.result);
+  request.onerror=()=>resolve(null);
+});
+async function gifStore(action,key,value){
+  const db=await gifDbPromise;if(!db)throw Error('Local GIF storage unavailable');
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('images',action==='get'?'readonly':'readwrite');
+    const req=tx.objectStore('images')[action](...(action==='put'?[value,key]:[key]));
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+}
+async function gifLocalUrl(phrase){
+  if(!gifUploads[phrase])return '';
+  try{const blob=await gifStore('get',gifUploads[phrase]);return blob?URL.createObjectURL(blob):'';}
+  catch(e){return '';}
+}
 function validGifUrl(value){
   if(typeof value!=='string' || value.length>2000)return '';
   try{const u=new URL(value.trim());return (u.protocol==='https:'||u.protocol==='http:')&&/\.gif$/i.test(u.pathname)?u.href:'';}
   catch(e){return '';}
 }
-function gifFor(phrase){return validGifUrl(gifs[phrase]);}
+function gifFor(phrase){return gifUploads[phrase] || validGifUrl(gifs[phrase]);}
 function addGifMarker(button){
   button.classList.add('has-gif');
   const badge=document.createElement('span');
@@ -1801,6 +1825,7 @@ function apply(raw){
   if(!raw) return;
   custom = raw.custom || {}; removed = raw.removed || {};
   gifs = raw.gifs && typeof raw.gifs==='object' && !Array.isArray(raw.gifs) ? raw.gifs : {};
+  gifUploads = raw.gifUploads && typeof raw.gifUploads==='object' ? raw.gifUploads : {};
   counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set([...raw.starred, "How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"])] : starred; settings = Object.assign(settings, raw.settings || {});
   // the saved card still carries the old "injury" wording unless he edited it himself
   let changed = false;
@@ -1828,7 +1853,7 @@ let saveTimer;
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = {custom, removed, counts, starred, settings, gifs};
+    const payload = {custom, removed, counts, starred, settings, gifs, gifUploads};
     try{
       if(backend === 'db') await dbDoc.set(payload);
       else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
@@ -2446,8 +2471,9 @@ function showBig(text){
   o.classList.add('open');
   requestAnimationFrame(()=>fitText('bigText','bigOverlay',text));
 }
-function showGif(phrase, override){
-  const url=validGifUrl(override || gifFor(phrase));
+async function showGif(phrase, override){
+  const local=!override ? await gifLocalUrl(phrase) : '';
+  const url=local || validGifUrl(override || gifFor(phrase));
   if(!url)return;
   gifPreviousFocus=document.activeElement;
   const img=document.getElementById('gifDisplay');
@@ -2461,6 +2487,7 @@ function showGif(phrase, override){
 function closeGif(){
   document.getElementById('gifOverlay').classList.remove('open');
   const img=document.getElementById('gifDisplay');
+  if(img.src.startsWith('blob:'))URL.revokeObjectURL(img.src);
   img.removeAttribute('src');img.onerror=null;
   if(gifPreviousFocus && gifPreviousFocus.isConnected)gifPreviousFocus.focus();
 }
@@ -2621,7 +2648,8 @@ const gifUrlEl=document.getElementById('gifUrl');
 const gifMessageEl=document.getElementById('gifMessage');
 function syncGifEditor(){
   const phrase=gifPhraseEl.value;
-  gifUrlEl.value=gifFor(phrase);
+  gifUrlEl.value=validGifUrl(gifs[phrase]);
+  document.getElementById('gifUpload').value='';
   document.getElementById('gifRemove').disabled=!gifFor(phrase);
   gifMessageEl.textContent=!phrase?'This topic has no phrases. Add one through Organize.'
     :gifFor(phrase)?'This phrase has a GIF. You may replace or remove it.':'Paste a direct GIF link to attach one.';
@@ -2652,17 +2680,32 @@ gifPhraseEl.onchange=syncGifEditor;
 document.getElementById('gifCancel').onclick=()=>gifSheet.classList.remove('open');
 document.getElementById('gifPreview').onclick=()=>{
   const url=validGifUrl(gifUrlEl.value);
-  if(!url){gifMessageEl.textContent='Enter a direct http(s) image link ending in .gif.';return;}
+  if(!url){gifMessageEl.textContent='For a local file, tap Save GIF first. For a link, enter a direct .gif URL.';return;}
   if(gifPhraseEl.value)showGif(gifPhraseEl.value,url);
 };
-document.getElementById('gifSave').onclick=()=>{
+document.getElementById('gifSave').onclick=async()=>{
   const phrase=gifPhraseEl.value,url=validGifUrl(gifUrlEl.value);
-  if(!phrase||!url){gifMessageEl.textContent='Choose a phrase and paste a valid direct .gif link.';return;}
-  gifs[phrase]=url;save();renderGrid();renderSaid();gifSheet.classList.remove('open');
+  const file=document.getElementById('gifUpload').files[0];
+  if(!phrase || (!file&&!url)){gifMessageEl.textContent='Choose a phrase and a GIF file or direct GIF link.';return;}
+  if(file){
+    if(file.type!=='image/gif' || file.size>15*1024*1024){gifMessageEl.textContent='Choose a GIF file smaller than 15 MB.';return;}
+    try{
+      const key='gif:'+crypto.randomUUID();
+      await gifStore('put',key,file);
+      if(gifUploads[phrase])await gifStore('delete',gifUploads[phrase]).catch(()=>{});
+      gifUploads[phrase]=key;delete gifs[phrase];
+    }catch(e){gifMessageEl.textContent='Could not store GIF on this device. Check available storage.';return;}
+  }else{
+    if(gifUploads[phrase])await gifStore('delete',gifUploads[phrase]).catch(()=>{});
+    delete gifUploads[phrase];gifs[phrase]=url;
+  }
+  save();renderGrid();renderSaid();gifSheet.classList.remove('open');
 };
 document.getElementById('gifRemove').onclick=()=>{
   const phrase=gifPhraseEl.value;if(!phrase)return;
-  delete gifs[phrase];save();renderGrid();renderSaid();
+  delete gifs[phrase];
+  if(gifUploads[phrase])gifStore('delete',gifUploads[phrase]).catch(()=>{});
+  delete gifUploads[phrase];save();renderGrid();renderSaid();
   populateGifPhrases(phrase);gifMessageEl.textContent='GIF removed; the phrase is unchanged.';
 };
 
@@ -2691,7 +2734,7 @@ document.getElementById('largeTargets').onchange = e=>{
 };
 document.getElementById('resetBtn').onclick = ()=>{
   if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.')) return;
-  custom={}; removed={}; gifs={}; save(); renderGrid();
+  custom={}; removed={}; gifs={}; gifUploads={}; save(); renderGrid();
   setSheet.classList.remove('open');
 };
 
