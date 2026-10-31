@@ -921,6 +921,23 @@
     .topic-width-panel .topic-width-done{margin-left:auto}
   }
 
+  /* GIF affordance: preserve original phrase tile dimensions and layout. */
+  .actions.speak-three.has-gif{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .gif-marker{position:absolute;right:7px;bottom:5px;padding:2px 5px;border:1px solid #6483B1;border-radius:3px;background:#E3EDFF;color:#18437E;font-size:11px;font-weight:bold;pointer-events:none}
+  .tile.has-gif,.nested-phrase.has-gif{padding-bottom:26px}
+  .nested-phrase{position:relative}
+  [data-theme="dark"] .gif-marker{background:#263B5A;color:#E8F1FF}
+  .gif-overlay{z-index:80;align-items:center;justify-content:center;gap:12px}
+  .gif-frame{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .gif-frame img{max-width:100%;max-height:74dvh;object-fit:contain}
+  .gif-frame p{margin:0;max-width:95%;text-align:center;color:#111;font-size:clamp(18px,3vw,32px);font-weight:bold;overflow-wrap:anywhere}
+  .gif-frame #gifError{color:#B3261E;font-size:18px}
+  [data-theme="dark"] .gif-frame p{color:#F5F5F5}
+  .gif-close{min-width:180px;min-height:54px;padding:10px 18px;border:2px solid #5579AC;border-radius:5px;background:var(--btn);color:var(--ink);font-size:19px;font-weight:bold}
+  .gif-sheet-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #gifSheet select,#gifSheet input{min-height:44px}
+  @media(max-width:560px){.actions.speak-three.has-gif{grid-template-columns:repeat(2,minmax(0,1fr))}.gif-frame img{max-height:68dvh}}
+
   /* Link to the distraction-reduced, train-themed communication board. */
   .toolbar a.train-talk-shortcut{
     display:inline-flex;align-items:center;justify-content:center;
@@ -946,6 +963,7 @@
       <button class="tbtn topic-tbtn" id="topicWidthToggle" type="button" aria-controls="topicWidthPanel" aria-expanded="false" title="Make the topic sidebar or tabs wider or narrower">Topic size</button>
     </div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
+    <button class="tbtn" id="gifManageBtn" type="button">GIFs</button>
     <span class="tsep"></span>
     <button class="tbtn" id="styleBtn" aria-pressed="false">Old style</button>
     <span class="tsep"></span>
@@ -994,6 +1012,7 @@
           <div class="actions speak-three" id="speakActions">
              <button class="act" id="sayAgain" disabled>Say again</button>
              <button class="act secondary" id="showBig" disabled>Show big</button>
+             <button class="act secondary" id="showGif" hidden disabled>Show GIF</button>
              <button class="act" id="favCurrent" disabled aria-label="Star last spoken phrase">☆ Star</button>
            </div>
           <div class="actions three" id="buildActions" hidden>
@@ -1027,6 +1046,16 @@
 <div class="overlay" id="bigOverlay" role="dialog" aria-label="Displayed message">
   <div class="fit"><span id="bigText"></span></div>
   <div class="hint">Tap anywhere to close</div>
+</div>
+
+<!-- Full-screen animated GIF viewer -->
+<div class="overlay gif-overlay" id="gifOverlay" role="dialog" aria-modal="true" aria-label="Animated GIF" tabindex="-1">
+  <div class="gif-frame">
+    <img id="gifDisplay" alt="">
+    <p id="gifCaption"></p>
+    <p id="gifError" hidden>Could not load the GIF. Check its link or your connection.</p>
+  </div>
+  <button id="gifClose" type="button" class="gif-close">Close GIF</button>
 </div>
 
 <!-- explainer card overlay -->
@@ -1074,6 +1103,27 @@
     <div class="sheet-actions">
       <button id="addCancel">Cancel</button>
       <button class="primary" id="addSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GIFs can be attached to existing phrases -->
+<div class="sheet" id="gifSheet" role="dialog" aria-modal="true" aria-label="Manage GIFs">
+  <div class="sheet-inner">
+    <h2>Add a GIF to a phrase</h2>
+    <p class="note">Choose a phrase and paste a direct GIF image link ending in .gif, not a GIPHY or Tenor web page link. GIFs load from the internet.</p>
+    <label for="gifCategory">Topic</label>
+    <select id="gifCategory"></select>
+    <label for="gifPhrase">Phrase</label>
+    <select id="gifPhrase"></select>
+    <label for="gifUrl">Direct GIF link</label>
+    <input id="gifUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://example.com/animation.gif">
+    <p class="note" id="gifMessage" role="status" aria-live="polite"></p>
+    <div class="sheet-actions gif-sheet-actions">
+      <button id="gifCancel">Cancel</button>
+      <button id="gifPreview">Preview</button>
+      <button id="gifRemove">Remove GIF</button>
+      <button id="gifSave" class="primary">Save GIF</button>
     </div>
   </div>
 </div>
@@ -1712,6 +1762,20 @@ let lastSaid = '';
 let buffer = '';
 let mode = 'speak';
 let addTarget = null;
+let gifs = {}; // { phrase text: direct GIF URL }
+let gifPreviousFocus = null;
+function validGifUrl(value){
+  if(typeof value!=='string' || value.length>2000)return '';
+  try{const u=new URL(value.trim());return (u.protocol==='https:'||u.protocol==='http:')&&/\.gif$/i.test(u.pathname)?u.href:'';}
+  catch(e){return '';}
+}
+function gifFor(phrase){return validGifUrl(gifs[phrase]);}
+function addGifMarker(button){
+  button.classList.add('has-gif');
+  const badge=document.createElement('span');
+  badge.className='gif-marker';badge.textContent='GIF';
+  badge.setAttribute('aria-hidden','true');button.appendChild(badge);
+}
 
 /* ------------------------------------------------------------- storage */
 /* Works in three places: a published page (claude db, syncs across your
@@ -1736,6 +1800,7 @@ async function initBackend(){
 function apply(raw){
   if(!raw) return;
   custom = raw.custom || {}; removed = raw.removed || {};
+  gifs = raw.gifs && typeof raw.gifs==='object' && !Array.isArray(raw.gifs) ? raw.gifs : {};
   counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set([...raw.starred, "How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"])] : starred; settings = Object.assign(settings, raw.settings || {});
   // the saved card still carries the old "injury" wording unless he edited it himself
   let changed = false;
@@ -1763,7 +1828,7 @@ let saveTimer;
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
-    const payload = {custom, removed, counts, starred, settings};
+    const payload = {custom, removed, counts, starred, settings, gifs};
     try{
       if(backend === 'db') await dbDoc.set(payload);
       else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
@@ -1804,7 +1869,11 @@ function speak(text){
   if(!text) return;
   lastSaid = text;
   renderSaid();
-  if(!window.speechSynthesis){ showBig(text); return; }
+  if(!window.speechSynthesis){
+    if(gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
+    else showBig(text);
+    return;
+  }
   try{
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -1813,6 +1882,7 @@ function speak(text){
     if(v) u.voice = v;
     speechSynthesis.speak(u);
   }catch(e){ showBig(text); }
+  if(gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
 }
 
 function bump(p){ counts[p] = (counts[p]||0)+1; save(); }
@@ -1898,6 +1968,10 @@ function renderSaid(){
   fav.textContent = lastSaid && isStarred(lastSaid) ? '★ Starred' : '☆ Star';
   fav.setAttribute('aria-label', lastSaid && isStarred(lastSaid) ? 'Remove last spoken phrase from favorites' : 'Save last spoken phrase to favorites');
   document.getElementById('showBig').disabled  = !lastSaid;
+  const hasGif = !!gifFor(lastSaid);
+  document.getElementById('showGif').hidden = !hasGif;
+  document.getElementById('showGif').disabled = !hasGif;
+  document.getElementById('speakActions').classList.toggle('has-gif',hasGif);
   document.getElementById('buildSay').disabled    = !buffer;
   document.getElementById('buildExpand').disabled = !buffer;
   document.getElementById('buildClear').disabled  = !buffer;
@@ -1984,6 +2058,7 @@ function makeTile(p, cat, noDel){
   t.className = 'tile' + (!cat.compact && p.length > 62 ? ' wide' : '');
   t.style.setProperty('--cat', cat.color);
   t.textContent = p;
+  if(gifFor(p)) addGifMarker(t);
   t.onclick = ()=>{
     if(editing) return;
     if(mode === 'build'){ addToBuffer(p, !!cat.addon); }
@@ -2306,6 +2381,7 @@ function renderGrid(){
     const b=document.createElement('button');
     b.className='nested-phrase';
     b.textContent=p;
+    if(gifFor(p)) addGifMarker(b);
     b.title=p;
     b.style.setProperty('--cat',cat.color);
     b.style.setProperty('--i',i);
@@ -2370,6 +2446,25 @@ function showBig(text){
   o.classList.add('open');
   requestAnimationFrame(()=>fitText('bigText','bigOverlay',text));
 }
+function showGif(phrase, override){
+  const url=validGifUrl(override || gifFor(phrase));
+  if(!url)return;
+  gifPreviousFocus=document.activeElement;
+  const img=document.getElementById('gifDisplay');
+  img.hidden=false;document.getElementById('gifError').hidden=true;
+  img.onerror=()=>{img.hidden=true;document.getElementById('gifError').hidden=false;};
+  img.alt='Animated GIF for '+phrase;
+  document.getElementById('gifCaption').textContent=phrase;
+  img.src=url;document.getElementById('gifOverlay').classList.add('open');
+  document.getElementById('gifClose').focus();
+}
+function closeGif(){
+  document.getElementById('gifOverlay').classList.remove('open');
+  const img=document.getElementById('gifDisplay');
+  img.removeAttribute('src');img.onerror=null;
+  if(gifPreviousFocus && gifPreviousFocus.isConnected)gifPreviousFocus.focus();
+}
+document.getElementById('gifClose').onclick=closeGif;
 document.getElementById('bigOverlay').onclick = e => e.currentTarget.classList.remove('open');
 document.getElementById('cardOverlay').onclick = e => e.currentTarget.classList.remove('open');
 
@@ -2465,6 +2560,7 @@ document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
 document.getElementById('favCurrent').onclick = ()=>{ if(lastSaid) toggleStar(lastSaid); };
 document.getElementById('stopBtn').onclick = ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); };
 document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);
+document.getElementById('showGif').onclick = ()=> showGif(lastSaid);
 
 document.getElementById('editBtn').onclick = (e)=>{
   editing = !editing;
@@ -2517,6 +2613,59 @@ document.getElementById('addSave').onclick = ()=>{
   addSheet.classList.remove('open');
 };
 
+/* GIF attachment manager, using existing board storage and phrase names. */
+const gifSheet=document.getElementById('gifSheet');
+const gifCatEl=document.getElementById('gifCategory');
+const gifPhraseEl=document.getElementById('gifPhrase');
+const gifUrlEl=document.getElementById('gifUrl');
+const gifMessageEl=document.getElementById('gifMessage');
+function syncGifEditor(){
+  const phrase=gifPhraseEl.value;
+  gifUrlEl.value=gifFor(phrase);
+  document.getElementById('gifRemove').disabled=!gifFor(phrase);
+  gifMessageEl.textContent=!phrase?'This topic has no phrases. Add one through Organize.'
+    :gifFor(phrase)?'This phrase has a GIF. You may replace or remove it.':'Paste a direct GIF link to attach one.';
+}
+function populateGifPhrases(preferred){
+  const phrases=[...new Set(phrasesFor(gifCatEl.value))];
+  gifPhraseEl.replaceChildren();
+  phrases.forEach(p=>{
+    const option=document.createElement('option');option.value=p;
+    option.textContent=p+(gifFor(p)?' (GIF attached)':'');
+    gifPhraseEl.appendChild(option);
+  });
+  if(preferred && phrases.includes(preferred))gifPhraseEl.value=preferred;
+  gifPhraseEl.disabled=!phrases.length;
+  syncGifEditor();
+}
+document.getElementById('gifManageBtn').onclick=()=>{
+  gifCatEl.replaceChildren();
+  CATS.filter(c=>c.id!=='starred'&&c.id!=='recent').forEach(c=>{
+    const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;gifCatEl.appendChild(opt);
+  });
+  gifCatEl.value=CATS.some(c=>c.id===activeCat&&c.id!=='starred'&&c.id!=='recent')
+    ?activeCat:(CATS.find(c=>c.id!=='starred'&&c.id!=='recent'&&phrasesFor(c.id).includes(lastSaid))?.id||'quick');
+  populateGifPhrases(lastSaid);gifSheet.classList.add('open');gifCatEl.focus();
+};
+gifCatEl.onchange=()=>populateGifPhrases();
+gifPhraseEl.onchange=syncGifEditor;
+document.getElementById('gifCancel').onclick=()=>gifSheet.classList.remove('open');
+document.getElementById('gifPreview').onclick=()=>{
+  const url=validGifUrl(gifUrlEl.value);
+  if(!url){gifMessageEl.textContent='Enter a direct http(s) image link ending in .gif.';return;}
+  if(gifPhraseEl.value)showGif(gifPhraseEl.value,url);
+};
+document.getElementById('gifSave').onclick=()=>{
+  const phrase=gifPhraseEl.value,url=validGifUrl(gifUrlEl.value);
+  if(!phrase||!url){gifMessageEl.textContent='Choose a phrase and paste a valid direct .gif link.';return;}
+  gifs[phrase]=url;save();renderGrid();renderSaid();gifSheet.classList.remove('open');
+};
+document.getElementById('gifRemove').onclick=()=>{
+  const phrase=gifPhraseEl.value;if(!phrase)return;
+  delete gifs[phrase];save();renderGrid();renderSaid();
+  populateGifPhrases(phrase);gifMessageEl.textContent='GIF removed; the phrase is unchanged.';
+};
+
 const setSheet = document.getElementById('setSheet');
 document.getElementById('setBtn').onclick = ()=>{
   document.getElementById('rate').value = settings.rate;
@@ -2542,7 +2691,7 @@ document.getElementById('largeTargets').onchange = e=>{
 };
 document.getElementById('resetBtn').onclick = ()=>{
   if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.')) return;
-  custom={}; removed={}; save(); renderGrid();
+  custom={}; removed={}; gifs={}; save(); renderGrid();
   setSheet.classList.remove('open');
 };
 
@@ -2572,6 +2721,7 @@ document.getElementById('demoStart').onclick = ()=>{
 document.addEventListener('keydown',e=>{
   const openSheet=[...document.querySelectorAll('.sheet.open')].at(-1);
   if(e.key==='Escape'){
+    if(document.getElementById('gifOverlay').classList.contains('open')){closeGif();e.preventDefault();return;}
     if(openSheet){openSheet.classList.remove('open');e.preventDefault();document.getElementById('demoBtn').focus();return;}
     if(!document.getElementById('topicWidthPanel').hidden){
       setTopicWidthPanel(false);e.preventDefault();document.getElementById('topicWidthToggle').focus();return;
