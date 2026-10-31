@@ -6,6 +6,19 @@
 
 Speechy is a personal prototype, not a standardized AAC assessment or a clinically validated replacement for a person's prescribed communication system.
 
+## Animated GIFs for phrases
+
+Speechy can now display an animated GIF along with a saved phrase, in both **Old Style** and **Nested Style**, including on iPad.
+
+1. Tap **GIFs** in the toolbar.
+2. Choose a **Topic** and **Phrase**.
+3. Paste a **direct GIF image URL** ending in `.gif` (not the page URL for a GIF).
+4. Tap **Preview** to check it, then **Save GIF**.
+
+The phrase button gets a small **GIF** label. When you tap it in **Tap speaks** mode, Speechy speaks the phrase and shows the GIF full-screen. Tap **Close GIF** to return to the board. The **Show GIF** button in the speech panel lets you display it again without repeating speech. GIFs do not open automatically when the device requests reduced motion; you can still display them manually.
+
+You can replace or remove a phrase's GIF through **GIFs** at any time. The link is saved alongside other board settings using the current storage backend, so the GIF must remain available online to play. This first version accepts direct online image URLs rather than local GIF uploads.
+
 ## Train Talk — a simple train-themed communication page
 
 Open **[🚂 Train Talk](https://lancepounds.github.io/Speechy/train-talk.html)** for a child-friendly communication page to share with family and caregivers. The page is separate from Speechy's more detailed adult phrase board so there are fewer distractions. A **Train Talk** shortcut in Speechy's top toolbar also opens it.
