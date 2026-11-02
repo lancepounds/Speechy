@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0a246a">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>Speechy | Personal AAC phraseboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -975,6 +978,7 @@
     <button class="tbtn" id="setBtn">Voice</button>
     <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by resting the mouse or eye-tracking pointer over them">Dwell: Off</button>
     <span class="tsep"></span>
+    <button class="tbtn" id="installAppBtn" type="button" aria-haspopup="dialog">Install app</button>
     <button class="tbtn" id="fsBtn">Full screen</button>
     <span class="tsep"></span>
     <button class="tbtn" id="themeBtn">Dark theme</button>
@@ -3140,5 +3144,14 @@ document.addEventListener('fullscreenchange', ()=>{
   if(window.speechSynthesis) loadVoices();
 })();
 </script>
+<dialog id="installAppDialog" aria-labelledby="installAppTitle" style="max-width:480px;width:calc(100% - 32px);color:var(--ink);background:var(--face);border:2px solid var(--edge);padding:24px">
+<h2 id="installAppTitle">Install Speechy</h2>
+<p id="installAppHelp">In Chrome or Edge, open the browser menu and choose “Install Speechy” or “Apps → Install this site as an app.” On iPad or iPhone, use Safari’s Share menu → Add to Home Screen.</p>
+<p id="offlineAppStatus" role="status">Preparing offline access…</p>
+<p>Your phrases and settings stay in this browser on this device. Use Export to keep a backup. Offline speech requires a voice installed on your device; linked GIFs may need internet.</p>
+<button id="installAppConfirm" class="tbtn" type="button" hidden style="min-height:44px">Install Speechy</button>
+<form method="dialog"><button class="tbtn" style="min-height:44px">Close</button></form>
+</dialog>
+<script src="./pwa.js" defer></script>
 </body>
 </html>
