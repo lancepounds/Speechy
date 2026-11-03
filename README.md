@@ -122,7 +122,7 @@ Use the **Dwell: Off / Dwell: On** toggle in Speechy's main toolbar. When enable
 
 ## Running and deployment
 
-The application is the single `index.html` file in this repository. There is no install, account requirement, bundler, or build step. This repository's GitHub Pages URL is:
+The application uses `index.html` with local storage and PWA support scripts. There is no account requirement, bundler, or build step. Serve the repository over HTTPS (or localhost for testing) to use offline support. This repository's GitHub Pages URL is:
 
 https://lancepounds.github.io/Speechy/
 
@@ -130,7 +130,7 @@ Open `index.html` in a modern browser for local testing. The project is also lin
 
 ## Storage and privacy limitations
 
-Speechy chooses the available storage backend: a supported Claude artifact database, `window.storage` in a compatible preview, browser `localStorage` on a standalone website, or in-memory state if storage is blocked. **GitHub Pages does not provide cross-device synchronization.** Customizations in one browser do not automatically appear on another, and browser data clearing can erase local customizations.
+Speechy saves on this device using IndexedDB and a localStorage recovery journal, with visible warnings if saving fails. **GitHub Pages does not provide cross-device synchronization.** Customizations in one browser do not automatically appear on another, and browser data clearing can erase local customizations.
 
 Browser speech synthesis runs through the browser's `SpeechSynthesis` API; voices and actual speech output are device-dependent. Text-to-speech may behave differently across platforms and browser permissions. AI suggestion processing is only attempted when a supported AI runtime is available; do not enter sensitive clinical information into an external feature without understanding that service's privacy practices.
 
@@ -150,3 +150,41 @@ This project does not claim HIPAA compliance, clinical validation, switch scanni
 ## License
 
 MIT, as specified by the hosting project's licensing terms.
+
+
+
+## Device-local saving and offline use
+
+Speechy saves the complete board (phrases, favorites, order, sizes, GIF references,
+and settings) to IndexedDB, with an immediate localStorage recovery journal for
+edits followed by an immediate close. Existing `aac:board` saves migrate on load.
+The visible save status reports success only after a local write succeeds and
+warns when storage is unavailable or full. Unreadable saved data is not replaced
+by defaults. Uploaded GIF blobs remain in the existing `speechy-gifs` database;
+transactions must commit before the board references a new upload. Previous
+blobs are retained to protect saved references after an interrupted replacement.
+
+Open Speechy online once and wait for offline readiness in Install app. The
+service worker caches the phraseboard, Train Talk, local scripts, manifest and
+icons. It falls back to the cache on network errors, HTTP errors or a stalled
+connection. Close all Speechy windows and reopen after updates so the waiting
+worker can activate. Bump `speechy-shell-v2` in sw.js for future shell releases.
+
+Offline speech needs an installed device voice (marked Offline where the
+browser reports it). Test in airplane mode on the actual device. A speech error
+falls back to displaying the message. Linked GIFs may need internet; uploaded
+GIFs are local. Browser data clearing, app removal, or OS storage eviction can
+still remove device data; persistent storage is requested when supported, but
+is not guaranteed. This web version requires one online load; a future native
+App Store build must bundle its assets for first-launch offline operation.
+
+Run dependency-free regression checks with:
+
+```sh
+node tests/storage.cjs
+node tests/offline.cjs
+```
+
+These checks simulate localStorage, IndexedDB transaction completion/failures,
+and service-worker network behavior. Real iPhone/iPad restart, GIF playback,
+installed voice, and app-update tests remain necessary before App Store release.

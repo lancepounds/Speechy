@@ -1,8 +1,8 @@
-const CACHE = 'speechy-shell-v1';
+const CACHE = 'speechy-shell-v2';
 const BASE = new URL('./', self.location.href);
-const SHELL = ['./','./index.html','./train-talk.html','./pwa.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'].map(path => new URL(path, BASE).href);
+const SHELL = ['./','./index.html','./train-talk.html','./pwa.js','./storage.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'].map(path => new URL(path, BASE).href);
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(url => new Request(url, {cache:'reload'})))));
 });
 // Let an existing session finish before activating a new version.
 self.addEventListener('activate', event => {
@@ -15,7 +15,12 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     try {
-      const response = await fetch(request);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3500);
+      let response;
+      try { response = await fetch(request, {signal:controller.signal}); }
+      finally { clearTimeout(timer); }
+      if (!response.ok) throw Error('App download failed: ' + response.status);
       if (response.ok) await cache.put(url.origin + url.pathname, response.clone());
       return response;
     } catch (error) {

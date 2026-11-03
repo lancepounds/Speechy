@@ -4,6 +4,7 @@
   const confirm = document.getElementById('installAppConfirm');
   const status = document.getElementById('offlineAppStatus');
   let promptEvent;
+  navigator.storage?.persist?.().catch(() => {});
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const update = () => { button.hidden = !!standalone(); };
   update();
@@ -18,7 +19,7 @@
   });
   window.addEventListener('appinstalled', () => { promptEvent = null; confirm.hidden = true; dialog.close(); button.hidden = true; });
   if ('serviceWorker' in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register('./sw.js', {scope:'./'}).then(() => navigator.serviceWorker.ready).then(() => {
+    navigator.serviceWorker.register('./sw.js', {scope:'./', updateViaCache:'none'}).then(() => navigator.serviceWorker.ready).then(() => {
       status.textContent = 'Offline access is ready. You can reopen Speechy without internet.';
     }).catch(error => {
       status.textContent = 'Offline access could not be prepared. Reopen Speechy online to try again.';
