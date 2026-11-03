@@ -961,7 +961,8 @@
 </style>
 </head>
 <body>
-<div class="window" id="app">
+<div class="window" id="app" inert>
+<p id="saveStatus" role="status" aria-live="polite" style="margin:0;padding:6px 12px;flex-shrink:0">Opening saved board…</p>
 
   <div class="toolbar">
     <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
@@ -1185,6 +1186,7 @@
   </div>
 </div>
 
+<script src="./storage.js"></script>
 <script>
 /* ------------------------------------------------------------------ data */
 const CATS = [
@@ -1814,16 +1816,17 @@ let gifUploads = {}; // {phrase: IndexedDB key}
 const gifDbPromise = new Promise(resolve=>{
   if(!window.indexedDB){resolve(null);return;}
   const request=indexedDB.open('speechy-gifs',1);
+  const timer=setTimeout(()=>resolve(null),4000);
   request.onupgradeneeded=()=>request.result.createObjectStore('images');
-  request.onsuccess=()=>resolve(request.result);
-  request.onerror=()=>resolve(null);
+  request.onsuccess=()=>{clearTimeout(timer);resolve(request.result);};
+  request.onerror=()=>{clearTimeout(timer);resolve(null);};
 });
 async function gifStore(action,key,value){
   const db=await gifDbPromise;if(!db)throw Error('Local GIF storage unavailable');
   return new Promise((resolve,reject)=>{
     const tx=db.transaction('images',action==='get'?'readonly':'readwrite');
     const req=tx.objectStore('images')[action](...(action==='put'?[value,key]:[key]));
-    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    tx.oncomplete=()=>resolve(req.result);tx.onerror=tx.onabort=()=>reject(tx.error || Error('GIF transaction aborted'));
   });
 }
 async function gifLocalUrl(phrase){
@@ -1845,24 +1848,9 @@ function addGifMarker(button){
 }
 
 /* ------------------------------------------------------------- storage */
-/* Works in three places: a published page (claude db, syncs across your
-   devices), the chat preview (window.storage), or a plain saved file
-   (localStorage). Falls back to memory-only rather than breaking. */
-let backend = 'memory', dbDoc = null;
-
-async function initBackend(){
-  try{
-    if(window.claude && typeof window.claude.use === 'function'){
-      const db = await window.claude.use('db');
-      if(db){ dbDoc = db.doc('board/main'); backend = 'db'; return; }
-    }
-  }catch(e){}
-  if(window.storage && window.storage.get){ backend = 'storage'; return; }
-  try{
-    localStorage.setItem('aac:probe','1'); localStorage.removeItem('aac:probe');
-    backend = 'local';
-  }catch(e){ backend = 'memory'; }
-}
+// Read saved state before enabling editing; never overwrite an unreadable board.
+let boardLoaded = false;
+async function initBackend() {}
 
 function apply(raw){
   if(!raw) return;
@@ -1879,31 +1867,15 @@ function apply(raw){
 }
 
 async function load(){
-  try{
-    if(backend === 'db'){
-      const snap = await dbDoc.get();
-      if(snap.exists) apply(snap.data());
-    } else if(backend === 'storage'){
-      const r = await window.storage.get('aac:board');
-      if(r && r.value) apply(JSON.parse(r.value));
-    } else if(backend === 'local'){
-      const v = localStorage.getItem('aac:board');
-      if(v) apply(JSON.parse(v));
-    }
-  }catch(e){ /* nothing saved yet, or storage unavailable — defaults stand */ }
+  try {
+    const raw = await SpeechyStorage.load();
+    boardLoaded = true;
+    if(raw) { apply(raw); await save(); }
+  } catch(error) { console.error('Could not open saved board', error); }
 }
-
-let saveTimer;
 function save(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    const payload = {custom, removed, counts, starred, settings, gifs, gifUploads, phraseOrder, phraseSizes};
-    try{
-      if(backend === 'db') await dbDoc.set(payload);
-      else if(backend === 'storage') await window.storage.set('aac:board', JSON.stringify(payload));
-      else if(backend === 'local') localStorage.setItem('aac:board', JSON.stringify(payload));
-    }catch(e){ console.error('Could not save', e); }
-  }, 300);
+  if(!boardLoaded) return Promise.resolve(false);
+  return SpeechyStorage.save({custom, removed, counts, starred, settings, gifs, gifUploads, phraseOrder, phraseSizes});
 }
 
 /* --------------------------------------------------------------- speech */
@@ -1920,13 +1892,13 @@ function loadVoices(){
   if(voices.length){
     voices.forEach(v=>{
       const o = document.createElement('option');
-      o.value = v.voiceURI; o.textContent = v.name;
+      o.value = v.voiceURI; o.textContent = v.name + (v.localService ? ' (Offline)' : ' (May need internet)');
       if(v.voiceURI === settings.voiceURI) o.selected = true;
       sel.appendChild(o);
     });
   }
   document.getElementById('voiceNote').textContent = window.speechSynthesis
-    ? 'Test the voice before presenting. The voices available here depend on this device and browser. For a loud room, Show big may work better.'
+    ? 'For offline speech, select a device voice marked Offline and test in airplane mode. Available voices depend on this device. Show big works without speech.'
     : 'This device will not play a voice. Show big and the card still work.';
 }
 if(window.speechSynthesis){
@@ -1947,7 +1919,8 @@ function speak(text){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.rate = settings.rate;
-    const v = voices.find(v=>v.voiceURI===settings.voiceURI);
+    const v = voices.find(v=>v.voiceURI===settings.voiceURI && (navigator.onLine || v.localService)) || (!navigator.onLine ? voices.find(v=>v.localService) : null);
+    u.onerror = event => { if(event.error !== 'canceled' && event.error !== 'interrupted') showBig(text); };
     if(v) u.voice = v;
     speechSynthesis.speak(u);
   }catch(e){ showBig(text); }
@@ -2743,19 +2716,19 @@ document.getElementById('gifSave').onclick=async()=>{
     try{
       const key='gif:'+crypto.randomUUID();
       await gifStore('put',key,file);
-      if(gifUploads[phrase])await gifStore('delete',gifUploads[phrase]).catch(()=>{});
       gifUploads[phrase]=key;delete gifs[phrase];
     }catch(e){gifMessageEl.textContent='Could not store GIF on this device. Check available storage.';return;}
   }else{
-    if(gifUploads[phrase])await gifStore('delete',gifUploads[phrase]).catch(()=>{});
     delete gifUploads[phrase];gifs[phrase]=url;
   }
-  save();renderGrid();renderSaid();gifSheet.classList.remove('open');
+  const saved = await save();
+  renderGrid();renderSaid();
+  if(saved) gifSheet.classList.remove('open');
+  else gifMessageEl.textContent='GIF is available in this session, but the board could not be saved. Keep Speechy open and free storage.';
 };
 document.getElementById('gifRemove').onclick=()=>{
   const phrase=gifPhraseEl.value;if(!phrase)return;
   delete gifs[phrase];
-  if(gifUploads[phrase])gifStore('delete',gifUploads[phrase]).catch(()=>{});
   delete gifUploads[phrase];save();renderGrid();renderSaid();
   populateGifPhrases(phrase);gifMessageEl.textContent='GIF removed; the phrase is unchanged.';
 };
@@ -2768,6 +2741,7 @@ document.getElementById('setBtn').onclick = ()=>{
   document.getElementById('largeTargets').checked = !!settings.largeTargets;
   setSheet.classList.add('open');
 };
+document.getElementById('cardEdit').addEventListener('input', e=>{ settings.card=e.target.value; save(); });
 document.getElementById('setClose').onclick = ()=>{
   settings.card = document.getElementById('cardEdit').value;
   save(); setSheet.classList.remove('open');
@@ -3139,6 +3113,7 @@ document.addEventListener('fullscreenchange', ()=>{
   if(window.speechSynthesis) loadVoices();
   await initBackend();
   await load();
+  document.getElementById('app').inert = false;
   applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
   renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
@@ -3148,10 +3123,11 @@ document.addEventListener('fullscreenchange', ()=>{
 <h2 id="installAppTitle">Install Speechy</h2>
 <p id="installAppHelp">In Chrome or Edge, open the browser menu and choose “Install Speechy” or “Apps → Install this site as an app.” On iPad or iPhone, use Safari’s Share menu → Add to Home Screen.</p>
 <p id="offlineAppStatus" role="status">Preparing offline access…</p>
-<p>Your phrases and settings stay in this browser on this device. Use Export to keep a backup. Offline speech requires a voice installed on your device; linked GIFs may need internet.</p>
+<p>Your phrases and settings stay in this browser on this device. Offline speech requires a voice installed on your device; linked GIFs may need internet.</p>
 <button id="installAppConfirm" class="tbtn" type="button" hidden style="min-height:44px">Install Speechy</button>
 <form method="dialog"><button class="tbtn" style="min-height:44px">Close</button></form>
 </dialog>
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
