@@ -858,6 +858,7 @@
     background:#1C68CB;transform-origin:left center;
     animation:dwell-progress var(--dwell-ms,1500ms) linear forwards;
   }
+  html[data-dwell-enabled="true"] button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
   @keyframes dwell-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
   [data-theme="dark"] .toolbar .dwell-toggle[aria-pressed="true"]{
     background:#264B88;color:#fff;border-color:#99B7FF;
@@ -917,7 +918,7 @@
     <button class="tbtn" id="styleBtn">Show all phrases</button>
     <span class="tsep"></span>
     <button class="tbtn" id="setBtn">Voice</button>
-    <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by resting the mouse or eye-tracking pointer over them">Dwell: Off</button>
+    <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by hovering a pointer or touching and holding">Dwell: Off</button>
     <span class="tsep"></span>
     <button class="tbtn" id="installAppBtn" type="button" aria-haspopup="dialog">Install app</button>
     <button class="tbtn" id="fsBtn">Full screen</button>
@@ -998,6 +999,7 @@
 <div class="overlay" id="bigOverlay" role="dialog" aria-label="Displayed message">
   <div class="fit"><span id="bigText"></span></div>
   <div class="hint">Tap anywhere to close</div>
+  <button type="button" class="gif-close" id="bigClose">Close message</button>
 </div>
 
 <!-- Full-screen animated GIF viewer -->
@@ -1016,6 +1018,7 @@
     <p id="cardText"></p>
     <p class="small">Tap anywhere to close. Change this card under Voice.</p>
   </div>
+  <button type="button" class="gif-close" id="cardClose">Close card</button>
 </div>
 
 <!-- sentence options sheet -->
@@ -1094,7 +1097,8 @@
     <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
     <label for="dwellDuration">Dwell to tap delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
     <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
-    <p class="note">Turn on <strong>Dwell: On</strong> in the top toolbar. Rest a mouse or eye-tracking pointer over a button until the progress bar fills to activate it without clicking. Moving away cancels it. Touch still uses normal taps; keyboard activation continues to work.</p>
+    <p class="note">Turn on <strong>Dwell: On</strong> in the toolbar. Hover a mouse or trackpad pointer over a button, or touch and hold a button with a finger or Pencil until its bar fills. A short tap still works normally. Moving to scroll cancels a hold.</p>
+    <p class="note">Using iPad Eye Tracking? In iPad Settings, open Accessibility → Eye Tracking and use its Dwell Control. Leave Speechy’s Dwell off when iPadOS is doing the tapping. <a href="https://support.apple.com/guide/ipad/ipad2cd35723/ipados" target="_blank" rel="noopener">Apple’s Eye Tracking guide</a></p>
     <p class="note" style="margin-top:4px">Uses fewer columns and larger targets. In All phrases, the Button size slider also adjusts their scale. This setting stays on this device.</p>
     <label for="cardEdit">Card for handing to someone</label>
     <textarea id="cardEdit"></textarea>
@@ -2560,13 +2564,15 @@ document.getElementById('classicSizeReset').addEventListener('click', () => {
 
 
 /* ------------------------------------------------------ dwell-to-tap access
-   Pointer dwell activates the same click handlers used by manual taps.
-   It deliberately avoids repeating a click while the pointer remains in place.
-   Touch taps and keyboard operation are unaffected. */
+   Hover pointers and touch/pen holds share the same dwell timer. A held touch
+   fires once; its later native click is consumed even if the button re-renders. */
 let dwellTimer = null;
 let dwellTarget = null;
 let dwellBlocked = null;
 let dwellPointer = {x:0,y:0};
+let dwellTouch = null;
+let dwellIgnoreMouseUntil = 0;
+let dwellReleaseClick = null;
 
 function applyDwellSettings(){
   const duration = Number(settings.dwellMs);
@@ -2575,13 +2581,14 @@ function applyDwellSettings(){
     : 1500;
   settings.dwellEnabled = settings.dwellEnabled === true;
   document.documentElement.style.setProperty('--dwell-ms', settings.dwellMs + 'ms');
+  document.documentElement.setAttribute('data-dwell-enabled', String(settings.dwellEnabled));
   const button = document.getElementById('dwellToggle');
   button.setAttribute('aria-pressed', String(settings.dwellEnabled));
   button.textContent = settings.dwellEnabled ? 'Dwell: On' : 'Dwell: Off';
-  button.title = settings.dwellEnabled ? 'Turn off dwell-to-tap' : 'Turn on dwell-to-tap (mouse or gaze pointer)';
+  button.title = settings.dwellEnabled ? 'Turn off Speechy dwell' : 'Turn on dwell: hover a pointer or touch and hold';
   document.getElementById('dwellDuration').value = String(settings.dwellMs);
   document.getElementById('dwellDurationLabel').textContent = (settings.dwellMs / 1000).toFixed(1) + ' seconds';
-  if(!settings.dwellEnabled) cancelDwell();
+  if(!settings.dwellEnabled) stopDwellInput();
 }
 function cancelDwell(){
   if(dwellTimer !== null) clearTimeout(dwellTimer);
@@ -2589,19 +2596,30 @@ function cancelDwell(){
   if(dwellTarget) dwellTarget.classList.remove('dwell-charging');
   dwellTarget = null;
 }
+function cancelAllDwell(){
+  cancelDwell();
+  if(dwellTouch) dwellTouch.cancelled = true;
+}
+function stopDwellInput(){
+  cancelAllDwell();
+  if(dwellTouch) dwellReleaseClick = {x:dwellPointer.x,y:dwellPointer.y,until:Date.now()+1500};
+  dwellTouch = null;
+  dwellBlocked = null;
+}
 function dwellCandidate(element){
   if(!(element instanceof Element)) return null;
-  // The star/remove glyph is inside a phrase button. Do not accidentally speak
-  // the phrase when the pointer rests over one of these independent controls.
   if(element.closest('.star-btn,.del')) return null;
   const button = element.closest('button');
   if(!button || button.disabled || !button.isConnected) return null;
-  // Keep a guaranteed conventional way to disable dwell. Reset stays manual.
-  if(button.id === 'dwellToggle' || button.id === 'resetBtn') return null;
-  if(button.closest('[hidden]') || !button.getClientRects().length) return null;
-  const openSheet = document.querySelector('.sheet.open');
-  if(openSheet && !openSheet.contains(button)) return null;
-  if(document.querySelector('.overlay.open')) return null;
+  // Keep pause and destructive board recovery actions under direct control.
+  if(['dwellToggle','resetBtn','backupPrevious'].includes(button.id)) return null;
+  if(button.closest('[hidden],[inert]') || !button.getClientRects().length) return null;
+  const dialog = [...document.querySelectorAll('dialog[open]')].at(-1);
+  if(dialog) return dialog.contains(button) ? button : null;
+  const overlay = [...document.querySelectorAll('.overlay.open')].at(-1);
+  if(overlay) return overlay.contains(button) ? button : null;
+  const sheet = [...document.querySelectorAll('.sheet.open')].at(-1);
+  if(sheet && !sheet.contains(button)) return null;
   return button;
 }
 function armDwell(candidate){
@@ -2612,44 +2630,109 @@ function armDwell(candidate){
   dwellTimer = setTimeout(() => {
     const button = dwellTarget;
     const point = document.elementFromPoint(dwellPointer.x,dwellPointer.y);
-    const stillOverButton = dwellCandidate(point) === button;
+    const stillOverButton = button && dwellCandidate(point) === button;
     cancelDwell();
     if(!settings.dwellEnabled || !stillOverButton || !button.isConnected || button.disabled) return;
-    // Arming another target requires moving the pointer; prevents accidental
-    // repeat speech after the board re-renders under a stationary cursor.
+    if(dwellTouch){
+      if(dwellTouch.cancelled || dwellTouch.fired) return;
+      dwellTouch.fired = true;
+      dwellReleaseClick = {x:dwellPointer.x,y:dwellPointer.y,until:Date.now()+2000};
+    }
     dwellBlocked = {x:dwellPointer.x,y:dwellPointer.y,target:button};
     button.click();
   },settings.dwellMs);
 }
-document.addEventListener('pointerover',event => {
-  if(!settings.dwellEnabled || event.pointerType === 'touch') return;
+function dwellHover(event){
+  if(!settings.dwellEnabled || dwellTouch || event.pointerType === 'touch' ||
+     Date.now() < dwellIgnoreMouseUntil || event.sourceCapabilities?.firesTouchEvents) return;
+  if(event.buttons){ cancelDwell(); return; }
   dwellPointer = {x:event.clientX,y:event.clientY};
-  const candidate = dwellCandidate(event.target);
-  if(!candidate){ cancelDwell(); return; }
-  if(candidate !== dwellTarget) armDwell(candidate);
-},true);
-document.addEventListener('pointerout',event => {
-  if(!dwellTarget) return;
-  if(dwellTarget.contains(event.target) &&
-     (!event.relatedTarget || !dwellTarget.contains(event.relatedTarget))) cancelDwell();
-},true);
-document.addEventListener('pointermove',event => {
-  if(!settings.dwellEnabled || event.pointerType === 'touch') return;
-  dwellPointer = {x:event.clientX,y:event.clientY};
-  const candidate = dwellCandidate(event.target);
-  if(dwellBlocked && Math.hypot(event.clientX-dwellBlocked.x,event.clientY-dwellBlocked.y) >= 24 &&
+  const point = document.elementFromPoint(event.clientX,event.clientY);
+  const candidate = dwellCandidate(point || event.target);
+  // iPad Safari can deliver a boundary event without a pointermove. Both paths
+  // must release the one-shot guard after the user deliberately moves away.
+  if(dwellBlocked && Math.hypot(event.clientX-dwellBlocked.x,event.clientY-dwellBlocked.y) >= 8 &&
      candidate !== dwellBlocked.target) dwellBlocked = null;
   if(!candidate){ cancelDwell(); return; }
-  if(candidate !== dwellTarget) armDwell(candidate);
+  armDwell(candidate);
+}
+function dwellOut(event){
+  if(dwellTouch || !dwellTarget) return;
+  if(dwellTarget.contains(event.target) &&
+     (!event.relatedTarget || !dwellTarget.contains(event.relatedTarget))) cancelDwell();
+}
+for(const type of ['pointerover','mouseover']) document.addEventListener(type,dwellHover,true);
+for(const type of ['pointerout','mouseout']) document.addEventListener(type,dwellOut,true);
+document.addEventListener('mousemove',dwellHover,true);
+document.addEventListener('pointermove',event => {
+  if(dwellTouch && event.pointerId === dwellTouch.id){
+    dwellPointer = {x:event.clientX,y:event.clientY};
+    const moved = Math.hypot(event.clientX-dwellTouch.x,event.clientY-dwellTouch.y);
+    const candidate = dwellCandidate(document.elementFromPoint(event.clientX,event.clientY));
+    if(moved > 18 || (!dwellTouch.fired && candidate !== dwellTouch.target)) cancelAllDwell();
+    return;
+  }
+  dwellHover(event);
 },true);
 document.addEventListener('pointerdown',event => {
+  dwellReleaseClick = null;
   cancelDwell();
-  if(settings.dwellEnabled && event.pointerType !== 'touch')
-    dwellBlocked = {x:event.clientX,y:event.clientY,target:dwellCandidate(event.target)};
+  if(event.pointerType === 'touch' || event.pointerType === 'pen'){
+    dwellIgnoreMouseUntil = Date.now()+1000;
+    if(dwellTouch || event.isPrimary === false){ cancelAllDwell(); return; }
+    if(!settings.dwellEnabled) return;
+    const candidate = dwellCandidate(event.target);
+    if(!candidate) return;
+    dwellBlocked = null;
+    dwellPointer = {x:event.clientX,y:event.clientY};
+    dwellTouch = {id:event.pointerId,x:event.clientX,y:event.clientY,target:candidate,fired:false,cancelled:false};
+    armDwell(candidate);
+    return;
+  }
+  if(settings.dwellEnabled) dwellBlocked = {x:event.clientX,y:event.clientY,target:dwellCandidate(event.target)};
 },true);
-document.addEventListener('scroll',cancelDwell,true);
-document.addEventListener('visibilitychange',() => { if(document.hidden) cancelDwell(); });
-window.addEventListener('blur',cancelDwell);
+// Some iPad Safari mouse sequences omit pointerdown after a touch. Cancel a
+// pending hover on mousedown as well, without intercepting the normal click.
+document.addEventListener('mousedown',event => {
+  if(dwellTouch || Date.now() < dwellIgnoreMouseUntil || event.sourceCapabilities?.firesTouchEvents) return;
+  cancelDwell();
+  if(settings.dwellEnabled) dwellBlocked={x:event.clientX,y:event.clientY,target:dwellCandidate(event.target)};
+},true);
+function endDwellTouch(event){
+  if(event.pointerType === 'touch' || event.pointerType === 'pen') dwellIgnoreMouseUntil = Date.now()+1000;
+  if(!dwellTouch || event.pointerId !== dwellTouch.id) return;
+  const touch = dwellTouch;
+  cancelDwell();
+  if(touch.fired || touch.cancelled || event.type === 'pointercancel'){
+    dwellReleaseClick = {x:event.clientX,y:event.clientY,until:Date.now()+1500};
+  }
+  dwellTouch = null;
+}
+document.addEventListener('pointerup',endDwellTouch,true);
+document.addEventListener('pointercancel',endDwellTouch,true);
+// Safari may call the compatibility click a mouse click after a touch. Match the
+// completed gesture by position/time instead of relying on click.pointerType.
+document.addEventListener('click',event => {
+  if(!event.isTrusted || event.detail === 0 || !dwellReleaseClick) return;
+  const samePlace = Math.hypot(event.clientX-dwellReleaseClick.x,event.clientY-dwellReleaseClick.y) <= 32;
+  if(Date.now() <= dwellReleaseClick.until && samePlace){
+    dwellReleaseClick = null;
+    event.preventDefault();event.stopImmediatePropagation();
+  }
+},true);
+document.addEventListener('contextmenu',event => {
+  if(settings.dwellEnabled && dwellCandidate(event.target)) event.preventDefault();
+},true);
+document.addEventListener('scroll',cancelAllDwell,true);
+document.addEventListener('visibilitychange',() => { if(document.hidden) stopDwellInput(); });
+window.addEventListener('blur',stopDwellInput);
+document.addEventListener('keydown',event => {
+  if(['Enter',' ','Escape'].includes(event.key)){
+    const target=dwellTarget;
+    cancelAllDwell();
+    if(target) dwellBlocked={x:dwellPointer.x,y:dwellPointer.y,target};
+  }
+},true);
 document.getElementById('dwellToggle').addEventListener('click',() => {
   settings.dwellEnabled = !settings.dwellEnabled;
   dwellBlocked = null;
@@ -2658,7 +2741,7 @@ document.getElementById('dwellToggle').addEventListener('click',() => {
 });
 document.getElementById('dwellDuration').addEventListener('input',event => {
   settings.dwellMs = Number(event.target.value);
-  cancelDwell();
+  cancelAllDwell();
   applyDwellSettings();
   save();
 });
@@ -2766,6 +2849,7 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 
 
 
