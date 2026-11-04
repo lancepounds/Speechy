@@ -1,6 +1,6 @@
-const CACHE = 'speechy-shell-v2';
+const CACHE = 'speechy-shell-v3';
 const BASE = new URL('./', self.location.href);
-const SHELL = ['./','./index.html','./train-talk.html','./pwa.js','./storage.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'].map(path => new URL(path, BASE).href);
+const SHELL = ['./','./index.html','./train-talk.html','./pwa.js','./storage.js','./backup.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'].map(path => new URL(path, BASE).href);
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(url => new Request(url, {cache:'reload'})))));
 });
@@ -30,3 +30,4 @@ self.addEventListener('fetch', event => {
     }
   })());
 });
+
