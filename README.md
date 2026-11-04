@@ -8,7 +8,7 @@ Speechy is a personal prototype, not a standardized AAC assessment or a clinical
 
 ## Animated GIFs for phrases
 
-Speechy can now display an animated GIF along with a saved phrase, in both **Old Style** and **Nested Style**, including on iPad.
+Speechy can now display an animated GIF along with a saved phrase, in both **All phrases** and **Grouped phrases**, including on iPad.
 
 1. Tap **GIFs** in the toolbar.
 2. Choose a **Topic** and **Phrase**.
@@ -19,13 +19,26 @@ The phrase button gets a small **GIF** label. When you tap it in **Tap speaks** 
 
 You can replace or remove a phrase's GIF through **GIFs** at any time. The link is saved alongside other board settings using the current storage backend, so the GIF must remain available online to play. This first version accepts direct online image URLs rather than local GIF uploads.
 
+## Choose a phrase layout
+
+- **All phrases** shows every phrase in the selected topic at once. Use it for
+  direct access without opening smaller groups.
+- **Grouped phrases** shows smaller groups first. Open a group, then choose a
+  phrase; fewer phrase buttons appear at one time.
+
+Both choices have a short explanation on their buttons and a visible selected
+state. The toolbar shortcut switches between them. Both layouts work with
+**Tap speaks** and **Tap builds**. Layout choice changes how phrases are shown;
+it does not change the saved phrases or the tapping mode. Existing layout
+preferences remain compatible.
+
 ## Five-minute SLP demonstration
 
 Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors through the following workflow:
 
 1. **Immediate communication:** Select **Quick answers**, open a topic, and tap a complete phrase. The device speaks it aloud.
 2. **Message composition:** Select **Tap builds**, combine phrases and the **Add on** category, and use **Say it**.
-3. **Navigation and efficiency:** Preview a topic without opening it, use **☆ Star** after speaking a phrase, and visit **★ Starred** or **Used most**. Switch between **Nested style** and **Old style**.
+3. **Navigation and efficiency:** Preview a topic without opening it, use **☆ Star** after speaking a phrase, and visit **★ Starred** or **Used most**. Switch between **Grouped phrases** and **All phrases**.
 4. **Communication alternatives:** Use **Show big** for large-text communication, or **Card** to show a customizable introduction to another person.
 5. **Personalization and motor access:** Open **Voice** to select an available device voice, change speaking speed, and turn on **Larger buttons (motor access)**. Use **Organize** to add or remove phrase tiles.
 
@@ -33,7 +46,7 @@ Use **■ Stop voice** to interrupt speech at any point. The entire demo works w
 
 ## Topic row: show, hide, pin, or unpin
 
-**At the top of Speechy, next to its name in the main toolbar**, are the clearly labeled **Hide topics / Show topics** controls and, on smaller screens, **Pin topics / Unpin topics**. They stay visible even when all topic navigation is hidden. The Old Style / Nested style switch remains immediately below **Tap speaks / Tap builds**.
+**At the top of Speechy, next to its name in the main toolbar**, are the clearly labeled **Hide topics / Show topics** controls and, on smaller screens, **Pin topics / Unpin topics**. They stay visible even when all topic navigation is hidden. The **All phrases / Grouped phrases** choices remain immediately below **Tap speaks / Tap builds**.
 
 - **Hide topics** collapses the entire horizontal topic row, giving the phrase editor more space. **Show topics** restores it without changing the selected category or any saved phrases.
 - **Unpin row** allows the topic row to scroll away when you browse phrases. **Pin row** makes it stay immediately below the message composer while scrolling.
@@ -41,23 +54,23 @@ Use **■ Stop voice** to interrupt speech at any point. The entire demo works w
 - On wide desktop screens, where categories appear in the left sidebar instead of a horizontal row, **Hide topics** collapses that sidebar to widen the workspace. Pinning applies to the horizontal topic row.
 - Both choices are remembered in this browser with the existing Speechy settings. New users keep the original behavior: topics visible and pinned.
 
-## Adjustable Old Style button size
+## Adjustable All phrases button size
 
-Select **Old style** (or **Switch to Old Style**). A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
+Select **All phrases**. A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
 
 - The range is **60%–150%**; the more compact default is **80%**.
 - Use **−** and **+** beside the slider to decrease or increase button size by exactly **5%** per tap. These controls and the slider always stay synchronized; the controls disable automatically at 60% and 150%.
 - Slider changes update the visible board immediately without interrupting speech or changing any phrases.
 - **Reset size** returns the board to 80%.
 - The chosen size is saved locally with the existing Speechy preferences and is restored when you reopen the page.
-- This control applies only to Old Style; the Nested style stays unchanged.
+- This control applies only to All phrases; the Grouped phrases stays unchanged.
 - The **Larger buttons (motor access)** preference under Voice remains available and works together with this control.
 
 ## Compact phrase buttons
 
-Phrase buttons now use less vertical padding and a smaller minimum height, especially in **Old Style**. The layout keeps phrase text visible and allows longer messages to wrap instead of clipping them. On wider screens, longer Old Style phrases use up to two grid columns rather than automatically occupying an entire row.
+Phrase buttons now use less vertical padding and a smaller minimum height, especially in **All phrases**. The layout keeps phrase text visible and allows longer messages to wrap instead of clipping them. On wider screens, longer All phrases phrases use up to two grid columns rather than automatically occupying an entire row.
 
-The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Nested-style spoken phrase choices also have less unused padding without changing the topic buttons.
+The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
 
 ## Dwell to tap (mouse or eye-tracking pointer)
 
@@ -150,7 +163,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v6` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v7` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -183,5 +196,6 @@ recovery, window conflicts, a mobile dialog and offline reopening. Set
 
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
 
 
