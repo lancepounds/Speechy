@@ -119,6 +119,8 @@
     border:1px solid #919B9C;border-bottom-color:#919B9C;
   }
   .mode + .mode{border-left:none}
+  .mode .mode-hint{display:block;margin-top:3px;font-size:12px;font-weight:normal;line-height:1.3}
+  .mode-help{margin:0 0 10px;font-size:14px;line-height:1.4;color:var(--ink)}
   .mode[aria-pressed="true"]{
     background:#fff;font-weight:bold;box-shadow:inset 0 3px 0 #FFC83C;border-bottom-color:#fff;
   }
@@ -1009,12 +1011,19 @@
     <div class="content">
       <div class="stage" id="stage">
         <div class="said">
-          <div class="modebar" role="group" aria-label="What tapping a tile does">
-            <button id="modeSpeak" class="mode" aria-pressed="true">Tap speaks</button>
-            <button id="modeBuild" class="mode" aria-pressed="false">Tap builds</button>
+          <div class="modebar" role="group" aria-label="Choose how phrase buttons work">
+            <button id="modeSpeak" class="mode" aria-pressed="true" aria-labelledby="modeSpeakLabel" aria-describedby="modeSpeakHint">
+              <span id="modeSpeakLabel">Tap speaks</span>
+              <span class="mode-hint" id="modeSpeakHint">Speak each phrase now</span>
+            </button>
+            <button id="modeBuild" class="mode" aria-pressed="false" aria-labelledby="modeBuildLabel" aria-describedby="modeBuildHint">
+              <span id="modeBuildLabel">Tap builds</span>
+              <span class="mode-hint" id="modeBuildHint">Combine phrases, then speak</span>
+            </button>
           </div>
           <button id="styleSwitchMain" class="act style-switch" title="Switch phrase layout">Old style</button>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
+          <div class="mode-help" id="modeHelp" role="status" aria-live="polite" aria-atomic="true">Tap a phrase to hear it immediately. Say again repeats the last phrase.</div>
           <div class="actions speak-three" id="speakActions">
              <button class="act" id="sayAgain" disabled>Say again</button>
              <button class="act secondary" id="showBig" disabled>Show big</button>
@@ -1764,6 +1773,11 @@ function subtopicsFor(cat, list){
 function renderSaid(){
   const el = document.getElementById('saidText');
   const build = mode === 'build';
+  const help = document.getElementById('modeHelp');
+  const explanation = build
+    ? 'Tap phrases to add them silently. Press Say it to speak your message, or Clear to start again.'
+    : 'Tap a phrase to hear it immediately. Say again repeats the last phrase.';
+  if(help.textContent !== explanation) help.textContent = explanation;
   document.getElementById('speakActions').hidden = build;
   document.getElementById('buildActions').hidden = !build;
   document.getElementById('modeSpeak').setAttribute('aria-pressed', !build);
@@ -2866,6 +2880,7 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 
 
 
