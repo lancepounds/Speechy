@@ -72,16 +72,32 @@ Phrase buttons now use less vertical padding and a smaller minimum height, espec
 
 The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
 
-## Dwell to tap (mouse or eye-tracking pointer)
+## Dwell to tap on pointer and touch devices
 
-Use the **Dwell: Off / Dwell: On** toggle in Speechy's main toolbar. When enabled, hold the pointer over a speech or navigation button until its progress bar fills; it activates the same action as a click, without physically clicking.
+Turn **Dwell: On** in the toolbar. With a mouse or trackpad, rest the pointer on
+an eligible button until the progress bar fills. On a touch screen, hold a finger
+or Pencil on the button. Short taps and keyboard activation continue normally.
 
-- Default is **Off**, so existing clicking, tapping, and keyboard use are unchanged.
-- The delay defaults to **1.5 seconds**. Under **Voice**, adjust **Dwell to tap delay** from **0.8 to 3.0 seconds**.
-- Moving away from a button before the delay expires cancels that selection. After an activation, move deliberately to another button before another dwell selection can begin, preventing accidental repeat speech when the board re-renders.
-- **Dwell: Off** can always be clicked normally. The destructive **Reset board** action is deliberately excluded from dwell activation.
-- Dwell is intended for mouse-compatible pointers, including assistive pointing devices that emulate a mouse. Touch continues to use regular taps. It is **not a built-in camera eye-tracking system** and has not been clinically validated.
-- The on/off preference and delay are saved with other board settings on this device; phrase data is unchanged.
+- Under **Voice**, choose a delay from **0.8 to 3.0 seconds**; the default is
+  **1.5 seconds**. The preference is saved on this device.
+- Touch holds activate once. Releasing after activation does not select the
+  button a second time, even if the board re-renders underneath the finger.
+- Moving away, starting a scroll, pointer cancellation, a second touch, or
+  leaving the app cancels a pending hold. Panning and pinch zoom remain available.
+- Hover supports both pointer and mouse events, including Safari boundary events.
+  Move deliberately away after activation to rearm; a stationary pointer cannot
+  repeatedly select newly rendered buttons underneath it.
+- Open overlays and dialogs limit dwell to their visible controls. The dwell
+  toggle, board reset, previous-save restore and phrase star/remove glyphs use
+  direct activation.
+- **iPad Eye Tracking and AssistiveTouch Dwell Control:** let iPadOS generate
+  the tap and leave Speechy's own Dwell off to avoid two timers. Set up Eye
+  Tracking under iPad Settings → Accessibility → Eye Tracking on a supported
+  model; see [Apple's guide](https://support.apple.com/guide/ipad/ipad2cd35723/ipados).
+  Speechy's setting does not turn on iPadOS Eye Tracking.
+
+Browser tests cover pointer and emulated touch sequences. Real iPad/Pencil,
+installed-voice playback and Eye Tracking still require testing on the device.
 
 ## Design principles
 
@@ -163,7 +179,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v7` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v8` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -183,6 +199,7 @@ npm ci
 npm test
 npx playwright install chromium
 npm run test:browser
+npm run test:dwell
 ```
 
 Storage tests use fake-indexeddb's transaction implementation, including aborted
@@ -194,8 +211,12 @@ backup and restore, quota/transaction failures and the Retry UI, previous-save
 recovery, window conflicts, a mobile dialog and offline reopening. Set
 `CHROMIUM_EXECUTABLE_PATH` to use an existing Chromium executable if needed.
 
+The dwell browser checks use trusted touch sequences, pointer/mouse fallback
+events, cancellation, one-shot holds, modal controls and both phrase layouts.
+
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
 
 
 
