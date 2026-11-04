@@ -41,16 +41,6 @@ Use **■ Stop voice** to interrupt speech at any point. The entire demo works w
 - On wide desktop screens, where categories appear in the left sidebar instead of a horizontal row, **Hide topics** collapses that sidebar to widen the workspace. Pinning applies to the horizontal topic row.
 - Both choices are remembered in this browser with the existing Speechy settings. New users keep the original behavior: topics visible and pinned.
 
-## Adjustable topic width
-
-Click **Topic size** in the permanent top toolbar, next to the **Hide topics** and **Pin topics** controls. Choose **Compact**, **Standard**, or **Large**, or move the width slider to fine-tune the category navigation. Press **Done** or **Escape** to close the controls.
-
-- On desktop (980px and wider), the control resizes the left category sidebar from **140 to 300 pixels**. Standard is **200px**, preserving the previous default.
-- On smaller screens, it resizes the horizontal topic tabs (roughly **90–195px**) while keeping them horizontally scrollable and allowing long topic names to wrap instead of clipping.
-- Presets are **Compact (140px)**, **Standard (200px)**, and **Large (280px)**. A custom slider value is also supported.
-- Changes take effect immediately and are saved with the existing Speechy preferences, including after a reload. The size is independent of the **Old Style** phrase-button sizing slider and the **Larger buttons** access preference.
-- **Hide topics / Show topics** continues to collapse or restore navigation; **Pin / Unpin** continues to control the horizontal topic row.
-
 ## Adjustable Old Style button size
 
 Select **Old style** (or **Switch to Old Style**). A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
@@ -160,7 +150,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v5` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v6` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -193,4 +183,5 @@ recovery, window conflicts, a mobile dialog and offline reopening. Set
 
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
 
