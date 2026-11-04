@@ -19,37 +19,6 @@ The phrase button gets a small **GIF** label. When you tap it in **Tap speaks** 
 
 You can replace or remove a phrase's GIF through **GIFs** at any time. The link is saved alongside other board settings using the current storage backend, so the GIF must remain available online to play. This first version accepts direct online image URLs rather than local GIF uploads.
 
-## Train Talk — a simple train-themed communication page
-
-Open **[🚂 Train Talk](https://lancepounds.github.io/Speechy/train-talk.html)** for a child-friendly communication page to share with family and caregivers. The page is separate from Speechy's more detailed adult phrase board so there are fewer distractions. A **Train Talk** shortcut in Speechy's top toolbar also opens it.
-
-The page contains **16 large, readable, tappable choices** across four small sections:
-
-- **My answers:** Yes, No, Help, Stop
-- **How I feel:** Happy, Sad, Too loud, Break
-- **With you:** Love you, Hug?, No hug, Play?
-- **Train time:** Trains!, Look!, More, All done
-
-Each button shows a short label with an icon and says a plain-language phrase aloud using the browser's speech engine. The chosen phrase stays visible for showing to someone even if audio is unavailable. **Say again** repeats it and **Stop voice** stops speech. It works with ordinary touch, mouse clicks, and keyboard activation; it has no account, advertising, data collection, flashing animations, or automatic playback.
-
-The choices support **self-directed communication**, including communicating preferences and boundaries. Children should be free to say no, decline physical contact, or ask for a break. It is a flexible communication aid, not an autism therapy or a substitute for a personalized AAC assessment.
-
-## MMI technology visit board
-
-Open **[MMI Tech Visit](https://lancepounds.github.io/Speechy/?v=20261014-mmi-tech-visit#mmi)** to prepare for a technology visit to the **Munroe-Meyer Institute (MMI)** in Omaha. It includes **66 ready-to-speak phrases** in seven groups:
-
-1. Getting started
-2. Controls and accessibility
-3. Communication and AAC
-4. Games, VR and making things
-5. What I think of it
-6. Questions for the team
-7. Breaks and wrapping up
-
-**Old Style** shows group headings with phrase buttons; **Nested Style** presents each group as a topic that opens to its phrases. The board also works with search, favorites, voice output, Dwell to Tap, and saved custom phrases. Use **Organize** to add personal questions or remove phrases you do not need. The visit board does not modify other categories.
-
-Questions about eye tracking, switch scanning, accessible gaming, VR, and maker technology are included as possibilities, not assertions that particular devices will be available at the visit. Existing Quick answers remain available for immediate Yes/No and other brief responses.
-
 ## Five-minute SLP demonstration
 
 Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors through the following workflow:
@@ -188,10 +157,10 @@ Previous GIF blobs are retained for recovery, so removing a GIF does not
 immediately reclaim its space.
 
 Open Speechy online once and wait for offline readiness in Install app. The
-service worker caches the phraseboard, Train Talk, local scripts, manifest and
+service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v3` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v4` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -224,3 +193,4 @@ recovery, window conflicts, a mobile dialog and offline reopening. Set
 
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
