@@ -958,11 +958,20 @@
 .phrase-edit-controls button{font:inherit;font-size:13px;min-width:38px;min-height:36px;padding:5px 8px;border:1px solid #777;border-radius:5px;background:#fff;color:#111;cursor:pointer}
 .tile:has(.phrase-edit-controls){height:auto;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 @media(max-width:480px){.tile.phrase-large{grid-column:span 2}.phrase-edit-controls button{min-width:34px}}
+  .saving-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;padding:calc(2px + env(safe-area-inset-top)) 12px 2px;flex-shrink:0;background:var(--face);border-bottom:1px solid var(--face-dk);font-size:13px}
+  .saving-bar button,.backup-actions button{min-height:44px;padding:8px 12px;background:var(--btn);color:var(--ink);border:1px solid var(--edge);border-radius:4px;font:inherit}
+  [data-failed="true"]{font-weight:bold;text-decoration:underline}
+  #backupDialog{width:calc(100% - 24px);max-width:540px;max-height:90dvh;overflow:auto;background:var(--face);color:var(--ink);border:2px solid var(--edge);padding:18px;font:inherit}
+  #backupDialog::backdrop{background:rgba(0,0,0,.5)}
+  .backup-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  #backupDialog input{max-width:100%;font:inherit}
+  #backupDialog input[type="file"]::file-selector-button{min-height:44px;padding:8px 10px;font:inherit}
+  .toolbar{padding-top:2px}
 </style>
 </head>
 <body>
 <div class="window" id="app" inert>
-<p id="saveStatus" role="status" aria-live="polite" style="margin:0;padding:6px 12px;flex-shrink:0">Opening saved board…</p>
+<div class="saving-bar"><span id="saveStatus" role="status" aria-live="polite">Opening saved board…</span><button id="backupOpen" type="button" aria-haspopup="dialog">Saving &amp; backups</button></div>
 
   <div class="toolbar">
     <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
@@ -1186,7 +1195,23 @@
   </div>
 </div>
 
+<dialog id="backupDialog" aria-labelledby="backupTitle">
+  <h2 id="backupTitle">Saving &amp; backups</h2>
+  <p id="backupSaveStatus" role="status">Opening saved board…</p>
+  <p>Your board saves on this device. Download a backup to keep a separate copy of your phrases, settings, favorites and uploaded GIFs.</p>
+  <div class="backup-actions">
+    <button id="backupDownload" type="button">Download backup</button>
+    <button id="backupRetry" type="button">Retry save</button>
+    <button id="backupPrevious" type="button">Restore previous save</button>
+  </div>
+  <label for="backupFile">Restore a backup file</label>
+  <input id="backupFile" type="file" accept=".json,application/json">
+  <p id="backupMessage" role="status" aria-live="polite"></p>
+  <p>Keep the downloaded file in Files or another safe place. Clearing browser data or removing the app can remove the copies stored on this device. Linked GIFs still need their original websites.</p>
+  <form method="dialog" class="backup-actions"><button id="backupClose">Close</button></form>
+</dialog>
 <script src="./storage.js"></script>
+<script src="./backup.js"></script>
 <script>
 /* ------------------------------------------------------------------ data */
 const CATS = [
@@ -1800,8 +1825,10 @@ function editPhrase(cat,old){
 let custom = {};      // {catId: [phrases]}
 let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
-let starred = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
-let settings = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, topicWidth:200, dwellEnabled:false, dwellMs:1500};
+const DEFAULT_STARRED = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
+let starred = [...DEFAULT_STARRED];
+const DEFAULT_SETTINGS = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, topicWidth:200, dwellEnabled:false, dwellMs:1500};
+let settings = {...DEFAULT_SETTINGS};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
 let radialPage = {};
 let activeSubtopic = {};
@@ -1813,20 +1840,34 @@ let addTarget = null;
 let gifs = {}; // { phrase text: direct GIF URL }
 let gifPreviousFocus = null;
 let gifUploads = {}; // {phrase: IndexedDB key}
-const gifDbPromise = new Promise(resolve=>{
-  if(!window.indexedDB){resolve(null);return;}
-  const request=indexedDB.open('speechy-gifs',1);
-  const timer=setTimeout(()=>resolve(null),4000);
-  request.onupgradeneeded=()=>request.result.createObjectStore('images');
-  request.onsuccess=()=>{clearTimeout(timer);resolve(request.result);};
-  request.onerror=()=>{clearTimeout(timer);resolve(null);};
-});
+let gifDatabase = null, gifOpening = null;
+async function openGifDatabase(){
+  if(gifDatabase)return gifDatabase;
+  if(gifOpening)return gifOpening;
+  gifOpening=new Promise((resolve,reject)=>{
+    if(!window.indexedDB){reject(Error('Local GIF storage unavailable'));return;}
+    const request=indexedDB.open('speechy-gifs',1);let expired=false;
+    const timer=setTimeout(()=>{expired=true;reject(Error('GIF storage is busy. Retry saving.'));},4000);
+    request.onupgradeneeded=()=>request.result.createObjectStore('images');
+    request.onsuccess=()=>{
+      if(expired){request.result.close();return;}
+      clearTimeout(timer);gifDatabase=request.result;
+      const connection=gifDatabase;
+      connection.onversionchange=()=>{connection.close();if(gifDatabase===connection)gifDatabase=null;};
+      connection.onclose=()=>{if(gifDatabase===connection)gifDatabase=null;};
+      resolve(gifDatabase);
+    };
+    request.onerror=()=>{clearTimeout(timer);reject(request.error);};
+  }).finally(()=>{gifOpening=null;});
+  return gifOpening;
+}
 async function gifStore(action,key,value){
-  const db=await gifDbPromise;if(!db)throw Error('Local GIF storage unavailable');
+  const db=await openGifDatabase();
   return new Promise((resolve,reject)=>{
     const tx=db.transaction('images',action==='get'?'readonly':'readwrite');
     const req=tx.objectStore('images')[action](...(action==='put'?[value,key]:[key]));
-    tx.oncomplete=()=>resolve(req.result);tx.onerror=tx.onabort=()=>reject(tx.error || Error('GIF transaction aborted'));
+    tx.oncomplete=()=>resolve(req.result);
+    tx.onerror=tx.onabort=()=>reject(tx.error || Error('GIF transaction aborted'));
   });
 }
 async function gifLocalUrl(phrase){
@@ -1850,7 +1891,6 @@ function addGifMarker(button){
 /* ------------------------------------------------------------- storage */
 // Read saved state before enabling editing; never overwrite an unreadable board.
 let boardLoaded = false;
-async function initBackend() {}
 
 function apply(raw){
   if(!raw) return;
@@ -1858,25 +1898,90 @@ function apply(raw){
   phraseOrder = raw.phraseOrder || {}; phraseSizes = raw.phraseSizes || {};
   gifs = raw.gifs && typeof raw.gifs==='object' && !Array.isArray(raw.gifs) ? raw.gifs : {};
   gifUploads = raw.gifUploads && typeof raw.gifUploads==='object' ? raw.gifUploads : {};
-  counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set([...raw.starred, "How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"])] : starred; settings = Object.assign(settings, raw.settings || {});
+  counts = raw.counts || {}; starred = Array.isArray(raw.starred) ? [...new Set(raw.starred)] : [...DEFAULT_STARRED]; settings = Object.assign({}, DEFAULT_SETTINGS, raw.settings || {});
   // the saved card still carries the old "injury" wording unless he edited it himself
-  let changed = false;
-  if(settings.card === CARD_OLD){ settings.card = CARD_DEFAULT; changed = true; }
-  RETIRED_PHRASES.forEach(p=>{ if(counts[p] !== undefined){ delete counts[p]; changed = true; } });
-  if(changed) save();
+  if(settings.card === CARD_OLD) settings.card = CARD_DEFAULT;
+  RETIRED_PHRASES.forEach(p=>{ delete counts[p]; });
+  // Changes will be included with the next explicit save; opening a board never writes defaults.
 }
 
 async function load(){
   try {
     const raw = await SpeechyStorage.load();
     boardLoaded = true;
-    if(raw) { apply(raw); await save(); }
-  } catch(error) { console.error('Could not open saved board', error); }
+    if(raw) apply(raw);
+    return true;
+  } catch(error) { boardLoaded=false; console.error('Could not open saved board', error); return false; }
 }
 function save(){
-  if(!boardLoaded) return Promise.resolve(false);
-  return SpeechyStorage.save({custom, removed, counts, starred, settings, gifs, gifUploads, phraseOrder, phraseSizes});
+  return SpeechyStorage.save(boardSnapshot());
 }
+
+function boardSnapshot(){
+  return JSON.parse(JSON.stringify({custom, removed, counts, starred, settings, gifs, gifUploads, phraseOrder, phraseSizes}));
+}
+function refreshBoard(){
+  applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
+  renderRail(); renderGrid(); renderSaid(); measure();
+  if(window.speechSynthesis) loadVoices();
+}
+const backupDialog=document.getElementById('backupDialog');
+const backupMessage=document.getElementById('backupMessage');
+const backupControls=['backupDownload','backupRetry','backupPrevious','backupFile','backupClose'];
+let backupBusy=false;
+async function backupAction(action){
+  if(backupBusy)return;
+  backupBusy=true;
+  backupControls.forEach(id=>document.getElementById(id).disabled=true);
+  try { await action(); }
+  catch(error){backupMessage.textContent=error.message || 'Could not complete the backup. Your current board is still available.';}
+  finally {backupBusy=false;backupControls.forEach(id=>document.getElementById(id).disabled=false);}
+}
+backupDialog.addEventListener('cancel',event=>{if(backupBusy)event.preventDefault();});
+document.getElementById('backupOpen').onclick=()=>{
+  document.getElementById('backupSaveStatus').textContent=document.getElementById('saveStatus').textContent;
+  backupMessage.textContent='';backupDialog.showModal();
+};
+document.getElementById('backupDownload').onclick=()=>backupAction(async()=>{
+  backupMessage.textContent='Preparing your board and uploaded GIFs…';
+  const file=await SpeechyBackup.create(boardSnapshot(),key=>gifStore('get',key));
+  const url=URL.createObjectURL(file),link=document.createElement('a');
+  link.href=url;link.download='Speechy-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+  backupMessage.textContent='Backup prepared. Save the downloaded file in Files or another safe place.';
+});
+document.getElementById('backupRetry').onclick=()=>backupAction(async()=>{
+  if(!boardLoaded){
+    if(await load()){refreshBoard();backupMessage.textContent='Your saved board was reopened.';}
+    else backupMessage.textContent='Saved data still could not be opened. Close other Speechy windows and try again.';
+  }else{
+    backupMessage.textContent=await SpeechyStorage.retry()?'Your latest changes are saved.':'Saving is still unavailable. Download a backup before closing Speechy.';
+  }
+});
+async function replaceBoard(raw, fromBackup=false){
+  apply(raw);boardLoaded=true;refreshBoard();
+  const saved=fromBackup ? await SpeechyStorage.restore(boardSnapshot()) : await save();
+  backupMessage.textContent=saved?'Board restored and saved on this device.':'Board restored in this window, but saving failed. Keep it open and download a backup.';
+}
+document.getElementById('backupPrevious').onclick=()=>backupAction(async()=>{
+  const raw=SpeechyStorage.previous();
+  if(!raw){backupMessage.textContent='There is no previous save available yet.';return;}
+  if(!SpeechyStorage.canSave()){backupMessage.textContent='Retry opening your saved data, or close other Speechy windows and reopen, before restoring.';return;}
+  if(window.confirm('Replace this board with the previous save? Your current saved board will become the recovery copy.'))await replaceBoard(raw);
+});
+document.getElementById('backupFile').onchange=event=>{
+  const file=event.target.files[0];event.target.value='';if(!file)return;
+  backupAction(async()=>{
+    const parsed=await SpeechyBackup.parse(file);
+    if(!SpeechyStorage.canRestore()){backupMessage.textContent='Another window saved changes. Download your current board and reopen Speechy before restoring.';return;}
+    const warning=boardLoaded ? 'Replace your board with this backup? Your current saved board will become the recovery copy.' : 'Replace the saved data that could not be opened with this backup?';
+    if(!window.confirm(warning))return;
+    backupMessage.textContent='Restoring uploaded GIFs…';
+    const raw=await SpeechyBackup.restore(parsed,(key,blob)=>gifStore('put',key,blob));
+    await replaceBoard(raw, true);
+  });
+};
 
 /* --------------------------------------------------------------- speech */
 let voices = [];
@@ -3111,7 +3216,6 @@ document.addEventListener('fullscreenchange', ()=>{
   applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
   renderSaid(); renderRail(); renderGrid(); measure();
   if(window.speechSynthesis) loadVoices();
-  await initBackend();
   await load();
   document.getElementById('app').inert = false;
   applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyTopicWidth(); applyDwellSettings(); updateStyleButton();
@@ -3130,4 +3234,5 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 

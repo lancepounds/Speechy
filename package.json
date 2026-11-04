@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "fake-indexeddb": "6.2.5",
+    "playwright": "1.62.1"
+  },
+  "name": "speechy",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/storage.cjs tests/backup.cjs && node tests/offline.cjs",
+    "test:browser": "node tests/browser.cjs"
+  }
+}

@@ -157,34 +157,70 @@ MIT, as specified by the hosting project's licensing terms.
 
 Speechy saves the complete board (phrases, favorites, order, sizes, GIF references,
 and settings) to IndexedDB, with an immediate localStorage recovery journal for
-edits followed by an immediate close. Existing `aac:board` saves migrate on load.
-The visible save status reports success only after a local write succeeds and
-warns when storage is unavailable or full. Unreadable saved data is not replaced
-by defaults. Uploaded GIF blobs remain in the existing `speechy-gifs` database;
-transactions must commit before the board references a new upload. Previous
-blobs are retained to protect saved references after an interrupted replacement.
+edits followed by an immediate close. Existing `aac:board` saves are read without
+writing defaults on startup and move to the new format on the next edit. Empty
+favorites stay empty when reopening the app.
+
+The **Saving & backups** button next to the save status provides:
+
+- **Retry save** to retry the latest snapshot or reopen saved data after a read
+  failure. Pending saves also retry when the app changes visibility or comes
+  back online. An unprotected edit triggers the browser's leave-page warning
+  where the browser supports it.
+- **Restore previous save** to recover the preceding version after confirmation.
+  Both localStorage and IndexedDB retain a previous copy. A damaged latest
+  record falls back to a valid saved copy instead of overwriting it with defaults.
+- **Download backup** to save a portable JSON file containing the complete board
+  and the actual uploaded GIFs. Store that file in Files or another safe location.
+- **Restore a backup file** to validate the entire file before replacing a board.
+  Uploaded GIFs are written under fresh keys and must commit before use, leaving
+  previous board references intact. Missing GIFs, malformed board data and
+  unsupported file formats are rejected. The previous saved board remains
+  available through recovery.
+
+A failed save stays visible; Speechy does not report success for memory-only
+changes. Database writes are ordered and compared against the last loaded
+version so an older window cannot silently replace a newer committed board.
+If another window saved changes, download any edits from the older window
+before reloading it. This is conflict protection, not cross-device syncing.
+Uploaded GIFs use the `speechy-gifs` database and retry opening after failures.
+Previous GIF blobs are retained for recovery, so removing a GIF does not
+immediately reclaim its space.
 
 Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, Train Talk, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v2` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v3` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
 falls back to displaying the message. Linked GIFs may need internet; uploaded
 GIFs are local. Browser data clearing, app removal, or OS storage eviction can
-still remove device data; persistent storage is requested when supported, but
-is not guaranteed. This web version requires one online load; a future native
-App Store build must bundle its assets for first-launch offline operation.
+still remove device data; the downloaded backup is the separate recovery copy.
+Persistent storage is requested when supported but is not guaranteed. This web
+version requires one online load; a future native App Store build must bundle
+its assets for first-launch offline operation.
 
-Run dependency-free regression checks with:
+## Saving regression tests
+
+The app runs without a build step. Development dependencies are only for tests:
 
 ```sh
-node tests/storage.cjs
-node tests/offline.cjs
+npm ci
+npm test
+npx playwright install chromium
+npm run test:browser
 ```
 
-These checks simulate localStorage, IndexedDB transaction completion/failures,
-and service-worker network behavior. Real iPhone/iPad restart, GIF playback,
-installed voice, and app-update tests remain necessary before App Store release.
+Storage tests use fake-indexeddb's transaction implementation, including aborted
+writes, retries, corruption recovery, immediate-close journaling, stale-window
+conflicts and legacy saves. Backup tests verify GIF byte-for-byte round trips
+and reject missing or malformed content. The browser test serves the actual app
+on localhost and checks phrase/card persistence, empty favorites, uploaded GIF
+backup and restore, quota/transaction failures and the Retry UI, previous-save
+recovery, window conflicts, a mobile dialog and offline reopening. Set
+`CHROMIUM_EXECUTABLE_PATH` to use an existing Chromium executable if needed.
+
+Real iPhone/iPad Files downloads, app termination, installed voices and
+TestFlight updates still need device testing before App Store release.
