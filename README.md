@@ -75,8 +75,12 @@ The **Button size** slider still controls the scale; the default compact size is
 ## Dwell to tap on pointer and touch devices
 
 Turn **Dwell: On** in the toolbar. With a mouse or trackpad, rest the pointer on
-an eligible button until the progress bar fills. On a touch screen, hold a finger
+an eligible button until the inside border fills. On a touch screen, hold a finger
 or Pencil on the button. Short taps and keyboard activation continue normally.
+A visible track and growing progress stroke stay inside the active button border,
+leaving the phrase readable.
+The border clears on cancellation. Dark mode uses a bright progress color; reduced
+motion uses four discrete steps instead of a continuous sweep.
 
 - Under **Voice**, choose a delay from **0.8 to 3.0 seconds**; the default is
   **1.5 seconds**. The preference is saved on this device.
@@ -179,7 +183,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v8` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v9` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -216,6 +220,7 @@ events, cancellation, one-shot holds, modal controls and both phrase layouts.
 
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
 
 
 

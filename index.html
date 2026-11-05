@@ -851,22 +851,33 @@
   .toolbar .dwell-toggle[aria-pressed="true"]{
     background:#DBEAFE;color:#103D87;box-shadow:inset 0 0 0 2px #316AC5;
   }
-  .dwell-charging{position:relative;outline:3px solid #F9A826!important;outline-offset:-3px!important}
-  .dwell-charging::after{
-    content:"";position:absolute;pointer-events:none;z-index:5;
-    bottom:2px;left:3px;right:3px;height:5px;border-radius:3px;
-    background:#1C68CB;transform-origin:left center;
-    animation:dwell-progress var(--dwell-ms,1500ms) linear forwards;
+  .dwell-charging{position:relative;box-shadow:none!important}
+  .dwell-indicator{
+    position:absolute;left:0;top:0;width:100%;height:100%;
+    pointer-events:none;z-index:6;fill:none;
+  }
+  .dwell-indicator rect{fill:none;stroke-width:3;vector-effect:non-scaling-stroke}
+  .dwell-indicator .dwell-border-track{stroke:#A7B7CE}
+  .dwell-indicator .dwell-border-progress{
+    stroke:#005FCC;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;
+    animation:dwell-border-progress var(--dwell-ms,1500ms) linear forwards;
   }
   html[data-dwell-enabled="true"] button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-  @keyframes dwell-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes dwell-border-progress{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
   [data-theme="dark"] .toolbar .dwell-toggle[aria-pressed="true"]{
     background:#264B88;color:#fff;border-color:#99B7FF;
   }
-  [data-theme="dark"] .dwell-charging::after{background:#FFCA5E}
+  [data-theme="dark"] .dwell-indicator .dwell-border-track{stroke:#64748B}
+  [data-theme="dark"] .dwell-indicator .dwell-border-progress{stroke:#FFCA5E}
   @media(prefers-reduced-motion:reduce){
-    .dwell-charging{outline:4px solid #F9A826!important}
-    .dwell-charging::after{animation:none!important;transform:scaleX(1)}
+    .dwell-indicator .dwell-border-progress{
+      animation:dwell-border-progress var(--dwell-ms,1500ms) steps(4,end) forwards!important;
+    }
+  }
+  @media(forced-colors:active){
+    .dwell-indicator{forced-color-adjust:none}
+    .dwell-indicator .dwell-border-track{stroke:GrayText}
+    .dwell-indicator .dwell-border-progress{stroke:Highlight}
   }
 
   /* GIF affordance: preserve original phrase tile dimensions and layout. */
@@ -1097,7 +1108,7 @@
     <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
     <label for="dwellDuration">Dwell to tap delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
     <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
-    <p class="note">Turn on <strong>Dwell: On</strong> in the toolbar. Hover a mouse or trackpad pointer over a button, or touch and hold a button with a finger or Pencil until its bar fills. A short tap still works normally. Moving to scroll cancels a hold.</p>
+    <p class="note">Turn on <strong>Dwell: On</strong> in the toolbar. Hover a mouse or trackpad pointer over a button, or touch and hold a button with a finger or Pencil until its inside border fills. A short tap still works normally. Moving to scroll cancels a hold.</p>
     <p class="note">Using iPad Eye Tracking? In iPad Settings, open Accessibility → Eye Tracking and use its Dwell Control. Leave Speechy’s Dwell off when iPadOS is doing the tapping. <a href="https://support.apple.com/guide/ipad/ipad2cd35723/ipados" target="_blank" rel="noopener">Apple’s Eye Tracking guide</a></p>
     <p class="note" style="margin-top:4px">Uses fewer columns and larger targets. In All phrases, the Button size slider also adjusts their scale. This setting stays on this device.</p>
     <label for="cardEdit">Card for handing to someone</label>
@@ -2568,6 +2579,7 @@ document.getElementById('classicSizeReset').addEventListener('click', () => {
    fires once; its later native click is consumed even if the button re-renders. */
 let dwellTimer = null;
 let dwellTarget = null;
+let dwellIndicator = null;
 let dwellBlocked = null;
 let dwellPointer = {x:0,y:0};
 let dwellTouch = null;
@@ -2594,6 +2606,8 @@ function cancelDwell(){
   if(dwellTimer !== null) clearTimeout(dwellTimer);
   dwellTimer = null;
   if(dwellTarget) dwellTarget.classList.remove('dwell-charging');
+  if(dwellIndicator) dwellIndicator.remove();
+  dwellIndicator = null;
   dwellTarget = null;
 }
 function cancelAllDwell(){
@@ -2622,11 +2636,33 @@ function dwellCandidate(element){
   if(sheet && !sheet.contains(button)) return null;
   return button;
 }
+function showDwellBorder(button){
+  const ns='http://www.w3.org/2000/svg';
+  const width=Math.max(12,button.clientWidth), height=Math.max(12,button.clientHeight);
+  const svg=document.createElementNS(ns,'svg');
+  svg.classList.add('dwell-indicator');
+  svg.setAttribute('viewBox','0 0 '+width+' '+height);
+  svg.setAttribute('preserveAspectRatio','none');
+  svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('focusable','false');
+  const radius=Math.max(0,Math.min(10,(parseFloat(getComputedStyle(button).borderRadius)||3)-2));
+  for(const name of ['dwell-border-track','dwell-border-progress']){
+    const rect=document.createElementNS(ns,'rect');
+    rect.classList.add(name);
+    rect.setAttribute('x','3');rect.setAttribute('y','3');
+    rect.setAttribute('width',String(width-6));rect.setAttribute('height',String(height-6));
+    rect.setAttribute('rx',String(radius));rect.setAttribute('pathLength','100');
+    svg.appendChild(rect);
+  }
+  button.appendChild(svg);
+  dwellIndicator=svg;
+}
 function armDwell(candidate){
   if(!settings.dwellEnabled || !candidate || dwellBlocked || candidate === dwellTarget) return;
   cancelDwell();
   dwellTarget = candidate;
   candidate.classList.add('dwell-charging');
+  showDwellBorder(candidate);
   dwellTimer = setTimeout(() => {
     const button = dwellTarget;
     const point = document.elementFromPoint(dwellPointer.x,dwellPointer.y);
@@ -2849,6 +2885,7 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 
 
 

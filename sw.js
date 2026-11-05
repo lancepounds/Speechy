@@ -1,4 +1,4 @@
-const CACHE = 'speechy-shell-v8';
+const CACHE = 'speechy-shell-v9';
 const BASE = new URL('./', self.location.href);
 const SHELL = ['./','./index.html','./pwa.js','./storage.js','./backup.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'].map(path => new URL(path, BASE).href);
 self.addEventListener('install', event => {
@@ -30,6 +30,7 @@ self.addEventListener('fetch', event => {
     }
   })());
 });
+
 
 
 
