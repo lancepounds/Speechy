@@ -854,24 +854,26 @@
   .dwell-charging{position:relative;box-shadow:none!important}
   .dwell-indicator{
     position:absolute;left:0;top:0;width:100%;height:100%;
-    pointer-events:none;z-index:6;fill:none;
+    pointer-events:none;z-index:6;fill:none;shape-rendering:geometricPrecision;
   }
   .dwell-indicator rect{fill:none;stroke-width:3;vector-effect:non-scaling-stroke}
   .dwell-indicator .dwell-border-track{stroke:#A7B7CE}
   .dwell-indicator .dwell-border-progress{
-    stroke:#005FCC;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;
-    animation:dwell-border-progress var(--dwell-ms,1500ms) linear forwards;
+    stroke:#005FCC;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:var(--dwell-stroke-length,100);stroke-dashoffset:var(--dwell-stroke-length,100);
+    animation:dwell-border-progress var(--dwell-ms,1500ms) linear both;
   }
   html[data-dwell-enabled="true"] button{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-  @keyframes dwell-border-progress{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+  @keyframes dwell-border-progress{from{stroke-dashoffset:var(--dwell-stroke-length,100)}to{stroke-dashoffset:0}}
   [data-theme="dark"] .toolbar .dwell-toggle[aria-pressed="true"]{
     background:#264B88;color:#fff;border-color:#99B7FF;
   }
   [data-theme="dark"] .dwell-indicator .dwell-border-track{stroke:#64748B}
   [data-theme="dark"] .dwell-indicator .dwell-border-progress{stroke:#FFCA5E}
   @media(prefers-reduced-motion:reduce){
+    /* Keep this functional countdown continuous; decorative movement remains reduced. */
     .dwell-indicator .dwell-border-progress{
-      animation:dwell-border-progress var(--dwell-ms,1500ms) steps(4,end) forwards!important;
+      animation:dwell-border-progress var(--dwell-ms,1500ms) linear both!important;
     }
   }
   @media(forced-colors:active){
@@ -2645,16 +2647,19 @@ function showDwellBorder(button){
   svg.setAttribute('preserveAspectRatio','none');
   svg.setAttribute('aria-hidden','true');
   svg.setAttribute('focusable','false');
-  const radius=Math.max(0,Math.min(10,(parseFloat(getComputedStyle(button).borderRadius)||3)-2));
+  const radius=Math.min(12,(Math.min(width,height)-6)/2,Math.max(4,parseFloat(getComputedStyle(button).borderRadius)||4));
   for(const name of ['dwell-border-track','dwell-border-progress']){
     const rect=document.createElementNS(ns,'rect');
     rect.classList.add(name);
     rect.setAttribute('x','3');rect.setAttribute('y','3');
     rect.setAttribute('width',String(width-6));rect.setAttribute('height',String(height-6));
-    rect.setAttribute('rx',String(radius));rect.setAttribute('pathLength','100');
+    rect.setAttribute('rx',String(radius));
     svg.appendChild(rect);
   }
   button.appendChild(svg);
+  // Animate the actual curve length, keeping subpixel progress around rounded corners.
+  const progress=svg.querySelector('.dwell-border-progress');
+  svg.style.setProperty('--dwell-stroke-length',String(progress.getTotalLength()));
   dwellIndicator=svg;
 }
 function armDwell(candidate){
@@ -2885,6 +2890,7 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 
 
 
