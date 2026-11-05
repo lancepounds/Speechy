@@ -6,6 +6,29 @@
 
 Speechy is a personal prototype, not a standardized AAC assessment or a clinically validated replacement for a person's prescribed communication system.
 
+## Settings panel
+
+Choose **Settings** in the main toolbar. The modal panel groups:
+
+- **Speech:** device voice, speaking speed, and Test voice / Stop voice. Testing
+  a voice leaves the current communication message in place.
+- **Appearance & layout:** Device default / Light / Dark theme, All phrases /
+  Grouped phrases, topic visibility and pinning, and All phrases button sizing.
+- **Accessibility & dwell:** larger touch targets, Speechy dwell on/off, its
+  0.8–3.0 second delay, and iPad Eye Tracking guidance.
+- **Your introduction card:** the text shown by the Card button.
+- **Saving & recovery:** the existing backup, retry and restore tools, plus the
+  confirmed board reset inside a collapsed section.
+
+Changes apply immediately and save on this device. The footer reports the real
+save status, including failures. **Done**, the top Close button, and Escape close
+the panel and restore focus to Settings. The contents scroll within phone,
+tablet and desktop viewports while the heading and footer remain available.
+The board is inactive while a native modal is open. Opening Settings does not
+change phrases, the tap mode or the message, and does not create a save.
+Quick Dwell, Show/Hide topics and layout controls on the board stay synchronized
+with the panel. Restoring a board through Settings updates the open controls.
+
 ## Animated GIFs for phrases
 
 Speechy can now display an animated GIF along with a saved phrase, in both **All phrases** and **Grouped phrases**, including on iPad.
@@ -27,7 +50,7 @@ You can replace or remove a phrase's GIF through **GIFs** at any time. The link 
   phrase; fewer phrase buttons appear at one time.
 
 Both choices have a short explanation on their buttons and a visible selected
-state. The toolbar shortcut switches between them. Both layouts work with
+state. They are also available under **Settings → Appearance & layout**. Both layouts work with
 **Tap speaks** and **Tap builds**. Layout choice changes how phrases are shown;
 it does not change the saved phrases or the tapping mode. Existing layout
 preferences remain compatible.
@@ -40,23 +63,23 @@ Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors 
 2. **Message composition:** Select **Tap builds**, combine phrases and the **Add on** category, and use **Say it**.
 3. **Navigation and efficiency:** Preview a topic without opening it, use **☆ Star** after speaking a phrase, and visit **★ Starred** or **Used most**. Switch between **Grouped phrases** and **All phrases**.
 4. **Communication alternatives:** Use **Show big** for large-text communication, or **Card** to show a customizable introduction to another person.
-5. **Personalization and motor access:** Open **Voice** to select an available device voice, change speaking speed, and turn on **Larger buttons (motor access)**. Use **Organize** to add or remove phrase tiles.
+5. **Personalization and motor access:** Open **Settings** to select an available device voice, change speaking speed, and turn on **Larger buttons and touch targets**. Use **Organize** to add or remove phrase tiles.
 
 Use **■ Stop voice** to interrupt speech at any point. The entire demo works without an account or a clinical setup. Allow sound and test a phrase before a presentation; browser and device speech voices vary.
 
 ## Topic row: show, hide, pin, or unpin
 
-**At the top of Speechy, next to its name in the main toolbar**, are the clearly labeled **Hide topics / Show topics** controls and, on smaller screens, **Pin topics / Unpin topics**. They stay visible even when all topic navigation is hidden. The **All phrases / Grouped phrases** choices remain immediately below **Tap speaks / Tap builds**.
+**Hide topics / Show topics** stays in the main toolbar, even when navigation is hidden. Under **Settings → Appearance & layout**, use **Show topic navigation** and **Keep the topic row visible while scrolling** for the same visibility preference and pinning. The **All phrases / Grouped phrases** choices remain immediately below **Tap speaks / Tap builds**.
 
 - **Hide topics** collapses the entire horizontal topic row, giving the phrase editor more space. **Show topics** restores it without changing the selected category or any saved phrases.
-- **Unpin row** allows the topic row to scroll away when you browse phrases. **Pin row** makes it stay immediately below the message composer while scrolling.
+- Clear **Keep the topic row visible while scrolling** to let the topic row scroll away. Check it to keep the row immediately below the message composer.
 - The composer controls remain accessible even when the topic row is hidden or unpinned, so you can always show and pin it again.
 - On wide desktop screens, where categories appear in the left sidebar instead of a horizontal row, **Hide topics** collapses that sidebar to widen the workspace. Pinning applies to the horizontal topic row.
 - Both choices are remembered in this browser with the existing Speechy settings. New users keep the original behavior: topics visible and pinned.
 
 ## Adjustable All phrases button size
 
-Select **All phrases**. A **Button size** slider appears immediately above the phrases. Move toward **Smaller** to use less space and fit more columns; move toward **Larger** for bigger, more comfortable phrase targets.
+Open **Settings → Appearance & layout** and choose **All phrases**. Its **Button size** slider appears in the panel. Decrease the percentage to fit more columns; increase it for larger phrase targets. Changes apply to the board immediately.
 
 - The range is **60%–150%**; the more compact default is **80%**.
 - Use **−** and **+** beside the slider to decrease or increase button size by exactly **5%** per tap. These controls and the slider always stay synchronized; the controls disable automatically at 60% and 150%.
@@ -64,13 +87,13 @@ Select **All phrases**. A **Button size** slider appears immediately above the p
 - **Reset size** returns the board to 80%.
 - The chosen size is saved locally with the existing Speechy preferences and is restored when you reopen the page.
 - This control applies only to All phrases; the Grouped phrases stays unchanged.
-- The **Larger buttons (motor access)** preference under Voice remains available and works together with this control.
+- The **Larger buttons and touch targets** preference under Settings remains available and works together with this control.
 
 ## Compact phrase buttons
 
 Phrase buttons now use less vertical padding and a smaller minimum height, especially in **All phrases**. The layout keeps phrase text visible and allows longer messages to wrap instead of clipping them. On wider screens, longer All phrases phrases use up to two grid columns rather than automatically occupying an entire row.
 
-The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons (motor access)** under Voice. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
+The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons and touch targets** under Settings. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
 
 ## Dwell to tap on pointer and touch devices
 
@@ -84,7 +107,7 @@ functional countdown stays continuous, including with Reduce Motion enabled;
 decorative movement still follows that preference. Rounded corners and the
 actual curve length keep the border fill even without changing the dwell delay.
 
-- Under **Voice**, choose a delay from **0.8 to 3.0 seconds**; the default is
+- Under **Settings → Accessibility & dwell**, choose a delay from **0.8 to 3.0 seconds**; the default is
   **1.5 seconds**. The preference is saved on this device.
 - Touch holds activate once. Releasing after activation does not select the
   button a second time, even if the board re-renders underneath the finger.
@@ -185,7 +208,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v10` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v11` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -206,6 +229,7 @@ npm test
 npx playwright install chromium
 npm run test:browser
 npm run test:dwell
+npm run test:settings
 ```
 
 Storage tests use fake-indexeddb's transaction implementation, including aborted
@@ -220,8 +244,14 @@ recovery, window conflicts, a mobile dialog and offline reopening. Set
 The dwell browser checks use trusted touch sequences, pointer/mouse fallback
 events, cancellation, one-shot holds, modal controls and both phrase layouts.
 
+The settings browser test checks modal focus and Escape, live changes and
+reload, unchanged messages, quick-control synchronization, nested previous-save
+recovery, failed-save retry and panel fit in desktop, iPad-sized, phone and
+landscape viewports.
+
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
+
 
 
 

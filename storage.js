@@ -10,7 +10,7 @@ window.SpeechyStorage = (() => {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const token = record => record ? (record.id || 'legacy:' + record.savedAt) : null;
   const report = (message, failed = false) => {
-    for (const id of ['saveStatus', 'backupSaveStatus']) {
+    for (const id of ['saveStatus', 'backupSaveStatus', 'settingsSaveStatus']) {
       const el = document.getElementById(id);
       if (el) { el.textContent = message; el.dataset.failed = String(failed); }
     }
@@ -254,3 +254,4 @@ window.SpeechyStorage = (() => {
     previous:() => previous ? clone(previous.data) : null,
     canSave:() => loaded && !conflicted, canRestore:() => !conflicted};
 })();
+

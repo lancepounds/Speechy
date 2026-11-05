@@ -761,21 +761,15 @@
     white-space:normal;line-height:1.2;
   }
   .stage-utilities #topicsToggle{font-weight:700}
-  .stage-utilities #topicsPin[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #98B8EA}
-  .stage-utilities #topicsPin[aria-pressed="false"]{font-weight:normal}
   html[data-topics-pinned="false"] .rail{position:relative;top:auto;z-index:1}
   /* Wide screens show topics in a left sidebar instead of the horizontal row. */
   @media(min-width:980px){
     html[data-topics-visible="false"] .navpane{display:none !important}
     .stage-utilities{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    .stage-utilities #topicsPin{display:none}
   }
   @media(max-width:560px){
     .stage-utilities{gap:5px}
     .stage-utilities .act{min-height:44px;font-size:12px;padding:7px 4px}
-  }
-  [data-theme="dark"] .stage-utilities #topicsPin[aria-pressed="true"]{
-    box-shadow:inset 0 0 0 2px #3F6FC0
   }
 
   /* Prominent, permanently accessible topic controls (not hidden by the grid). */
@@ -797,7 +791,6 @@
   [data-theme="dark"] .layout-option[aria-pressed="true"]{background:#1B1B1B}
   [data-theme="dark"] .toolbar .topic-tbtn{color:#F2F2F2;border-color:#759AE2;box-shadow:none}
   [data-theme="dark"] .toolbar .topic-tbtn:hover{color:#fff}
-  @media (min-width:980px){.toolbar-topic-tools #topicsPin{display:none}}
   @media (max-width:699px){
     .toolbar-topic-tools{order:-1;flex:1 0 auto;margin:3px 4px 2px 0;padding-right:6px}
     .toolbar .topic-tbtn{min-height:44px;font-size:13px;padding:7px 10px}
@@ -913,6 +906,41 @@
   #backupDialog input{max-width:100%;font:inherit}
   #backupDialog input[type="file"]::file-selector-button{min-height:44px;padding:8px 10px;font:inherit}
   .toolbar{padding-top:2px}
+  .toolbar .settings-open{min-height:44px;font-weight:bold;border:1px solid #316AC5;border-radius:4px;background:var(--btn)}
+  .settings-panel{display:none;width:calc(100% - 24px);max-width:760px;max-height:calc(100dvh - 24px);margin:auto;padding:0;border:3px solid var(--frame);border-radius:8px;background:var(--face);color:var(--ink);font:inherit;overflow:hidden;box-shadow:0 12px 40px #0006}
+  .settings-panel[open]{display:flex;flex-direction:column}
+  .settings-panel::backdrop{background:rgba(0,0,0,.45)}
+  .settings-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 10px;background:var(--title);color:#fff;flex-shrink:0}
+  .settings-header h2{margin:0;font:700 19px/1.3 var(--titlefont)}
+  .settings-header button{min-width:44px;min-height:44px;color:#fff;font-size:28px;border:1px solid #ffffff99;border-radius:4px}
+  .settings-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px}
+  .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  .settings-section{min-width:0;margin:0;padding:10px 14px 14px;border:1px solid #AAA99F;border-radius:5px;background:#F8F7F1}
+  .settings-section legend{font-size:16px;font-weight:bold;padding:0 6px;color:var(--ink)}
+  .settings-wide{grid-column:1/-1}
+  .settings-panel label{font-size:14px;margin:10px 0 5px;color:var(--ink)}
+  .settings-panel select,.settings-panel textarea{max-width:100%;min-height:44px;font:inherit;font-size:16px}
+  .settings-panel :focus-visible{outline:3px solid #316AC5;outline-offset:2px}
+  .settings-header :focus-visible{outline-color:#fff;outline-offset:-4px}
+  .settings-panel input[type=range]{height:44px;margin:0}
+  .settings-panel .settings-hint,.settings-panel .note{margin:8px 0 12px;font-size:13px;line-height:1.45;color:var(--ink)}
+  .settings-panel .settings-choice{display:flex;align-items:center;gap:10px;min-height:44px;margin:5px 0;font-size:15px;font-weight:normal}
+  .settings-choice input{width:23px;height:23px;flex:0 0 23px;accent-color:#316AC5}
+  .settings-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .settings-actions button,.settings-footer button,.settings-help button{min-height:44px;padding:9px 13px;background:var(--btn);color:var(--ink);border:1px solid var(--edge);border-radius:4px;font:inherit}
+  .settings-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #AAA99F;background:var(--face);flex-shrink:0}
+  .settings-footer button{min-width:84px;font-weight:bold}
+  #settingsSaveStatus{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+  .settings-help summary{padding:10px 0;min-height:44px;cursor:pointer;font-size:14px;font-weight:bold}
+  .settings-help p{font-size:13px;line-height:1.45}
+  .settings-panel .settings-danger{border-color:#A33;color:var(--ink)}
+  .settings-panel .settings-button-size{padding:8px 0 0;background:transparent;border:0;gap:6px}
+  .settings-button-size label{flex:1 0 100%;white-space:normal}
+  .settings-button-size input[type=range]{min-width:70px;flex:1 1 100px}
+  .settings-panel .settings-button-size button{min-height:44px}
+  [data-theme="dark"] .settings-section{background:#242424;border-color:#5C5C5C}
+  [data-theme="dark"] .settings-footer{border-color:#555}
+  @media(max-width:640px){.settings-grid{grid-template-columns:1fr}.settings-panel{max-height:calc(100dvh - 16px);width:calc(100% - 16px)}.settings-body{padding:10px}.settings-section{padding:8px 12px 12px}.settings-header{padding:4px 10px}}
 </style>
 </head>
 <body>
@@ -923,20 +951,16 @@
     <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
     <div class="toolbar-topic-tools" role="group" aria-label="Topic navigation controls">
       <button class="tbtn topic-tbtn" id="topicsToggle" type="button" aria-controls="rail navlist" aria-expanded="true" title="Hide or show topic navigation">▴ Hide topics</button>
-      <button class="tbtn topic-tbtn" id="topicsPin" type="button" aria-pressed="true" title="Keep the topic row visible while scrolling">Unpin topics</button>
     </div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <button class="tbtn" id="gifManageBtn" type="button">GIFs</button>
     <span class="tsep"></span>
-    <button class="tbtn" id="styleBtn">Show all phrases</button>
-    <span class="tsep"></span>
-    <button class="tbtn" id="setBtn">Voice</button>
+    <button class="tbtn settings-open" id="setBtn" type="button" aria-haspopup="dialog" aria-controls="setSheet">Settings</button>
     <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by hovering a pointer or touching and holding">Dwell: Off</button>
     <span class="tsep"></span>
     <button class="tbtn" id="installAppBtn" type="button" aria-haspopup="dialog">Install app</button>
     <button class="tbtn" id="fsBtn">Full screen</button>
     <span class="tsep"></span>
-    <button class="tbtn" id="themeBtn">Dark theme</button>
     <button class="tbtn" id="demoBtn" aria-haspopup="dialog">Demo guide</button>
     <button class="tbtn stop-voice" id="stopBtn">■ Stop voice</button>
     <div class="searchbox">
@@ -990,13 +1014,6 @@
       </div>
 
       <div class="rail" id="rail" role="tablist"></div>
-      <div class="classic-size-bar" id="classicSizeBar" hidden role="group" aria-label="All phrases button sizing">
-        <label for="classicButtonSize">Button size <output id="classicButtonSizeValue" for="classicButtonSize">80%</output></label>
-        <button type="button" class="size-step" id="classicSizeDecrease" aria-label="Decrease All phrases button size by 5 percent" title="Decrease button size (5%)">−</button>
-        <input type="range" id="classicButtonSize" min="60" max="150" step="5" value="80" aria-label="All phrases button size">
-        <button type="button" class="size-step" id="classicSizeIncrease" aria-label="Increase All phrases button size by 5 percent" title="Increase button size (5%)">+</button>
-        <button type="button" id="classicSizeReset" title="Restore the default button size">Reset size</button>
-      </div>
       <div class="grid" id="grid" aria-label="Communication phrases"></div>
     </div>
   </div>
@@ -1099,32 +1116,76 @@
   </div>
 </div>
 
-<!-- settings sheet -->
-<div class="sheet" id="setSheet" role="dialog" aria-modal="true" aria-label="Voice settings">
-  <div class="sheet-inner">
-    <h2>Voice</h2>
-    <label for="voiceSel">Which voice</label>
-    <select id="voiceSel"></select>
-    <label for="rate">Speaking speed <output id="rateLabel" for="rate">0.95×</output></label>
-    <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
-    <label class="access-toggle" for="largeTargets"><input id="largeTargets" type="checkbox"> Larger buttons (motor access)</label>
-    <label for="dwellDuration">Dwell to tap delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
-    <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
-    <p class="note">Turn on <strong>Dwell: On</strong> in the toolbar. Hover a mouse or trackpad pointer over a button, or touch and hold a button with a finger or Pencil until its inside border fills. A short tap still works normally. Moving to scroll cancels a hold.</p>
-    <p class="note">Using iPad Eye Tracking? In iPad Settings, open Accessibility → Eye Tracking and use its Dwell Control. Leave Speechy’s Dwell off when iPadOS is doing the tapping. <a href="https://support.apple.com/guide/ipad/ipad2cd35723/ipados" target="_blank" rel="noopener">Apple’s Eye Tracking guide</a></p>
-    <p class="note" style="margin-top:4px">Uses fewer columns and larger targets. In All phrases, the Button size slider also adjusts their scale. This setting stays on this device.</p>
-    <label for="cardEdit">Card for handing to someone</label>
-    <textarea id="cardEdit"></textarea>
-    <div class="sheet-actions">
-      <button id="setClose">Done</button>
-      <button class="primary" id="setTest">Test the voice</button>
-    </div>
-    <p class="note" id="voiceNote"></p>
-    <div class="sheet-actions" style="grid-template-columns:1fr;margin-top:10px">
-      <button id="resetBtn">Reset board to the original phrases</button>
+<!-- settings panel -->
+<dialog id="setSheet" class="settings-panel" aria-labelledby="settingsTitle" aria-describedby="settingsIntro">
+  <header class="settings-header">
+    <h2 id="settingsTitle" tabindex="-1">Settings</h2>
+    <button id="settingsCloseTop" type="button" aria-label="Close settings">×</button>
+  </header>
+  <div class="settings-body">
+    <p id="settingsIntro" class="settings-hint">Changes apply immediately and save on this device.</p>
+    <div class="settings-grid">
+      <fieldset class="settings-section">
+        <legend>Speech</legend>
+        <label for="voiceSel">Voice</label>
+        <select id="voiceSel"></select>
+        <label for="rate">Speaking speed <output id="rateLabel" for="rate">0.95×</output></label>
+        <input type="range" id="rate" min="0.6" max="1.3" step="0.05">
+        <div class="settings-actions">
+          <button type="button" id="setTest">Test voice</button>
+          <button type="button" id="settingsStopVoice">Stop voice</button>
+        </div>
+        <p class="settings-hint" id="voiceNote"></p>
+        <p class="settings-hint" id="voiceTestStatus" role="status" aria-live="polite"></p>
+      </fieldset>
+      <fieldset class="settings-section">
+        <legend>Appearance &amp; layout</legend>
+        <label for="settingsTheme">Theme</label>
+        <select id="settingsTheme"><option value="auto">Device default</option><option value="light">Light</option><option value="dark">Dark</option></select>
+        <label for="settingsLayout">Phrase layout</label>
+        <select id="settingsLayout"><option value="classic">All phrases</option><option value="nested">Grouped phrases</option></select>
+        <p class="settings-hint">All phrases shows the selected topic at once. Grouped phrases opens smaller groups first.</p>
+        <label class="settings-choice" for="settingsTopicsVisible"><input id="settingsTopicsVisible" type="checkbox">Show topic navigation</label>
+        <label class="settings-choice" for="settingsTopicsPinned"><input id="settingsTopicsPinned" type="checkbox">Keep the topic row visible while scrolling</label>
+        <p class="settings-hint">Pinning applies to the horizontal topic row on smaller screens.</p>
+        <div class="classic-size-bar settings-button-size" id="classicSizeBar" hidden role="group" aria-label="All phrases button sizing">
+          <label for="classicButtonSize">Button size <output id="classicButtonSizeValue" for="classicButtonSize">80%</output></label>
+          <button type="button" class="size-step" id="classicSizeDecrease" aria-label="Decrease All phrases button size by 5 percent">−</button>
+          <input type="range" id="classicButtonSize" min="60" max="150" step="5" value="80" aria-label="All phrases button size">
+          <button type="button" class="size-step" id="classicSizeIncrease" aria-label="Increase All phrases button size by 5 percent">+</button>
+          <button type="button" id="classicSizeReset">Reset size</button>
+        </div>
+        <p id="settingsSizeHint" class="settings-hint">Choose All phrases to adjust its button size.</p>
+      </fieldset>
+      <fieldset class="settings-section settings-wide">
+        <legend>Accessibility &amp; dwell</legend>
+        <label class="settings-choice" for="largeTargets"><input id="largeTargets" type="checkbox">Larger buttons and touch targets</label>
+        <p class="settings-hint">Uses fewer columns and more room for each phrase.</p>
+        <label class="settings-choice" for="settingsDwellEnabled"><input id="settingsDwellEnabled" type="checkbox">Enable Speechy dwell</label>
+        <label for="dwellDuration">Dwell delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
+        <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
+        <p class="settings-hint">Hover a pointer over a button, or touch and hold it, until the inside border fills. Short taps still work. Moving to scroll cancels a hold. The toolbar’s Dwell button is a quick on/off shortcut.</p>
+        <details class="settings-help"><summary>Using iPad Eye Tracking?</summary><p>Use Dwell Control under iPad Settings → Accessibility → Eye Tracking. Leave Speechy’s Dwell off when iPadOS is doing the tapping. <a href="https://support.apple.com/guide/ipad/ipad2cd35723/ipados" target="_blank" rel="noopener">Apple’s Eye Tracking guide</a></p></details>
+      </fieldset>
+      <fieldset class="settings-section settings-wide">
+        <legend>Your introduction card</legend>
+        <label for="cardEdit">What the Card button shows</label>
+        <textarea id="cardEdit" rows="4"></textarea>
+        <p class="settings-hint">Write what you want someone to know about communicating with you.</p>
+      </fieldset>
+      <fieldset class="settings-section settings-wide">
+        <legend>Saving &amp; recovery</legend>
+        <p class="settings-hint">Keep a separate backup of your phrases, settings, favorites, and uploaded GIFs.</p>
+        <div class="settings-actions"><button type="button" id="settingsBackup">Open saving &amp; backups</button></div>
+        <details class="settings-help"><summary>Reset board</summary><p>Your added phrases, removed phrases, and GIF attachments will be reset on this device. Download a backup first if you want to keep them.</p><button type="button" id="resetBtn" class="settings-danger">Reset board to the original phrases</button></details>
+      </fieldset>
     </div>
   </div>
-</div>
+  <footer class="settings-footer">
+    <span id="settingsSaveStatus" role="status" aria-live="polite">Opening saved board…</span>
+    <button type="button" id="setClose">Done</button>
+  </footer>
+</dialog>
 
 <!-- Optional walkthrough for SLPs and visitors -->
 <div class="sheet demo-sheet" id="demoSheet" role="dialog" aria-modal="true" aria-labelledby="demoTitle">
@@ -1137,7 +1198,7 @@
         <li><strong>Build a message:</strong> choose Tap builds, combine phrases or add-ons, then Say it.</li>
         <li><strong>Find useful phrases:</strong> preview topics, star spoken phrases, use Used most, or switch navigation styles.</li>
         <li><strong>Communicate without sound:</strong> use Show big or the customizable Card.</li>
-        <li><strong>Personalize:</strong> use Organize and Voice to customize the board and speech rate.</li>
+        <li><strong>Personalize:</strong> use Organize for phrases and Settings for speech, appearance, accessibility, and backups.</li>
       </ol>
       <p class="note">A personal communication prototype, not a standardized AAC assessment. Speech is produced by the browser/device. On the public website, edits stay in this browser; AI sentence suggestions require a supported runtime.</p>
     </div>
@@ -1565,6 +1626,7 @@ function refreshBoard(){
   applyTheme(); applyAccessSettings(); applyClassicButtonSize(); applyTopicSettings(); applyDwellSettings(); updateStyleButton();
   renderRail(); renderGrid(); renderSaid(); measure();
   if(window.speechSynthesis) loadVoices();
+  if(document.getElementById('setSheet').open) syncSettingsControls();
 }
 const backupDialog=document.getElementById('backupDialog');
 const backupMessage=document.getElementById('backupMessage');
@@ -1579,10 +1641,11 @@ async function backupAction(action){
   finally {backupBusy=false;backupControls.forEach(id=>document.getElementById(id).disabled=false);}
 }
 backupDialog.addEventListener('cancel',event=>{if(backupBusy)event.preventDefault();});
-document.getElementById('backupOpen').onclick=()=>{
+function openBackups(){
   document.getElementById('backupSaveStatus').textContent=document.getElementById('saveStatus').textContent;
   backupMessage.textContent='';backupDialog.showModal();
-};
+}
+document.getElementById('backupOpen').onclick=openBackups;
 document.getElementById('backupDownload').onclick=()=>backupAction(async()=>{
   backupMessage.textContent='Preparing your board and uploaded GIFs…';
   const file=await SpeechyBackup.create(boardSnapshot(),key=>gifStore('get',key));
@@ -1627,9 +1690,11 @@ document.getElementById('backupFile').onchange=event=>{
 /* --------------------------------------------------------------- speech */
 let voices = [];
 function loadVoices(){
-  if(!window.speechSynthesis) return;
-  voices = speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
+  voices = window.speechSynthesis ? speechSynthesis.getVoices().filter(v=>v.lang && v.lang.toLowerCase().startsWith('en')) : [];
   const sel = document.getElementById('voiceSel');
+  sel.disabled = !window.speechSynthesis;
+  document.getElementById('setTest').disabled = !window.speechSynthesis;
+  document.getElementById('settingsStopVoice').disabled = !window.speechSynthesis;
   sel.innerHTML = '';
   const defaultOption = document.createElement('option');
   defaultOption.value = '';
@@ -2439,33 +2504,85 @@ document.getElementById('gifRemove').onclick=()=>{
 };
 
 const setSheet = document.getElementById('setSheet');
-document.getElementById('setBtn').onclick = ()=>{
+let settingsReturnFocus = null;
+function syncSettingsControls(){
   document.getElementById('rate').value = settings.rate;
   document.getElementById('rateLabel').textContent = Number(settings.rate).toFixed(2) + '×';
   document.getElementById('cardEdit').value = settings.card;
   document.getElementById('largeTargets').checked = !!settings.largeTargets;
-  setSheet.classList.add('open');
+  const voice = document.getElementById('voiceSel');
+  voice.value = voices.some(v=>v.voiceURI === settings.voiceURI) ? settings.voiceURI : '';
+  document.getElementById('settingsTheme').value = settings.theme || 'auto';
+  document.getElementById('settingsLayout').value = settings.uiStyle === 'classic' ? 'classic' : 'nested';
+  document.getElementById('settingsTopicsVisible').checked = settings.topicsVisible !== false;
+  document.getElementById('settingsTopicsPinned').checked = settings.topicsPinned !== false;
+  document.getElementById('settingsDwellEnabled').checked = !!settings.dwellEnabled;
+  const status = document.getElementById('saveStatus');
+  const panelStatus = document.getElementById('settingsSaveStatus');
+  panelStatus.textContent = status.textContent;
+  panelStatus.dataset.failed = status.dataset.failed || 'false';
+}
+function openSettings(){
+  if(setSheet.open) return;
+  settingsReturnFocus = document.activeElement;
+  stopDwellInput();
+  loadVoices();
+  syncSettingsControls();
+  document.getElementById('voiceTestStatus').textContent = '';
+  setSheet.showModal();
+  document.getElementById('settingsTitle').focus();
+}
+function closeSettings(){
+  stopDwellInput();
+  if(setSheet.open) setSheet.close();
+}
+document.getElementById('setBtn').onclick = openSettings;
+document.getElementById('setClose').onclick = closeSettings;
+document.getElementById('settingsCloseTop').onclick = closeSettings;
+setSheet.addEventListener('cancel',event=>{event.preventDefault();closeSettings();});
+setSheet.addEventListener('close',()=>{
+  if(settingsReturnFocus?.isConnected) settingsReturnFocus.focus();
+});
+document.getElementById('cardEdit').addEventListener('input',e=>{settings.card=e.target.value;save();});
+document.getElementById('setTest').onclick = ()=>{
+  const status = document.getElementById('voiceTestStatus');
+  try{
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance('This is how my voice sounds.');
+    utterance.rate = settings.rate;
+    const voice = voices.find(v=>v.voiceURI===settings.voiceURI && (navigator.onLine || v.localService)) || (!navigator.onLine ? voices.find(v=>v.localService) : null);
+    if(voice) utterance.voice = voice;
+    utterance.onend = ()=>{status.textContent='Voice test finished.';};
+    utterance.onerror = event=>{if(!['canceled','interrupted'].includes(event.error))status.textContent='The voice could not play. Try another device voice and check your volume.';};
+    status.textContent = 'Playing the test phrase…';
+    speechSynthesis.speak(utterance);
+  }catch(error){status.textContent='The voice could not play. Try another device voice and check your volume.';}
 };
-document.getElementById('cardEdit').addEventListener('input', e=>{ settings.card=e.target.value; save(); });
-document.getElementById('setClose').onclick = ()=>{
-  settings.card = document.getElementById('cardEdit').value;
-  save(); setSheet.classList.remove('open');
+document.getElementById('settingsStopVoice').onclick = ()=>{
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  document.getElementById('voiceTestStatus').textContent='Voice stopped.';
 };
-document.getElementById('setTest').onclick = ()=> speak('This is how my voice sounds.');
 document.getElementById('rate').oninput = e=>{
-  settings.rate = parseFloat(e.target.value);
-  document.getElementById('rateLabel').textContent = settings.rate.toFixed(2) + '×';
+  settings.rate=parseFloat(e.target.value);
+  document.getElementById('rateLabel').textContent=settings.rate.toFixed(2)+'×';
   save();
 };
-document.getElementById('voiceSel').onchange = e=>{ settings.voiceURI = e.target.value || null; save(); };
+document.getElementById('voiceSel').onchange = e=>{settings.voiceURI=e.target.value||null;save();};
 document.getElementById('largeTargets').onchange = e=>{
-  settings.largeTargets = e.target.checked;
-  applyAccessSettings(); save(); renderGrid(); measure();
+  settings.largeTargets=e.target.checked;
+  applyAccessSettings();save();renderGrid();measure();
 };
+document.getElementById('settingsTheme').onchange = e=>{settings.theme=e.target.value;applyTheme();save();};
+document.getElementById('settingsLayout').onchange = e=>setUiStyle(e.target.value);
+document.getElementById('settingsTopicsVisible').onchange = e=>{settings.topicsVisible=e.target.checked;applyTopicSettings();save();};
+document.getElementById('settingsTopicsPinned').onchange = e=>{settings.topicsPinned=e.target.checked;applyTopicSettings();save();};
+document.getElementById('settingsDwellEnabled').onchange = e=>{
+  settings.dwellEnabled=e.target.checked;dwellBlocked=null;applyDwellSettings();save();
+};
+document.getElementById('settingsBackup').onclick = openBackups;
 document.getElementById('resetBtn').onclick = ()=>{
-  if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.')) return;
-  custom={}; removed={}; gifs={}; gifUploads={}; save(); renderGrid();
-  setSheet.classList.remove('open');
+  if(!window.confirm('Reset your board? Your added and removed phrases will be lost on this device.'))return;
+  custom={};removed={};gifs={};gifUploads={};save();renderGrid();closeSettings();
 };
 
 // keep the category rail pinned right under the compose bar
@@ -2492,6 +2609,7 @@ document.getElementById('demoStart').onclick = ()=>{
   document.getElementById('modeSpeak').focus();
 };
 document.addEventListener('keydown',e=>{
+  if(document.querySelector('dialog[open]')) return; // Native dialogs own focus and Escape.
   const openSheet=[...document.querySelectorAll('.sheet.open')].at(-1);
   if(e.key==='Escape'){
     if(document.getElementById('gifOverlay').classList.contains('open')){closeGif();e.preventDefault();return;}
@@ -2600,6 +2718,7 @@ function applyDwellSettings(){
   button.setAttribute('aria-pressed', String(settings.dwellEnabled));
   button.textContent = settings.dwellEnabled ? 'Dwell: On' : 'Dwell: Off';
   button.title = settings.dwellEnabled ? 'Turn off Speechy dwell' : 'Turn on dwell: hover a pointer or touch and hold';
+  document.getElementById('settingsDwellEnabled').checked = settings.dwellEnabled;
   document.getElementById('dwellDuration').value = String(settings.dwellMs);
   document.getElementById('dwellDurationLabel').textContent = (settings.dwellMs / 1000).toFixed(1) + ' seconds';
   if(!settings.dwellEnabled) stopDwellInput();
@@ -2789,14 +2908,14 @@ document.getElementById('dwellDuration').addEventListener('input',event => {
 
 function applyAccessSettings(){
   document.documentElement.setAttribute('data-large-targets', settings.largeTargets ? 'true' : 'false');
+  document.getElementById('largeTargets').checked = !!settings.largeTargets;
 }
 function applyTheme(){
   const t = (settings.theme || 'auto');
   const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
   const dark = t === 'dark' || (t === 'auto' && sysDark);
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  const b = document.getElementById('themeBtn');
-  if(b) b.textContent = dark ? 'Light theme' : 'Dark theme';
+  document.getElementById('settingsTheme').value = t;
 }
 
 function applyTopicSettings(){
@@ -2809,19 +2928,11 @@ function applyTopicSettings(){
   toggle.textContent = visible ? '▴ Hide topics' : '▾ Show topics';
   toggle.setAttribute('aria-expanded', String(visible));
   toggle.setAttribute('aria-label', visible ? 'Hide topic navigation' : 'Show topic navigation');
-  const pin = document.getElementById('topicsPin');
-  pin.textContent = pinned ? 'Unpin topics' : 'Pin topics';
-  pin.setAttribute('aria-pressed', String(pinned));
-  pin.setAttribute('aria-label', pinned ? 'Unpin topic row so it scrolls away' : 'Pin topic row below the message area');
-  pin.title = pinned ? 'Let the topic row scroll with the page' : 'Keep the topic row visible while scrolling';
+  document.getElementById('settingsTopicsVisible').checked = visible;
+  document.getElementById('settingsTopicsPinned').checked = pinned;
 }
 document.getElementById('topicsToggle').addEventListener('click', () => {
   settings.topicsVisible = settings.topicsVisible === false;
-  applyTopicSettings();
-  save();
-});
-document.getElementById('topicsPin').addEventListener('click', () => {
-  settings.topicsPinned = settings.topicsPinned === false;
   applyTopicSettings();
   save();
 });
@@ -2829,8 +2940,8 @@ function updateStyleButton(){
   const all = settings.uiStyle === 'classic';
   document.documentElement.setAttribute('data-ui-style', all ? 'classic' : 'nested');
   document.getElementById('classicSizeBar').hidden = !all;
-  const shortcut = document.getElementById('styleBtn');
-  shortcut.textContent = all ? 'Show grouped phrases' : 'Show all phrases';
+  document.getElementById('settingsLayout').value = all ? 'classic' : 'nested';
+  document.getElementById('settingsSizeHint').hidden = all;
   document.getElementById('layoutAll').setAttribute('aria-pressed', String(all));
   document.getElementById('layoutGrouped').setAttribute('aria-pressed', String(!all));
 }
@@ -2843,18 +2954,9 @@ function setUiStyle(style){
   save();
   renderGrid();
 }
-function toggleUiStyle(){
-  setUiStyle(settings.uiStyle === 'classic' ? 'nested' : 'classic');
-}
-document.getElementById('styleBtn').onclick = toggleUiStyle;
 document.getElementById('layoutAll').onclick = ()=>setUiStyle('classic');
 document.getElementById('layoutGrouped').onclick = ()=>setUiStyle('nested');
 
-document.getElementById('themeBtn').onclick = ()=>{
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  settings.theme = isDark ? 'light' : 'dark';
-  applyTheme(); save();
-};
 if(window.matchMedia){
   try{
     matchMedia('(prefers-color-scheme: dark)')
@@ -2890,6 +2992,7 @@ document.addEventListener('fullscreenchange', ()=>{
 <script src="./pwa.js" defer></script>
 </body>
 </html>
+
 
 
 
