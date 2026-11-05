@@ -9,7 +9,8 @@
     "test": "node --test tests/storage.cjs tests/backup.cjs && node tests/offline.cjs",
     "test:browser": "node tests/browser.cjs",
     "test:dwell": "node tests/dwell.cjs",
-    "test:settings": "node tests/settings.cjs"
+    "test:settings": "node tests/settings.cjs",
+    "test:groups": "node tests/groups.cjs"
   }
 }
 
