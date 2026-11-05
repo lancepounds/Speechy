@@ -46,14 +46,26 @@ You can replace or remove a phrase's GIF through **GIFs** at any time. The link 
 
 - **All phrases** shows every phrase in the selected topic at once. Use it for
   direct access without opening smaller groups.
-- **Grouped phrases** shows smaller groups first. Open a group, then choose a
-  phrase; fewer phrase buttons appear at one time.
+- **Grouped phrases** shows smaller groups with labels describing the buttons
+  inside. For example, Right now has **Speech & listening**, **Breaks & comfort**,
+  and **Typing & showing**. Open a named group, then choose a phrase.
 
 Both choices have a short explanation on their buttons and a visible selected
 state. They are also available under **Settings → Appearance & layout**. Both layouts work with
 **Tap speaks** and **Tap builds**. Layout choice changes how phrases are shown;
 it does not change the saved phrases or the tapping mode. Existing layout
 preferences remain compatible.
+
+## Content labels for group panels
+
+Grouped panels use meaningful names such as **Menus & ordering**, **Documents &
+follow-up**, and **Instructions & follow-up**. The same name appears on the panel,
+in its preview, and in the opened group heading. Standard phrases
+are grouped by subject; custom phrases remain available in panels named from the
+text they contain. Empty groups are omitted. Starred and Used most group known
+phrases by their source topic and use phrase excerpts for unmatched saved text.
+This applies to navigation only: the saved phrase text and All phrases view are
+unchanged. Saved ordering is respected within each content group.
 
 ## Five-minute SLP demonstration
 
@@ -208,7 +220,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v11` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v12` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -230,6 +242,7 @@ npx playwright install chromium
 npm run test:browser
 npm run test:dwell
 npm run test:settings
+npm run test:groups
 ```
 
 Storage tests use fake-indexeddb's transaction implementation, including aborted
@@ -248,6 +261,10 @@ The settings browser test checks modal focus and Escape, live changes and
 reload, unchanged messages, quick-control synchronization, nested previous-save
 recovery, failed-save retry and panel fit in desktop, iPad-sized, phone and
 landscape viewports.
+
+The group-panel browser test checks meaningful names, matching previews and
+opened headings, complete phrase coverage, custom edits, favorites and recent
+phrases, saved ordering, and label fit at desktop, tablet and phone widths.
 
 Real iPhone/iPad Files downloads, app termination, installed voices and
 TestFlight updates still need device testing before App Store release.
