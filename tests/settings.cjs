@@ -140,6 +140,14 @@ const root=path.resolve(__dirname,'..');
     }
     await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>document.activeElement.id),'setBtn');
     await page.reload();await ready();assert.equal(await page.evaluate(()=>settings.card),'Retry this introduction');
+    await page.locator('#setBtn').click();
+    await page.locator('#settingsTheme').selectOption('sepia');
+    assert.equal(await page.locator('html').getAttribute('data-theme'),'sepia');
+    await saved();
+    await page.reload();await ready();
+    await page.locator('#setBtn').click();
+    assert.equal(await page.locator('#settingsTheme').inputValue(),'sepia');
+    assert.equal(await page.locator('html').getAttribute('data-theme'),'sepia');
     assert.deepEqual(errors,[],'no runtime errors');
     console.log('PASS: modal focus/Escape, immediate settings and reload, message preservation, linked quick controls, dwell close, reset cancellation, nested recovery, failed-save retry, desktop/iPad/phone/landscape panel.');
     console.log('Settings screenshots:',screenshots);
