@@ -990,6 +990,45 @@
     [data-theme="sepia"] .dwell-border-track{stroke:#b79b74}
     [data-theme="sepia"] .dwell-border-progress{stroke:var(--signal)}
   }
+  /* High Contrast builds on the dark layout with distinct visual states. */
+  @media(forced-colors:none){
+    [data-theme="dark"][data-high-contrast]{
+      color-scheme:dark;
+      --ink:#fff;
+      --ink-soft:#e0e0e0;
+      --face:#000;
+      --face-dk:#242424;
+      --edge:#eee;
+      --title:#000;
+      --frame:#eee;
+      --btn:#111;
+      --btnpress:#333;
+      --hot:#67e8f9;
+      --hot-in:#111;
+      --selection:#ffe05c;
+    }
+    [data-high-contrast] :is(.frame,.content,.stage,.rail,.overlay,.settings-section){background:#000}
+    [data-theme="dark"][data-high-contrast] :is(button,select,textarea,input[type=text]){
+      border:2px solid var(--edge);color:var(--ink)
+    }
+    [data-theme="dark"][data-high-contrast] :is(button,select,textarea,input[type=text]):disabled{
+      background:#222;color:#ccc;border-color:#999
+    }
+    [data-theme="dark"][data-high-contrast] :is(.navitem,.mode,.chip,.layout-option,.tbtn)[aria-selected="true"],
+    [data-theme="dark"][data-high-contrast] :is(.mode,.layout-option,.tbtn)[aria-pressed="true"]{
+      background:var(--selection);color:#000;border-color:var(--selection);box-shadow:none
+    }
+    [data-high-contrast] :is(.said p,.book-preview-panel,.settings-section){border:2px solid var(--edge)}
+    [data-theme="dark"][data-high-contrast] .group-head{color:var(--ink);border-image:none}
+    [data-theme="dark"][data-high-contrast] :focus-visible{outline:3px solid var(--hot)!important}
+    [data-high-contrast] :is(input[type=range],.settings-choice input){accent-color:var(--selection)}
+    [data-high-contrast] .dwell-indicator .dwell-border-track{stroke:#777}
+    [data-high-contrast] .dwell-indicator .dwell-border-progress{stroke:var(--hot);stroke-width:4}
+  }
+  @media(forced-colors:active){
+    [data-high-contrast] .dwell-indicator .dwell-border-track{stroke:GrayText}
+    [data-high-contrast] .dwell-indicator .dwell-border-progress{stroke:Highlight}
+  }
 </style>
 </head>
 <body>
@@ -1189,7 +1228,7 @@
       <fieldset class="settings-section">
         <legend>Appearance &amp; layout</legend>
         <label for="settingsTheme">Theme</label>
-        <select id="settingsTheme"><option value="auto">Device default</option><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option></select>
+        <select id="settingsTheme"><option value="auto">Device default</option><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option><option value="high-contrast">High Contrast</option></select>
         <label for="settingsLayout">Phrase layout</label>
         <select id="settingsLayout"><option value="classic">All phrases</option><option value="nested">Grouped phrases</option></select>
         <p class="settings-hint">All phrases shows the selected topic at once. Grouped phrases opens smaller groups first.</p>
@@ -3037,7 +3076,9 @@ function applyTheme(){
   if(!theme.value) theme.value = 'auto';
   const sysDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
   const resolved = theme.value === 'auto' ? (sysDark ? 'dark' : 'light') : theme.value;
-  document.documentElement.setAttribute('data-theme', resolved);
+  const highContrast = resolved === 'high-contrast';
+  document.documentElement.setAttribute('data-theme', highContrast ? 'dark' : resolved);
+  document.documentElement.toggleAttribute('data-high-contrast', highContrast);
 }
 
 function applyTopicSettings(){
