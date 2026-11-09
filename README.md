@@ -73,7 +73,7 @@ Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors 
 
 1. **Immediate communication:** Select **Quick answers**, open a topic, and tap a complete phrase. The device speaks it aloud.
 2. **Message composition:** Select **Tap builds**, combine phrases and the **Add on** category, and use **Say it**.
-3. **Navigation and efficiency:** Preview a topic without opening it, use **☆ Star** after speaking a phrase, and visit **★ Starred** or **Used most**. Switch between **Grouped phrases** and **All phrases**.
+3. **Navigation and efficiency:** Preview a topic without opening it, use the **☆** on a phrase tile, and visit **★ Starred** or **Used most**. Switch between **Grouped phrases** and **All phrases**.
 4. **Communication alternatives:** Use **Show big** for large-text communication, or **Card** to show a customizable introduction to another person.
 5. **Personalization and motor access:** Open **Settings** to select an available device voice, change speaking speed, and turn on **Larger buttons and touch targets**. Use **Organize** to add or remove phrase tiles.
 
@@ -220,7 +220,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v12` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v13` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error

@@ -165,6 +165,7 @@
   .grid.compact{grid-template-columns:repeat(3,1fr);gap:7px}
   .grid.compact .tile{min-height:56px;font-size:15px;padding:9px 6px;
                       align-items:center;justify-content:center;text-align:center;border-left-width:4px}
+  .grid .tile:has(.star-btn){padding-inline-end:43px}
   .star-btn{
     position:absolute;
     top:6px;
@@ -610,8 +611,8 @@
   .toolbar .tbtn{min-height:38px;padding:6px 10px}
   .stop-voice{font-weight:bold}
   .searchbox input{height:38px;font-size:14px}
-  .actions.speak-three{grid-template-columns:1fr 1fr .82fr}
-  .actions.speak-three .act{min-width:0;min-height:52px;padding:9px 5px;font-size:clamp(13px,1.7vw,17px)}
+  .actions.speak-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .actions.speak-actions .act{min-width:0;min-height:52px;padding:9px 5px;font-size:clamp(13px,1.7vw,17px)}
   .chip{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
   .dock button{min-height:50px}
   .nested-wrap,.nested-tab,.nested-grid,.nested-phrase,.book-button{min-width:0}
@@ -654,7 +655,7 @@
   @media (max-width:370px){
     .app-identity{width:100%;border:0;margin:0}
     .nested-phrase{font-size:14px}
-    .actions.speak-three .act{font-size:12px}
+    .actions.speak-actions .act{font-size:12px}
   }
 
   .access-toggle{display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px}
@@ -876,7 +877,7 @@
   }
 
   /* GIF affordance: preserve original phrase tile dimensions and layout. */
-  .actions.speak-three.has-gif{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .actions.speak-actions.has-gif{grid-template-columns:repeat(3,minmax(0,1fr))}
   .gif-marker{position:absolute;right:7px;bottom:5px;padding:2px 5px;border:1px solid #6483B1;border-radius:3px;background:#E3EDFF;color:#18437E;font-size:11px;font-weight:bold;pointer-events:none}
   .tile.has-gif,.nested-phrase.has-gif{padding-bottom:26px}
   .nested-phrase{position:relative}
@@ -890,7 +891,7 @@
   .gif-close{min-width:180px;min-height:54px;padding:10px 18px;border:2px solid #5579AC;border-radius:5px;background:var(--btn);color:var(--ink);font-size:19px;font-weight:bold}
   .gif-sheet-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
   #gifSheet select,#gifSheet input{min-height:44px}
-  @media(max-width:560px){.actions.speak-three.has-gif{grid-template-columns:repeat(2,minmax(0,1fr))}.gif-frame img{max-height:68dvh}}
+  @media(max-width:560px){.actions.speak-actions.has-gif{grid-template-columns:repeat(2,minmax(0,1fr))}.gif-frame img{max-height:68dvh}}
 
 .tile.phrase-large{grid-column:span 2;min-height:120px}
 .phrase-edit-controls{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;width:100%;margin-top:8px}
@@ -999,11 +1000,10 @@
           </div>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
           <div class="mode-help" id="modeHelp" role="status" aria-live="polite" aria-atomic="true">Tap a phrase to hear it immediately. Say again repeats the last phrase.</div>
-          <div class="actions speak-three" id="speakActions">
+          <div class="actions speak-actions" id="speakActions">
              <button class="act" id="sayAgain" disabled>Say again</button>
              <button class="act secondary" id="showBig" disabled>Show big</button>
              <button class="act secondary" id="showGif" hidden disabled>Show GIF</button>
-             <button class="act" id="favCurrent" disabled aria-label="Star last spoken phrase">☆ Star</button>
            </div>
           <div class="actions three" id="buildActions" hidden>
             <button class="act" id="buildSay" disabled>Say it</button>
@@ -1196,7 +1196,7 @@
       <ol>
         <li><strong>Speak immediately:</strong> choose Quick answers, open a topic, and tap a phrase.</li>
         <li><strong>Build a message:</strong> choose Tap builds, combine phrases or add-ons, then Say it.</li>
-        <li><strong>Find useful phrases:</strong> preview topics, star spoken phrases, use Used most, or switch navigation styles.</li>
+        <li><strong>Find useful phrases:</strong> preview topics, use the star on a phrase tile, use Used most, or switch navigation styles.</li>
         <li><strong>Communicate without sound:</strong> use Show big or the customizable Card.</li>
         <li><strong>Personalize:</strong> use Organize for phrases and Settings for speech, appearance, accessibility, and backups.</li>
       </ol>
@@ -1890,10 +1890,6 @@ function renderSaid(){
     el.classList.add('empty');
   }
   document.getElementById('sayAgain').disabled = !lastSaid;
-  const fav = document.getElementById('favCurrent');
-  fav.disabled = !lastSaid;
-  fav.textContent = lastSaid && isStarred(lastSaid) ? '★ Starred' : '☆ Star';
-  fav.setAttribute('aria-label', lastSaid && isStarred(lastSaid) ? 'Remove last spoken phrase from favorites' : 'Save last spoken phrase to favorites');
   document.getElementById('showBig').disabled  = !lastSaid;
   const hasGif = !!gifFor(lastSaid);
   document.getElementById('showGif').hidden = !hasGif;
@@ -1992,7 +1988,7 @@ function makeTile(p, cat, noDel){
     else { speak(p); bump(p); }
   };
 
-  if(settings.uiStyle === 'classic' && !editing){
+  if(!editing){
     const star = document.createElement('span');
     star.className = 'star-btn';
     star.textContent = isStarred(p) ? '★' : '☆';
@@ -2457,7 +2453,6 @@ document.getElementById('buildSay').onclick = ()=>{ if(buffer){ speak(buffer); b
 document.getElementById('buildExpand').onclick = ()=>{ if(buffer) openOptions(buffer); };
 document.getElementById('buildClear').onclick = ()=>{ buffer=''; renderSaid(); };
 document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
-document.getElementById('favCurrent').onclick = ()=>{ if(lastSaid) toggleStar(lastSaid); };
 document.getElementById('stopBtn').onclick = ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); };
 document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);
 document.getElementById('showGif').onclick = ()=> showGif(lastSaid);
