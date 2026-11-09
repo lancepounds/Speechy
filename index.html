@@ -13,6 +13,7 @@
 <style>
   /* ================= Luna (Windows XP style) ================= */
   :root{
+    --classic-button-scale:var(--classic-saved-scale,.8);
     --ink:#000000;
     --ink-soft:#444444;
     --face:#ECE9D8;           /* XP dialog beige */
@@ -673,6 +674,10 @@
     [data-large-targets="true"] .grid.phrasebook{grid-template-columns:1fr 1fr}
   }
 
+  [data-target-size="2"] #grid{--classic-button-scale:calc(var(--classic-saved-scale,.8) * 1.25)}
+  [data-target-size="2"] :is(.nested-phrase,.book-button,.grid.phrasebook .tile){min-height:152px;font-size:22px}
+  [data-target-size="2"] .chip{min-height:62px;font-size:17px}
+
   /* Adjustable All phrases tiles: size influences height, padding, text and columns. */
   .classic-size-bar{
     display:flex;align-items:center;gap:9px;flex-wrap:wrap;
@@ -710,7 +715,7 @@
     font-size:clamp(13px,calc(17px * var(--classic-button-scale,.8)),24px);
     border-left-width:4px;
   }
-  /* The existing Larger buttons setting remains effective; slider still scales it. */
+  /* All phrases sizing and the shared touch-target slider work together. */
   html[data-ui-style="classic"][data-large-targets="true"] #grid.grid:not(.phrasebook){
     grid-template-columns:repeat(auto-fit,minmax(min(100%,clamp(165px,calc(240px * var(--classic-button-scale,.8)),370px)),1fr));
   }
@@ -1268,8 +1273,9 @@
       </fieldset>
       <fieldset id="settingsAccess" tabindex="-1" class="settings-section settings-wide">
         <legend>Accessibility &amp; dwell</legend>
-        <label class="settings-choice" for="largeTargets"><input id="largeTargets" type="checkbox">Larger buttons and touch targets</label>
-        <p class="settings-hint">Uses fewer columns and more room for each phrase.</p>
+        <label for="targetSize">Button and touch target size <output id="targetSizeLabel" for="targetSize">Standard</output></label>
+        <input type="range" id="targetSize" min="0" max="2" step="1" value="0" aria-valuetext="Standard" aria-describedby="targetSizeHint">
+        <p class="settings-hint" id="targetSizeHint">Choose Standard, Large, or Extra large. Larger sizes give buttons more room in both phrase layouts.</p>
         <label class="settings-choice" for="settingsDwellEnabled"><input id="settingsDwellEnabled" type="checkbox">Enable Speechy dwell</label>
         <label for="dwellDuration">Dwell delay <output id="dwellDurationLabel" for="dwellDuration">1.5 seconds</output></label>
         <input type="range" id="dwellDuration" min="800" max="3000" step="100" value="1500">
@@ -2707,7 +2713,6 @@ function syncSettingsControls(){
   document.getElementById('rate').value = settings.rate;
   document.getElementById('rateLabel').textContent = Number(settings.rate).toFixed(2) + '×';
   document.getElementById('cardEdit').value = settings.card;
-  document.getElementById('largeTargets').checked = !!settings.largeTargets;
   const voice = document.getElementById('voiceSel');
   voice.value = voices.some(v=>v.voiceURI === settings.voiceURI) ? settings.voiceURI : '';
   document.getElementById('settingsLayout').value = settings.uiStyle === 'classic' ? 'classic' : 'nested';
@@ -2787,8 +2792,9 @@ document.getElementById('rate').oninput = e=>{
   save();
 };
 document.getElementById('voiceSel').onchange = e=>{settings.voiceURI=e.target.value||null;save();};
-document.getElementById('largeTargets').onchange = e=>{
-  settings.largeTargets=e.target.checked;
+document.getElementById('targetSize').oninput = event=>{
+  settings.targetSize = event.target.valueAsNumber;
+  settings.largeTargets = settings.targetSize > 0;
   applyAccessSettings();save();renderGrid();measure();
 };
 document.getElementById('settingsTheme').onchange = e=>{settings.theme=e.target.value;applyTheme();save();};
@@ -2886,7 +2892,7 @@ function applyClassicButtonSize(){
     ? Math.min(150, Math.max(60, Math.round(saved / 5) * 5))
     : CLASSIC_SIZE_DEFAULT;
   settings.classicButtonSize = normalized;
-  document.documentElement.style.setProperty('--classic-button-scale', (normalized / 100).toFixed(2));
+  document.documentElement.style.setProperty('--classic-saved-scale', (normalized / 100).toFixed(2));
   const control = document.getElementById('classicButtonSize');
   const value = document.getElementById('classicButtonSizeValue');
   if(control) control.value = String(normalized);
@@ -3127,8 +3133,14 @@ document.getElementById('dwellDuration').addEventListener('input',event => {
 });
 
 function applyAccessSettings(){
-  document.documentElement.setAttribute('data-large-targets', settings.largeTargets ? 'true' : 'false');
-  document.getElementById('largeTargets').checked = !!settings.largeTargets;
+  const labels = ['Standard', 'Large', 'Extra large'];
+  const size = [0, 1, 2].includes(settings.targetSize) ? settings.targetSize : Number(!!settings.largeTargets);
+  const slider = document.getElementById('targetSize');
+  document.documentElement.dataset.targetSize = size;
+  document.documentElement.dataset.largeTargets = String(size > 0);
+  slider.value = size;
+  slider.setAttribute('aria-valuetext', labels[size]);
+  document.getElementById('targetSizeLabel').textContent = labels[size];
 }
 function applyTheme(){
   const theme = document.getElementById('settingsTheme');

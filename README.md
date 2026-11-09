@@ -14,7 +14,7 @@ Choose **Settings** beside the Speechy name at the top. The section shortcuts ju
   a voice leaves the current communication message in place.
 - **Appearance & layout:** Device default / Light / Dark / Sepia / High Contrast theme, All phrases /
   Grouped phrases, topic visibility and pinning, and All phrases button sizing.
-- **Accessibility & dwell:** larger touch targets, Speechy dwell on/off, its
+- **Accessibility & dwell:** a Standard / Large / Extra large touch-target slider, Speechy dwell on/off, its
   0.8–3.0 second delay, and iPad Eye Tracking guidance.
 - **Phrases & GIFs:** shortcuts to organize phrase tiles and manage GIFs, plus the text shown by the Card button.
 - **App & help:** installation, offline access, full screen where available, and the demo guide.
@@ -76,7 +76,7 @@ Open Speechy in a full browser tab and choose **Demo guide**. It walks visitors 
 2. **Message composition:** Select **Tap builds**, combine phrases and the **Add on** category, and use **Say it**.
 3. **Navigation and efficiency:** Preview a topic without opening it, use the **☆** on a phrase tile, and visit **★ Starred** or **Used most**. Switch between **Grouped phrases** and **All phrases**.
 4. **Communication alternatives:** Use **Show big** for large-text communication, or **Card** to show a customizable introduction to another person.
-5. **Personalization and motor access:** Open **Settings** to select an available device voice, change speaking speed, and turn on **Larger buttons and touch targets**. Use **Organize** to add or remove phrase tiles.
+5. **Personalization and motor access:** Open **Settings** to select an available device voice, change speaking speed, and adjust **Button and touch target size**. Use **Organize** to add or remove phrase tiles.
 
 Use **■ Stop voice** to interrupt speech at any point. The entire demo works without an account or a clinical setup. Allow sound and test a phrase before a presentation; browser and device speech voices vary.
 
@@ -100,13 +100,13 @@ Open **Settings → Appearance & layout** and choose **All phrases**. Its **Butt
 - **Reset size** returns the board to 80%.
 - The chosen size is saved locally with the existing Speechy preferences and is restored when you reopen the page.
 - This control applies only to All phrases; the Grouped phrases stays unchanged.
-- The **Larger buttons and touch targets** preference under Settings remains available and works together with this control.
+- The **Button and touch target size** slider under Accessibility works together with this control.
 
 ## Compact phrase buttons
 
 Phrase buttons now use less vertical padding and a smaller minimum height, especially in **All phrases**. The layout keeps phrase text visible and allows longer messages to wrap instead of clipping them. On wider screens, longer All phrases phrases use up to two grid columns rather than automatically occupying an entire row.
 
-The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, turn on **Larger buttons and touch targets** under Settings. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
+The **Button size** slider still controls the scale; the default compact size is still **80%**. If larger touch targets are easier to use, adjust **Button and touch target size** under Settings. Grouped spoken phrase choices also have less unused padding without changing the topic buttons.
 
 ## Dwell to tap on pointer and touch devices
 
@@ -173,7 +173,7 @@ This project does not claim HIPAA compliance, clinical validation, switch scanni
 - Speak a phrase, Stop voice, Say again, Star it, and open the Starred category.
 - Toggle Tap builds, combine phrases, Say it, and Clear.
 - Test Show big, Card, Type something, Organize, and settings.
-- Enable Larger buttons, test light/dark theme, and reload to confirm settings persist.
+- Move the touch-target slider to Large or Extra large, test light/dark theme, and reload to confirm settings persist.
 - Open Make a sentence on GitHub Pages and verify it offers the original wording without an API error.
 - Use Escape to dismiss dialogs and confirm keyboard focus stays inside an open dialog.
 
@@ -221,7 +221,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v16` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v17` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
