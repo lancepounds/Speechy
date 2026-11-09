@@ -1477,7 +1477,9 @@ const BASE = {
     "I'll come back to that in a minute.",
     "Let me start that over.",
     "Either one works for me.",
-    "Can I let you know later?"
+    "Can I let you know later?",
+    "I tapped the wrong phrase.",
+    "Could you come back to me after the next person?"
   ],
   now:[
     "Give me a second and I'll get there.",
@@ -1495,7 +1497,9 @@ const BASE = {
     "Please let me finish what I was saying.",
     "Could you ask me one question at a time?",
     "Could you move that a little closer to me?",
-    "Please ask before helping me."
+    "Please ask before helping me.",
+    "I'd like to try it myself first.",
+    "Could you hold this steady while I use it?"
   ],
   ask:[
     "What do you think about that?",
@@ -1575,7 +1579,8 @@ const BASE = {
     "I'll rest on the record for that point.",
     "May I finish my answer before we move on?",
     "I'll put my question in the chat.",
-    "Could you read that part back for the record?"
+    "Could you read that part back for the record?",
+    "Can you see what I typed in the chat?"
   ],
   church:[
     "It's good to see you.",
@@ -1608,7 +1613,8 @@ const BASE = {
     "We're ready for the check whenever you are.",
     "That was very good, thank you.",
     "Can I show you my order on this screen?",
-    "Could we have a table with a little more room to get in?"
+    "Could we have a table with a little more room to get in?",
+    "Can I pay at the table?"
   ],
   around:[
     "Which way is the elevator?",
@@ -1625,7 +1631,8 @@ const BASE = {
     "I'm parked right out front.",
     "Is there a step-free way to get inside?",
     "Where is the nearest accessible restroom?",
-    "Could we stop somewhere so I can get out and stretch?"
+    "Could we stop somewhere so I can get out and stretch?",
+    "Is there somewhere I can sit while I wait?"
   ],
   appts:[
     "Could you write those instructions down for me?",
@@ -1640,7 +1647,8 @@ const BASE = {
     "I'd like to have that in writing before I decide.",
     "What should I do if this gets worse before my next visit?",
     "Who should I contact if I have a question after I leave?",
-    "I'd like to go through my questions one at a time."
+    "I'd like to go through my questions one at a time.",
+    "Could we start with the main reason I came in today?"
   ]
 };
 
@@ -1920,9 +1928,9 @@ function phrasesFor(cat){
 const PHRASE_GROUPS = {
   quick:[
     ['Yes, no & decisions',[0,1,2,3,5,16,17]],
-    ['Time to think',[4,8,14]],
+    ['Time to think',[4,8,14,19]],
     ['Thanks & well-being',[6,9]],
-    ['Clarify & start again',[7,10,11,12,13,15]]
+    ['Clarify & start again',[7,10,11,12,13,15,18]]
   ],
   addon:[
     ['Politeness & urgency',[0,1,2,3,4,5,6]],
@@ -1932,7 +1940,7 @@ const PHRASE_GROUPS = {
   ],
   now:[
     ['Speech & listening',[0,1,2,3,10,12,13]],
-    ['Breaks & comfort',[4,5,6,7,11,14,15]],
+    ['Breaks & comfort',[4,5,6,7,11,14,15,16,17]],
     ['Typing & showing',[8,9]]
   ],
   ask:[
@@ -1956,7 +1964,7 @@ const PHRASE_GROUPS = {
   hearing:[
     ['Appearances & arguments',[0,6,7,11]],
     ['Pauses & recesses',[1,2,9,10,12]],
-    ['Repeating & responding',[3,4,8,13,14]],
+    ['Repeating & responding',[3,4,8,13,14,15]],
     ['Exhibits',[5]]
   ],
   church:[
@@ -1967,15 +1975,15 @@ const PHRASE_GROUPS = {
   food:[
     ['Menus & ordering',[0,1,2,3,4,5,12]],
     ['Seating & comfort',[7,13]],
-    ['Checks, boxes & thanks',[6,8,9,10,11]]
+    ['Checks, boxes & thanks',[6,8,9,10,11,14]]
   ],
   around:[
-    ['Directions & check-in',[0,5,6,8,9,12,13]],
+    ['Directions & check-in',[0,5,6,8,9,12,13,15]],
     ['Driving, travel & timing',[1,2,10,11,14]],
     ['Contact, pauses & thanks',[3,4,7]]
   ],
   appts:[
-    ['Instructions & follow-up',[0,1,5,6,7,9,10,11]],
+    ['Instructions & follow-up',[0,1,5,6,7,9,10,11,13]],
     ['Speech, energy & timing',[2,3,4,12]],
     ['Bringing Janae',[8]]
   ]
