@@ -45,13 +45,18 @@ You can replace or remove a phrase's GIF through **GIFs** at any time. The link 
 
 ## Choose a phrase layout
 
+**Quick Board** keeps six phrases in a two-column grid. Choose **Edit slots**
+or open **Settings → Appearance → Edit Quick Board slots** to pick the phrases.
+**More phrases** returns to the last full layout. Slots save on this device and
+work with touch, keyboard, and dwell. Both tap modes work on Quick Board.
+
 - **All phrases** shows every phrase in the selected topic at once. Use it for
   direct access without opening smaller groups.
 - **Grouped phrases** shows smaller groups with labels describing the buttons
   inside. For example, Right now has **Speech & listening**, **Breaks & comfort**,
   and **Typing & showing**. Open a named group, then choose a phrase.
 
-Both choices have a short explanation on their buttons and a visible selected
+Each layout has a short explanation on their buttons and a visible selected
 state. They are also available under **Settings → Appearance & layout**. Both layouts work with
 **Tap speaks** and **Tap builds**. Layout choice changes how phrases are shown;
 it does not change the saved phrases or the tapping mode. Existing layout
@@ -221,7 +226,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v19` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v20` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error

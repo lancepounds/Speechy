@@ -87,6 +87,26 @@ const root=path.resolve(__dirname,'..');
       }
       await page.screenshot({path:path.join(screenshots,`${name}.png`)});
     }
+    await page.locator('#layoutQuick').click();
+    const slots = page.locator('.quick-board .quick-phrase');
+    const initialSlots = await slots.allTextContents();
+    assert.equal(initialSlots.length,6);
+    assert.equal(await slots.first().innerText(),'Please let me finish what I was saying.');
+    const positions = await slots.evaluateAll(buttons=>buttons.map(button=>[button.offsetLeft,button.offsetTop]));
+    assert.equal(new Set(positions.map(([x])=>x)).size,2);
+    assert.equal(new Set(positions.map(([,y])=>y)).size,3);
+    await page.locator('#modeBuild').click();
+    await slots.first().press('Enter');
+    assert.equal(await page.locator('#saidText').innerText(),initialSlots[0]);
+    await page.getByRole('button',{name:'Edit slots',exact:true}).click();
+    await page.getByLabel('Slot 2',{exact:true}).selectOption('Could I see a menu, please?');
+    await page.locator('#setClose').click();
+    await page.waitForFunction(()=>document.getElementById('saveStatus').textContent==='Saved on this device');
+    await page.reload();await ready();
+    initialSlots[1]='Could I see a menu, please?';
+    assert.deepEqual(await slots.allTextContents(),initialSlots);
+    await page.getByRole('button',{name:'More phrases',exact:true}).click();
+    assert.equal(await page.locator('#layoutGrouped').getAttribute('aria-pressed'),'true');
     assert.deepEqual(errors,[],'no runtime errors');
     console.log('PASS: content titles, previews/heading/back, complete phrase coverage, edited/custom/favorite/recent phrases, saved order, All phrases unchanged, desktop/iPad/phone title fit.');
     console.log('Group screenshots:',screenshots);

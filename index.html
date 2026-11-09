@@ -1043,6 +1043,20 @@
     .toolbar-brand{order:-2;justify-content:space-between;flex:1 0 100%;margin-right:0}
     .toolbar-brand .app-identity{width:auto;border:0;margin:0}
   }
+  .content:has(.quick-board) :is(.stage,.rail){position:static}
+  #grid.quick-board{grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+  .quick-board .quick-phrase{
+    min-width:0;min-height:86px;padding:12px;font-size:clamp(15px,2vw,20px);
+    align-items:center;justify-content:center;text-align:center;overflow-wrap:anywhere
+  }
+  [data-large-targets="true"] .quick-board .quick-phrase{min-height:118px}
+  [data-target-size="2"] .quick-board .quick-phrase{min-height:146px;font-size:22px}
+  .quick-board .quick-controls{grid-column:1/-1;display:grid;grid-template-columns:2fr 1fr;gap:8px}
+  .quick-controls button{min-width:0;min-height:52px}
+  @media(max-width:420px){
+    .quick-board .quick-phrase{padding:8px}
+    .quick-controls button{font-size:14px}
+  }
 </style>
 </head>
 <body>
@@ -1099,6 +1113,10 @@
             <button id="layoutGrouped" class="act layout-option" aria-pressed="true" aria-labelledby="layoutGroupedName" aria-describedby="layoutGroupedDescription">
               <span id="layoutGroupedName">Grouped phrases</span>
               <span class="layout-description" id="layoutGroupedDescription">Open smaller groups of phrases</span>
+            </button>
+            <button id="layoutQuick" class="act layout-option" aria-pressed="false" aria-labelledby="layoutQuickName" aria-describedby="layoutQuickDescription">
+              <span id="layoutQuickName">Quick Board</span>
+              <span class="layout-description" id="layoutQuickDescription">Six phrases you choose</span>
             </button>
           </div>
           <p id="saidText" class="empty">Tap a phrase and it speaks.</p>
@@ -1257,8 +1275,13 @@
         <label for="settingsTheme">Theme</label>
         <select id="settingsTheme"><option value="auto">Device default</option><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option><option value="high-contrast">High Contrast</option></select>
         <label for="settingsLayout">Phrase layout</label>
-        <select id="settingsLayout"><option value="classic">All phrases</option><option value="nested">Grouped phrases</option></select>
-        <p class="settings-hint">All phrases shows the selected topic at once. Grouped phrases opens smaller groups first.</p>
+        <select id="settingsLayout"><option value="classic">All phrases</option><option value="nested">Grouped phrases</option><option value="quick">Quick Board</option></select>
+        <p class="settings-hint">All phrases shows the selected topic at once. Grouped phrases opens smaller groups first. Quick Board keeps six chosen phrases in fixed positions.</p>
+        <details id="quickBoardEditor" class="settings-help">
+          <summary>Edit Quick Board slots</summary>
+          <p class="settings-hint">Choose a phrase for each slot. Positions go left to right, then top to bottom.</p>
+          <div id="quickSlotFields"></div>
+        </details>
         <label class="settings-choice" for="settingsTopicsVisible"><input id="settingsTopicsVisible" type="checkbox">Show topic navigation</label>
         <label class="settings-choice" for="settingsTopicsPinned"><input id="settingsTopicsPinned" type="checkbox">Keep the topic row visible while scrolling</label>
         <p class="settings-hint">Pinning applies to the horizontal topic row on smaller screens.</p>
@@ -1696,6 +1719,14 @@ let removed = {};     // {catId: [phrases removed from BASE]}
 let counts  = {};     // {phrase: n}
 const DEFAULT_STARRED = ["How can courts determine whether an AI system violates equal protection principles when discriminatory outcomes emerge without evidence of discriminatory intent?"];      // default starred phrase
 let starred = [...DEFAULT_STARRED];
+const DEFAULT_QUICK_PHRASES = [
+  "Please let me finish what I was saying.",
+  "I tapped the wrong phrase.",
+  "Could you say that again, please?",
+  "I need to take a short break.",
+  "I'm going to type this out instead.",
+  "Could you come back to me after the next person?"
+];
 const DEFAULT_SETTINGS = {rate:0.95, voiceURI:null, card:CARD_DEFAULT, theme:'auto', uiStyle:'nested', largeTargets:false, classicButtonSize:80, topicsVisible:true, topicsPinned:true, topicWidth:200, dwellEnabled:false, dwellMs:1500};
 let settings = {...DEFAULT_SETTINGS};
 let activeCat = CATS.some(c=>c.id===location.hash.slice(1)) ? location.hash.slice(1) : 'now';
@@ -2095,6 +2126,7 @@ function addToBuffer(fragment, isAddon){
 }
 
 function selectCat(c){
+  if(settings.uiStyle === 'quick' && !editing) setUiStyle(quickReturnStyle());
   activeCat = c.id;
   if(c.addon){
     if(mode !== 'build') mode = 'build';
@@ -2126,6 +2158,10 @@ function renderRail(){
     b.setAttribute('aria-selected', c.id===activeCat);
     b.style.setProperty('--cat', c.color);
     b.onclick = ()=>{
+      if(settings.uiStyle === 'quick' && !editing){
+        selectCat(c);
+        return;
+      }
       activeCat = c.id;
       if(c.addon){
         if(mode !== 'build') mode = 'build';
@@ -2266,6 +2302,57 @@ function renderClassicGrid(grid, cat){
   }
 }
 
+function quickBoardPhrases(){
+  const saved = Array.isArray(settings.quickPhrases) ? settings.quickPhrases : [];
+  return DEFAULT_QUICK_PHRASES.map((fallback,index)=>
+    typeof saved[index] === 'string' && saved[index].trim() ? saved[index] : fallback
+  );
+}
+
+function quickReturnStyle(){
+  return settings.quickReturnStyle === 'classic' ? 'classic' : 'nested';
+}
+
+function renderQuickBoard(grid){
+  grid.className = 'grid quick-board';
+  for(const phrase of quickBoardPhrases()){
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'tile quick-phrase';
+    button.style.setProperty('--cat','var(--c-now)');
+    button.textContent = phrase;
+    if(gifFor(phrase)) addGifMarker(button);
+    button.onclick = ()=>{
+      if(mode === 'build') addToBuffer(phrase,false);
+      else { speak(phrase); bump(phrase); }
+    };
+    grid.appendChild(button);
+  }
+  const controls = document.createElement('div');
+  controls.className = 'quick-controls';
+  const more = document.createElement('button');
+  more.type = 'button';
+  more.className = 'act';
+  more.textContent = 'More phrases';
+  more.onclick = ()=>{
+    const style = quickReturnStyle();
+    setUiStyle(style);
+    document.getElementById(style === 'classic' ? 'layoutAll' : 'layoutGrouped').focus();
+  };
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'act';
+  edit.textContent = 'Edit slots';
+  edit.onclick = ()=>{
+    openSettings();
+    const editor = document.getElementById('quickBoardEditor');
+    editor.open = true;
+    editor.querySelector('summary').focus();
+  };
+  controls.append(more,edit);
+  grid.appendChild(controls);
+}
+
 function renderGrid(){
   const grid = document.getElementById('grid');
   const cat = CATS.find(c=>c.id===activeCat);
@@ -2286,6 +2373,13 @@ function renderGrid(){
     }
     hits.forEach(h=> grid.appendChild(makeTile(h.p, h.cat, true)));
     setStatus(hits.length, 'matching "' + query + '"');
+    return;
+  }
+
+  if(settings.uiStyle === 'quick' && !editing){
+    if(crumb) crumb.textContent = 'Quick Board';
+    setStatus(DEFAULT_QUICK_PHRASES.length, 'Quick Board');
+    renderQuickBoard(grid);
     return;
   }
 
@@ -2750,13 +2844,52 @@ document.getElementById('gifRemove').onclick=()=>{
 
 const setSheet = document.getElementById('setSheet');
 let settingsReturnFocus = null;
+const quickBoardEditor = document.getElementById('quickBoardEditor');
+function renderQuickSlotFields(){
+  const fields = document.getElementById('quickSlotFields');
+  const options = document.createDocumentFragment();
+  const listed = new Set();
+  for(const cat of CATS){
+    if(cat.id === 'recent' || cat.addon) continue;
+    const group = document.createElement('optgroup');
+    group.label = cat.name;
+    for(const phrase of phrasesFor(cat.id)){
+      if(listed.has(phrase)) continue;
+      listed.add(phrase);
+      group.appendChild(new Option(phrase,phrase));
+    }
+    if(group.children.length) options.appendChild(group);
+  }
+  fields.replaceChildren();
+  const pins = quickBoardPhrases();
+  pins.forEach((phrase,index)=>{
+    const select = document.createElement('select');
+    select.id = 'quickSlot' + (index + 1);
+    select.appendChild(options.cloneNode(true));
+    if(!listed.has(phrase)) select.prepend(new Option(phrase,phrase));
+    select.value = phrase;
+    const label = document.createElement('label');
+    label.htmlFor = select.id;
+    label.textContent = 'Slot ' + (index + 1);
+    select.onchange = ()=>{
+      pins[index] = select.value;
+      settings.quickPhrases = pins;
+      save();
+      if(settings.uiStyle === 'quick' && !editing) renderGrid();
+    };
+    fields.append(label,select);
+  });
+}
+quickBoardEditor.addEventListener('toggle',()=>{
+  if(quickBoardEditor.open) renderQuickSlotFields();
+});
 function syncSettingsControls(){
+  if(quickBoardEditor.open) renderQuickSlotFields();
   document.getElementById('rate').value = settings.rate;
   document.getElementById('rateLabel').textContent = Number(settings.rate).toFixed(2) + '×';
   document.getElementById('cardEdit').value = settings.card;
   const voice = document.getElementById('voiceSel');
   voice.value = voices.some(v=>v.voiceURI === settings.voiceURI) ? settings.voiceURI : '';
-  document.getElementById('settingsLayout').value = settings.uiStyle === 'classic' ? 'classic' : 'nested';
   document.getElementById('settingsTopicsVisible').checked = settings.topicsVisible !== false;
   document.getElementById('settingsTopicsPinned').checked = settings.topicsPinned !== false;
   document.getElementById('settingsDwellEnabled').checked = !!settings.dwellEnabled;
@@ -2806,7 +2939,9 @@ document.getElementById('setClose').onclick = closeSettings;
 document.getElementById('settingsCloseTop').onclick = closeSettings;
 setSheet.addEventListener('cancel',event=>{event.preventDefault();closeSettings();});
 setSheet.addEventListener('close',()=>{
-  if(settingsReturnFocus?.isConnected) settingsReturnFocus.focus();
+  if(settingsReturnFocus){
+    (settingsReturnFocus.isConnected ? settingsReturnFocus : document.getElementById('layoutQuick')).focus();
+  }
 });
 document.getElementById('cardEdit').addEventListener('input',e=>{settings.card=e.target.value;save();});
 document.getElementById('setTest').onclick = ()=>{
@@ -3213,25 +3348,37 @@ document.getElementById('topicsToggle').addEventListener('click', () => {
   save();
 });
 function updateStyleButton(){
-  const all = settings.uiStyle === 'classic';
-  document.documentElement.setAttribute('data-ui-style', all ? 'classic' : 'nested');
+  const style = ['classic','nested','quick'].includes(settings.uiStyle) ? settings.uiStyle : 'nested';
+  const all = style === 'classic';
+  document.documentElement.setAttribute('data-ui-style', style);
   document.getElementById('classicSizeBar').hidden = !all;
-  document.getElementById('settingsLayout').value = all ? 'classic' : 'nested';
+  document.getElementById('settingsLayout').value = style;
   document.getElementById('settingsSizeHint').hidden = all;
   document.getElementById('layoutAll').setAttribute('aria-pressed', String(all));
-  document.getElementById('layoutGrouped').setAttribute('aria-pressed', String(!all));
+  document.getElementById('layoutGrouped').setAttribute('aria-pressed', String(style === 'nested'));
+  document.getElementById('layoutQuick').setAttribute('aria-pressed', String(style === 'quick'));
 }
 function setUiStyle(style){
   if(settings.uiStyle === style) return;
+  if(style === 'quick'){
+    settings.quickReturnStyle = settings.uiStyle;
+    document.getElementById('search').value = '';
+  }
   settings.uiStyle = style;
   activeSubtopic = {};
   radialPage = {};
   updateStyleButton();
   save();
   renderGrid();
+  if(style === 'quick') document.querySelector('.content').scrollTop = 0;
 }
 document.getElementById('layoutAll').onclick = ()=>setUiStyle('classic');
 document.getElementById('layoutGrouped').onclick = ()=>setUiStyle('nested');
+document.getElementById('layoutQuick').onclick = ()=>{
+  document.getElementById('search').value = '';
+  if(settings.uiStyle === 'quick') renderGrid();
+  else setUiStyle('quick');
+};
 
 if(window.matchMedia){
   try{
