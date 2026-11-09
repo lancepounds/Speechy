@@ -1029,6 +1029,15 @@
     [data-high-contrast] .dwell-indicator .dwell-border-track{stroke:GrayText}
     [data-high-contrast] .dwell-indicator .dwell-border-progress{stroke:Highlight}
   }
+  .toolbar-brand{display:flex;align-items:center;gap:4px;margin-right:8px}
+  .toolbar .settings-open{padding-inline:16px}
+  .settings-jump{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+  .settings-jump button{flex:1 1 112px;min-height:44px;padding:6px 8px;border:1px solid var(--edge);border-radius:4px;background:var(--btn);color:var(--ink);font-weight:bold}
+  .settings-section{scroll-margin-block-start:12px}
+  @media(max-width:699px){
+    .toolbar-brand{order:-2;justify-content:space-between;flex:1 0 100%;margin-right:0}
+    .toolbar-brand .app-identity{width:auto;border:0;margin:0}
+  }
 </style>
 </head>
 <body>
@@ -1036,14 +1045,16 @@
 <div class="saving-bar"><span id="saveStatus" role="status" aria-live="polite">Opening saved board…</span><button id="backupOpen" type="button" aria-haspopup="dialog">Saving &amp; backups</button></div>
 
   <div class="toolbar">
-    <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
+    <div class="toolbar-brand">
+      <div class="app-identity"><strong>Speechy</strong><span>Personal AAC phraseboard</span></div>
+      <button class="tbtn settings-open" id="setBtn" type="button" aria-haspopup="dialog" aria-controls="setSheet">Settings</button>
+    </div>
     <div class="toolbar-topic-tools" role="group" aria-label="Topic navigation controls">
       <button class="tbtn topic-tbtn" id="topicsToggle" type="button" aria-controls="rail navlist" aria-expanded="true" title="Hide or show topic navigation">▴ Hide topics</button>
     </div>
     <button class="tbtn" id="editBtn" aria-pressed="false">Organize</button>
     <button class="tbtn" id="gifManageBtn" type="button">GIFs</button>
     <span class="tsep"></span>
-    <button class="tbtn settings-open" id="setBtn" type="button" aria-haspopup="dialog" aria-controls="setSheet">Settings</button>
     <button class="tbtn dwell-toggle" id="dwellToggle" type="button" aria-pressed="false" title="Select buttons by hovering a pointer or touching and holding">Dwell: Off</button>
     <span class="tsep"></span>
     <button class="tbtn" id="installAppBtn" type="button" aria-haspopup="dialog">Install app</button>
@@ -1133,7 +1144,7 @@
 <div class="overlay" id="cardOverlay" role="dialog" aria-label="Explainer card">
   <div class="card-body">
     <p id="cardText"></p>
-    <p class="small">Tap anywhere to close. Change this card under Voice.</p>
+    <p class="small">Tap anywhere to close. Change this card in Settings → Phrases &amp; GIFs.</p>
   </div>
   <button type="button" class="gif-close" id="cardClose">Close card</button>
 </div>
@@ -1211,9 +1222,20 @@
   </header>
   <div class="settings-body">
     <p id="settingsIntro" class="settings-hint">Changes apply immediately and save on this device.</p>
+    <nav class="settings-jump" aria-label="Settings sections">
+      <button type="button" data-settings-section="settingsSpeech">Speech</button>
+      <button type="button" data-settings-section="settingsAppearance">Appearance</button>
+      <button type="button" data-settings-section="settingsAccess">Accessibility</button>
+      <button type="button" data-settings-section="settingsBoard">Phrases &amp; GIFs</button>
+      <button type="button" data-settings-section="settingsApp">App &amp; help</button>
+      <button type="button" data-settings-section="settingsRecovery">Backups</button>
+    </nav>
     <div class="settings-grid">
-      <fieldset class="settings-section">
+      <fieldset id="settingsSpeech" tabindex="-1" class="settings-section">
         <legend>Speech</legend>
+        <label for="settingsTapMode">What happens when you tap a phrase</label>
+        <select id="settingsTapMode"><option value="speak">Tap speaks</option><option value="build">Tap builds</option></select>
+        <p class="settings-hint">Speak immediately or collect phrases into a message for this session.</p>
         <label for="voiceSel">Voice</label>
         <select id="voiceSel"></select>
         <label for="rate">Speaking speed <output id="rateLabel" for="rate">0.95×</output></label>
@@ -1225,7 +1247,7 @@
         <p class="settings-hint" id="voiceNote"></p>
         <p class="settings-hint" id="voiceTestStatus" role="status" aria-live="polite"></p>
       </fieldset>
-      <fieldset class="settings-section">
+      <fieldset id="settingsAppearance" tabindex="-1" class="settings-section">
         <legend>Appearance &amp; layout</legend>
         <label for="settingsTheme">Theme</label>
         <select id="settingsTheme"><option value="auto">Device default</option><option value="light">Light</option><option value="dark">Dark</option><option value="sepia">Sepia</option><option value="high-contrast">High Contrast</option></select>
@@ -1244,7 +1266,7 @@
         </div>
         <p id="settingsSizeHint" class="settings-hint">Choose All phrases to adjust its button size.</p>
       </fieldset>
-      <fieldset class="settings-section settings-wide">
+      <fieldset id="settingsAccess" tabindex="-1" class="settings-section settings-wide">
         <legend>Accessibility &amp; dwell</legend>
         <label class="settings-choice" for="largeTargets"><input id="largeTargets" type="checkbox">Larger buttons and touch targets</label>
         <p class="settings-hint">Uses fewer columns and more room for each phrase.</p>
@@ -1254,13 +1276,27 @@
         <p class="settings-hint">Hover a pointer over a button, or touch and hold it, until the inside border fills. Short taps still work. Moving to scroll cancels a hold. The toolbar’s Dwell button is a quick on/off shortcut.</p>
         <details class="settings-help"><summary>Using iPad Eye Tracking?</summary><p>Use Dwell Control under iPad Settings → Accessibility → Eye Tracking. Leave Speechy’s Dwell off when iPadOS is doing the tapping. <a href="https://support.apple.com/guide/ipad/ipad2cd35723/ipados" target="_blank" rel="noopener">Apple’s Eye Tracking guide</a></p></details>
       </fieldset>
-      <fieldset class="settings-section settings-wide">
-        <legend>Your introduction card</legend>
+      <fieldset id="settingsBoard" tabindex="-1" class="settings-section settings-wide">
+        <legend>Phrases, GIFs &amp; introduction card</legend>
+        <p class="settings-hint">Edit and resize phrase tiles or attach an animated GIF to a phrase.</p>
+        <div class="settings-actions">
+          <button type="button" data-settings-tool="editBtn" id="settingsOrganize">Organize phrases</button>
+          <button type="button" data-settings-tool="gifManageBtn">Manage GIFs</button>
+        </div>
         <label for="cardEdit">What the Card button shows</label>
         <textarea id="cardEdit" rows="4"></textarea>
         <p class="settings-hint">Write what you want someone to know about communicating with you.</p>
       </fieldset>
-      <fieldset class="settings-section settings-wide">
+      <fieldset id="settingsApp" tabindex="-1" class="settings-section settings-wide">
+        <legend>App &amp; help</legend>
+        <p class="settings-hint">Set up offline access, change the display, or open the walkthrough.</p>
+        <div class="settings-actions">
+          <button type="button" data-settings-tool="installAppBtn" id="settingsInstall">Install app &amp; offline help</button>
+          <button type="button" data-settings-tool="fsBtn" id="settingsFullscreen">Full screen</button>
+          <button type="button" data-settings-tool="demoBtn">Demo guide</button>
+        </div>
+      </fieldset>
+      <fieldset id="settingsRecovery" tabindex="-1" class="settings-section settings-wide">
         <legend>Saving &amp; recovery</legend>
         <p class="settings-hint">Keep a separate backup of your phrases, settings, favorites, and uploaded GIFs.</p>
         <div class="settings-actions"><button type="button" id="settingsBackup">Open saving &amp; backups</button></div>
@@ -1958,6 +1994,7 @@ function subtopicsFor(cat, list){
 function renderSaid(){
   const el = document.getElementById('saidText');
   const build = mode === 'build';
+  document.getElementById('settingsTapMode').value = mode;
   const help = document.getElementById('modeHelp');
   const explanation = build
     ? 'Tap phrases to add them silently. Press Say it to speak your message, or Clear to start again.'
@@ -2688,8 +2725,11 @@ function openSettings(){
   stopDwellInput();
   loadVoices();
   syncSettingsControls();
+  document.getElementById('settingsOrganize').textContent = editing ? 'Finish organizing' : 'Organize phrases';
+  document.getElementById('settingsFullscreen').textContent = document.getElementById('fsBtn').textContent;
   document.getElementById('voiceTestStatus').textContent = '';
   setSheet.showModal();
+  setSheet.querySelector('.settings-body').scrollTop = 0;
   document.getElementById('settingsTitle').focus();
 }
 function closeSettings(){
@@ -2697,6 +2737,25 @@ function closeSettings(){
   if(setSheet.open) setSheet.close();
 }
 document.getElementById('setBtn').onclick = openSettings;
+setSheet.querySelector('.settings-jump').addEventListener('click', event=>{
+  const section = document.getElementById(event.target.dataset.settingsSection);
+  if(!section) return;
+  section.focus({preventScroll:true});
+  section.scrollIntoView({block:'start'});
+});
+setSheet.querySelectorAll('[data-settings-tool]').forEach(button=>{
+  button.onclick = ()=>{
+    const tool = document.getElementById(button.dataset.settingsTool);
+    settingsReturnFocus = null;
+    closeSettings();
+    (tool.hidden ? document.getElementById('setBtn') : tool).focus();
+    tool.click();
+  };
+});
+document.getElementById('settingsTapMode').onchange = event=>{
+  const button = event.target.value === 'build' ? 'modeBuild' : 'modeSpeak';
+  document.getElementById(button).click();
+};
 document.getElementById('setClose').onclick = closeSettings;
 document.getElementById('settingsCloseTop').onclick = closeSettings;
 setSheet.addEventListener('cancel',event=>{event.preventDefault();closeSettings();});
@@ -2799,6 +2858,7 @@ const root = document.documentElement;
 let framed = false; try{ framed = window.self !== window.top; }catch(e){ framed = true; }
 if(framed || !(root.requestFullscreen || root.webkitRequestFullscreen)){
   fsBtn.style.display = 'none';
+  document.getElementById('settingsFullscreen').hidden = true;
   if(fsBtn.nextElementSibling && fsBtn.nextElementSibling.classList.contains('tsep')) fsBtn.nextElementSibling.style.display = 'none';
 }
 fsBtn.onclick = ()=>{

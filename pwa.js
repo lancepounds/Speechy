@@ -1,12 +1,16 @@
 (() => {
   const button = document.getElementById('installAppBtn');
+  const settingsButton = document.getElementById('settingsInstall');
   const dialog = document.getElementById('installAppDialog');
   const confirm = document.getElementById('installAppConfirm');
   const status = document.getElementById('offlineAppStatus');
   let promptEvent;
   navigator.storage?.persist?.().catch(() => {});
   const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  const update = () => { button.hidden = !!standalone(); };
+  const update = (installed = !!standalone()) => {
+    button.hidden = installed;
+    if (settingsButton) settingsButton.textContent = installed ? 'Offline access & help' : 'Install app & offline help';
+  };
   update();
   button.addEventListener('click', () => dialog.showModal());
   window.addEventListener('beforeinstallprompt', event => {
@@ -17,7 +21,7 @@
     const pending = promptEvent; promptEvent = null; confirm.hidden = true;
     try { await pending.prompt(); await pending.userChoice; } catch (error) { console.warn('Install prompt unavailable', error); }
   });
-  window.addEventListener('appinstalled', () => { promptEvent = null; confirm.hidden = true; dialog.close(); button.hidden = true; });
+  window.addEventListener('appinstalled', () => { promptEvent = null; confirm.hidden = true; dialog.close(); update(true); });
   if ('serviceWorker' in navigator && window.isSecureContext) {
     navigator.serviceWorker.register('./sw.js', {scope:'./', updateViaCache:'none'}).then(() => navigator.serviceWorker.ready).then(() => {
       status.textContent = 'Offline access is ready. You can reopen Speechy without internet.';

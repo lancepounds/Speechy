@@ -8,15 +8,16 @@ Speechy is a personal prototype, not a standardized AAC assessment or a clinical
 
 ## Settings panel
 
-Choose **Settings** in the main toolbar. The modal panel groups:
+Choose **Settings** beside the Speechy name at the top. The section shortcuts jump directly to each group:
 
-- **Speech:** device voice, speaking speed, and Test voice / Stop voice. Testing
+- **Speech:** Tap speaks / Tap builds, device voice, speaking speed, and Test voice / Stop voice. Testing
   a voice leaves the current communication message in place.
 - **Appearance & layout:** Device default / Light / Dark / Sepia / High Contrast theme, All phrases /
   Grouped phrases, topic visibility and pinning, and All phrases button sizing.
 - **Accessibility & dwell:** larger touch targets, Speechy dwell on/off, its
   0.8–3.0 second delay, and iPad Eye Tracking guidance.
-- **Your introduction card:** the text shown by the Card button.
+- **Phrases & GIFs:** shortcuts to organize phrase tiles and manage GIFs, plus the text shown by the Card button.
+- **App & help:** installation, offline access, full screen where available, and the demo guide.
 - **Saving & recovery:** the existing backup, retry and restore tools, plus the
   confirmed board reset inside a collapsed section.
 
@@ -220,7 +221,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v15` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v16` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
