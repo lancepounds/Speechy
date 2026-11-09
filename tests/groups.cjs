@@ -52,7 +52,7 @@ const root=path.resolve(__dirname,'..');
     await page.getByRole('button',{name:'I will type a message for you.',exact:true}).click();
     assert.deepEqual(await page.locator('.nested-phrase').allTextContents(),['I will type a message for you.']);
     await page.evaluate(async()=>{
-      custom.food=['A table for two near the window, please.'];
+      custom.food=['A table for two near the window, please.','Can I show you my order on this screen?'];
       starred=['Could I see a menu, please?','I will type a message for you.','Unlisted favorite for the weekend.'];
       counts={'Could I see a menu, please?':5,'Unlisted recent phrase about tomorrow.':3};
       phraseOrder.now=["It's easier if I show you on the screen.","Could you slow down a little for me?","Give me a second and I'll get there."];
@@ -61,6 +61,11 @@ const root=path.resolve(__dirname,'..');
     await page.reload();await ready();
     const after=await page.evaluate(()=>CATS.map(cat=>({id:cat.id,source:phrasesFor(cat.id),groups:subtopicsFor(cat,phrasesFor(cat.id))})));
     for(const {id,source,groups} of after)assert.deepEqual(groups.flatMap(group=>group.phrases).sort(),source.slice().sort(),`${id}: edits/favorites/recent remain reachable after reload`);
+    await page.evaluate(()=>removePhrase('food','Can I show you my order on this screen?'));
+    assert.equal(await page.evaluate(()=>phrasesFor('food').includes('Can I show you my order on this screen?')),false);
+    await choose('work');
+    await page.getByRole('button',{name:'Assistive tech & access',exact:true}).click();
+    assert(await page.getByRole('button',{name:'Could I try this with eye tracking or a switch?',exact:true}).isVisible());
     await choose('starred');
     assert.deepEqual(await page.locator('.book-button').allTextContents(),['Eating out','Right now','Unlisted favorite for the weekend.']);
     await choose('recent');assert.deepEqual(await page.locator('.book-button').allTextContents(),['Eating out','Unlisted recent phrase about tomorrow.']);
@@ -75,7 +80,7 @@ const root=path.resolve(__dirname,'..');
     const screenshots=await fs.mkdtemp(path.join(os.tmpdir(),'speechy-groups-'));
     for(const [name,width,height] of [['desktop',1280,900],['ipad',1024,768],['phone',390,844],['small-phone',320,780]]){
       await page.setViewportSize({width,height});await choose('work');
-      assert.deepEqual(await page.locator('.book-button').allTextContents(),['Legal practice & experience','Meetings & contact','Documents & follow-up','Decisions & deadlines']);
+      assert.deepEqual(await page.locator('.book-button').allTextContents(),['Legal practice & experience','Meetings & contact','Documents & follow-up','Decisions & deadlines','Assistive tech & access']);
       assert.equal(await page.locator('.content').evaluate(element=>element.scrollWidth<=element.clientWidth),true,`${name}: no horizontal overflow`);
       for(const button of await page.locator('.book-button').all()){
         assert.equal(await button.evaluate(element=>element.scrollWidth<=element.clientWidth&&element.scrollHeight<=element.clientHeight),true,`${name}: group title fits`);

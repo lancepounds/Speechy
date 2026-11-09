@@ -1475,7 +1475,9 @@ const BASE = {
     "You're close. Keep going.",
     "Never mind, it wasn't important.",
     "I'll come back to that in a minute.",
-    "Let me start that over."
+    "Let me start that over.",
+    "Either one works for me.",
+    "Can I let you know later?"
   ],
   now:[
     "Give me a second and I'll get there.",
@@ -1489,7 +1491,11 @@ const BASE = {
     "I'm going to type this out instead.",
     "It's easier if I show you on the screen.",
     "I understand you fine. It just takes me a moment.",
-    "I'm tired, but I'm okay."
+    "I'm tired, but I'm okay.",
+    "Please let me finish what I was saying.",
+    "Could you ask me one question at a time?",
+    "Could you move that a little closer to me?",
+    "Please ask before helping me."
   ],
   ask:[
     "What do you think about that?",
@@ -1517,7 +1523,11 @@ const BASE = {
     "This is my wife, Janae.",
     "I'm an attorney here in Omaha.",
     "I've spent time in both Nebraska and Idaho.",
-    "Boise is home for me too."
+    "Boise is home for me too.",
+    "I'm getting to know the legal community in Omaha.",
+    "I sometimes use this app when speaking takes more effort.",
+    "If a word is unclear, tell me which one and I'll try it again.",
+    "I'd love to hear more about what you do. Could we find a time to meet?"
   ],
   work:[
     "I'm an attorney, and I work on disability and Medicaid cases.",
@@ -1539,7 +1549,16 @@ const BASE = {
     "Let me check with my co-counsel before I commit.",
     "I'll put my thoughts in a memo for you.",
     "Could we push that meeting to the morning?",
-    "Meeting in person works much better for me than a call."
+    "Meeting in person works much better for me than a call.",
+    "My background is in Medicaid planning and administrative appeals.",
+    "I'm interested in work that helps people get support at home and in their communities.",
+    "Is there someone else you think I should meet?",
+    "Could you send me the slides or a link after the meeting?",
+    "Before we wrap up, can we agree on who will follow up?",
+    "I'm working on a way for people to try assistive technology before deciding what works for them.",
+    "Could I try this with eye tracking or a switch?",
+    "I'd like to try it once more before we move on.",
+    "What support is available after someone takes the device home?"
   ],
   hearing:[
     "Good morning. Lance Pounds, appearing for the claimant.",
@@ -1553,7 +1572,10 @@ const BASE = {
     "Could you speak up a little, please?",
     "Give me a second to find that page.",
     "Could we go off the record for a moment?",
-    "I'll rest on the record for that point."
+    "I'll rest on the record for that point.",
+    "May I finish my answer before we move on?",
+    "I'll put my question in the chat.",
+    "Could you read that part back for the record?"
   ],
   church:[
     "It's good to see you.",
@@ -1569,7 +1591,8 @@ const BASE = {
     "I'll see you on Sunday.",
     "I'm helping with Grief Share this year.",
     "Come sit with us.",
-    "Can I pray for you about that?"
+    "Can I pray for you about that?",
+    "I'd like to help. What do you still need volunteers for?"
   ],
   food:[
     "Could I see a menu, please?",
@@ -1583,7 +1606,9 @@ const BASE = {
     "That's all for me, thank you.",
     "Could I get a box for this?",
     "We're ready for the check whenever you are.",
-    "That was very good, thank you."
+    "That was very good, thank you.",
+    "Can I show you my order on this screen?",
+    "Could we have a table with a little more room to get in?"
   ],
   around:[
     "Which way is the elevator?",
@@ -1597,7 +1622,10 @@ const BASE = {
     "I'm here for a ten o'clock appointment.",
     "Where do I check in?",
     "I'm flying out to Boise.",
-    "I'm parked right out front."
+    "I'm parked right out front.",
+    "Is there a step-free way to get inside?",
+    "Where is the nearest accessible restroom?",
+    "Could we stop somewhere so I can get out and stretch?"
   ],
   appts:[
     "Could you write those instructions down for me?",
@@ -1609,7 +1637,10 @@ const BASE = {
     "Let me repeat that back to make sure I have it.",
     "Who should I follow up with?",
     "Could Janae come back with me?",
-    "I'd like to have that in writing before I decide."
+    "I'd like to have that in writing before I decide.",
+    "What should I do if this gets worse before my next visit?",
+    "Who should I contact if I have a question after I leave?",
+    "I'd like to go through my questions one at a time."
   ]
 };
 
@@ -1640,12 +1671,11 @@ function editPhrase(cat,old){
  const next=value.trim();
  if(!next||next===old)return;
  if(phrasesFor(cat).includes(next)){alert('This phrase already exists in this topic.');return;}
- if((custom[cat]||[]).includes(old)){
-  custom[cat]=custom[cat].map(p=>p===old?next:p);
- }else{
+ const wasCustom = (custom[cat]||[]).includes(old);
+ if(!wasCustom || BASE[cat]?.includes(old)){
   removed[cat]=[...new Set([...(removed[cat]||[]),old])];
-  custom[cat]=[...(custom[cat]||[]),next];
  }
+ custom[cat]=wasCustom ? custom[cat].map(p=>p===old?next:p) : [...(custom[cat]||[]),next];
  phraseOrder[cat]=(phraseOrder[cat]||phrasesFor(cat)).map(p=>p===old?next:p);
  if(phraseSizes[old]){phraseSizes[next]=phraseSizes[old];delete phraseSizes[old];}
  if(gifs[old]){gifs[next]=gifs[old];delete gifs[old];}
@@ -1881,14 +1911,15 @@ function phrasesFor(cat){
   if(cat === 'offduty'){
     return orderedPhrases(cat,JOKE_GROUPS.flatMap(g=>g.lines).filter(p=>!gone.includes(p)).concat(custom.offduty || []));
   }
-  return orderedPhrases(cat,(BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]));
+  const available = (BASE[cat]||[]).filter(p=>!gone.includes(p)).concat(custom[cat]||[]);
+  return orderedPhrases(cat, [...new Set(available)]);
 }
 
 // Content groups refer to the original phrases, never to positions in a user's
 // reordered board. Filtering the current list preserves edits and local order.
 const PHRASE_GROUPS = {
   quick:[
-    ['Yes, no & decisions',[0,1,2,3,5]],
+    ['Yes, no & decisions',[0,1,2,3,5,16,17]],
     ['Time to think',[4,8,14]],
     ['Thanks & well-being',[6,9]],
     ['Clarify & start again',[7,10,11,12,13,15]]
@@ -1900,8 +1931,8 @@ const PHRASE_GROUPS = {
     ['Repeat, reply & follow-up',[7,20,21,22,23,24,25,26,27]]
   ],
   now:[
-    ['Speech & listening',[0,1,2,3,10]],
-    ['Breaks & comfort',[4,5,6,7,11]],
+    ['Speech & listening',[0,1,2,3,10,12,13]],
+    ['Breaks & comfort',[4,5,6,7,11,14,15]],
     ['Typing & showing',[8,9]]
   ],
   ask:[
@@ -1911,40 +1942,41 @@ const PHRASE_GROUPS = {
     ['Help & writing',[5,7]]
   ],
   people:[
-    ['Introductions & home',[0,8,9,10,11]],
-    ['Speech & understanding',[1,2,3,4]],
-    ['Coffee, email & calls',[5,6,7]]
+    ['Introductions & home',[0,8,9,10,11,12]],
+    ['Speech & understanding',[1,2,3,4,13,14]],
+    ['Coffee, email & calls',[5,6,7,15]]
   ],
   work:[
-    ['Legal practice & experience',[0,10,11,12,13,14]],
-    ['Meetings & contact',[1,2,18,19]],
-    ['Documents & follow-up',[4,5,6,15,17]],
-    ['Decisions & deadlines',[3,7,8,9,16]]
+    ['Legal practice & experience',[0,10,11,12,13,14,20]],
+    ['Meetings & contact',[1,2,18,19,21,22]],
+    ['Documents & follow-up',[4,5,6,15,17,23,24]],
+    ['Decisions & deadlines',[3,7,8,9,16]],
+    ['Assistive tech & access',[25,26,27,28]]
   ],
   hearing:[
     ['Appearances & arguments',[0,6,7,11]],
-    ['Pauses & recesses',[1,2,9,10]],
-    ['Repeating & responding',[3,4,8]],
+    ['Pauses & recesses',[1,2,9,10,12]],
+    ['Repeating & responding',[3,4,8,13,14]],
     ['Exhibits',[5]]
   ],
   church:[
     ['Greetings & catching up',[0,1,2,9]],
-    ['Plans, seats & sharing',[3,4,6,7,8,10,12]],
+    ['Plans, seats & sharing',[3,4,6,7,8,10,12,14]],
     ['Prayer & Grief Share',[5,11,13]]
   ],
   food:[
-    ['Menus & ordering',[0,1,2,3,4,5]],
-    ['Seating & comfort',[7]],
+    ['Menus & ordering',[0,1,2,3,4,5,12]],
+    ['Seating & comfort',[7,13]],
     ['Checks, boxes & thanks',[6,8,9,10,11]]
   ],
   around:[
-    ['Directions & check-in',[0,5,6,8,9]],
-    ['Driving, travel & timing',[1,2,10,11]],
+    ['Directions & check-in',[0,5,6,8,9,12,13]],
+    ['Driving, travel & timing',[1,2,10,11,14]],
     ['Contact, pauses & thanks',[3,4,7]]
   ],
   appts:[
-    ['Instructions & follow-up',[0,1,5,6,7,9]],
-    ['Speech, energy & timing',[2,3,4]],
+    ['Instructions & follow-up',[0,1,5,6,7,9,10,11]],
+    ['Speech, energy & timing',[2,3,4,12]],
     ['Bringing Janae',[8]]
   ]
 };
@@ -2448,8 +2480,9 @@ function renderGrid(){
 }
 
 function removePhrase(cat, p){
-  if((custom[cat]||[]).includes(p)) custom[cat] = custom[cat].filter(x=>x!==p);
-  else { removed[cat] = (removed[cat]||[]).concat([p]); }
+  const wasCustom = (custom[cat]||[]).includes(p);
+  if(wasCustom) custom[cat] = custom[cat].filter(x=>x!==p);
+  if(!wasCustom || BASE[cat]?.includes(p)) removed[cat] = [...new Set([...(removed[cat]||[]),p])];
   save(); renderGrid();
 }
 
