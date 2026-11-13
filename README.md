@@ -232,7 +232,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v21` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v22` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -287,3 +287,7 @@ TestFlight updates still need device testing before App Store release.
 
 
 
+
+### Find a phrase
+
+Choose **Find a phrase** in the toolbar to search every topic and your custom phrases in a large, keyboard-accessible dialog. Results show their topic and follow Tap speaks or Tap builds. Close or press Escape to return to your current board. Search also works offline.
