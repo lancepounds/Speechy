@@ -232,7 +232,7 @@ Open Speechy online once and wait for offline readiness in Install app. The
 service worker caches the phraseboard, local scripts, manifest and
 icons. It falls back to the cache on network errors, HTTP errors or a stalled
 connection. Close all Speechy windows and reopen after updates so the waiting
-worker can activate. Bump `speechy-shell-v23` in sw.js for future shell releases.
+worker can activate. Bump `speechy-shell-v24` in sw.js for future shell releases.
 
 Offline speech needs an installed device voice (marked Offline where the
 browser reports it). Test in airplane mode on the actual device. A speech error
@@ -295,3 +295,5 @@ Choose **Find a phrase** in the toolbar to search every topic and your custom ph
 ### Undo a phrase
 
 In Tap builds, **Undo last phrase** restores the message before your last phrase selection, including punctuation changed by add-on phrases. Repeat to undo up to 30 selections. Clear or replacing the message starts fresh. Undo never speaks.
+
+Search now includes topic page names. **Find pages & phrases** shows Pages first with an Open page action, followed by matching Phrases. Opening a page does not speak.

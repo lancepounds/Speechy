@@ -1088,7 +1088,7 @@
     <button class="tbtn" id="demoBtn" aria-haspopup="dialog">Demo guide</button>
     <button class="tbtn stop-voice" id="stopBtn">■ Stop voice</button>
     <div class="searchbox">
-      <button class="tbtn" id="findPhraseBtn" type="button" aria-haspopup="dialog" aria-controls="findPhraseDialog">Find a phrase</button>
+      <button class="tbtn" id="findPhraseBtn" type="button" aria-haspopup="dialog" aria-controls="findPhraseDialog">Find pages &amp; phrases</button>
       <input type="hidden" id="search" value="">
     </div>
   </div>
@@ -1248,10 +1248,10 @@
 
 <!-- settings panel -->
 <dialog id="findPhraseDialog" class="settings-panel" aria-labelledby="findPhraseTitle">
-  <div class="settings-header"><h2 id="findPhraseTitle">Find a phrase</h2><button id="findPhraseClose" type="button" aria-label="Close phrase search">×</button></div>
+  <div class="settings-header"><h2 id="findPhraseTitle">Find pages &amp; phrases</h2><button id="findPhraseClose" type="button" aria-label="Close phrase search">×</button></div>
   <div class="settings-body">
-    <label for="findPhraseInput">Search every topic, including your own phrases</label>
-    <input id="findPhraseInput" type="text" inputmode="search" placeholder="Try break, coffee, or repeat" autocomplete="off" autofocus>
+    <label for="findPhraseInput">Search topic pages and phrases, including your own phrases</label>
+    <input id="findPhraseInput" type="text" inputmode="search" placeholder="Try work, coffee, or repeat" autocomplete="off" autofocus>
     <p id="findPhraseMode"></p>
     <p id="findPhraseStatus" role="status" aria-live="polite"></p>
     <div id="findPhraseResults"></div>
@@ -3099,18 +3099,41 @@ function renderPhraseSearch(){
   const query = findPhraseInput.value.trim();
   const results = document.getElementById('findPhraseResults');
   results.replaceChildren();
+  const pages = query ? CATS.filter(cat=>cat.name.toLowerCase().includes(query.toLowerCase())) : [];
   const seen = new Set();
   const hits = query ? searchAll(query).filter(hit=>{
     if(seen.has(hit.p)) return false;
     seen.add(hit.p); return true;
   }) : [];
   document.getElementById('findPhraseStatus').textContent = !query
-    ? 'Type a word or part of a phrase to find it.'
-    : hits.length ? hits.length + (hits.length === 1 ? ' phrase found.' : ' phrases found.')
-    : 'No phrases found. Try a shorter word or a different spelling.';
+    ? 'Type a page name or part of a phrase to find it.'
+    : pages.length || hits.length
+      ? pages.length + (pages.length === 1 ? ' page and ' : ' pages and ') + hits.length + (hits.length === 1 ? ' phrase found.' : ' phrases found.')
+      : 'No pages or phrases found. Try a shorter word or a different spelling.';
+  const heading = text=>{
+    const title = document.createElement('h3'); title.textContent = text;
+    title.style.gridColumn = '1 / -1'; title.style.margin = '4px 0'; results.appendChild(title);
+  };
+  if(pages.length) heading('Pages');
+  pages.forEach(cat=>{
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'tile search-page';
+    button.style.setProperty('--cat',cat.color);
+    const name = document.createElement('span'); name.textContent = cat.name;
+    const action = document.createElement('small'); action.textContent = 'Open page';
+    button.append(name,action);
+    button.onclick = ()=>{
+      findPhraseDialog.close();
+      activeSubtopic[cat.id] = null;
+      selectCat(cat);
+      document.querySelector('.content').scrollTop = 0;
+    };
+    results.appendChild(button);
+  });
+  if(hits.length) heading('Phrases');
   hits.forEach(({p,cat})=>{
     const button = document.createElement('button');
-    button.type = 'button'; button.className = 'tile';
+    button.type = 'button'; button.className = 'tile search-phrase';
     button.style.setProperty('--cat',cat.color);
     const phrase = document.createElement('span'); phrase.textContent = p;
     const topic = document.createElement('small'); topic.textContent = cat.name;
@@ -3126,8 +3149,8 @@ function renderPhraseSearch(){
 document.getElementById('findPhraseBtn').onclick = ()=>{
   findPhraseInput.value = '';
   document.getElementById('findPhraseMode').textContent = mode === 'build'
-    ? 'Tap builds: choose a phrase to add it to your message.'
-    : 'Tap speaks: choose a phrase to say it aloud.';
+    ? 'Choose a page to open it. Tap builds: choose a phrase to add it to your message.'
+    : 'Choose a page to open it. Tap speaks: choose a phrase to say it aloud.';
   renderPhraseSearch(); findPhraseDialog.showModal(); findPhraseInput.focus();
 };
 document.getElementById('findPhraseClose').onclick = ()=>findPhraseDialog.close();
