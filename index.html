@@ -215,8 +215,8 @@
   }
 
   /* ---- command area + status bar ---- */
-  .dock{display:flex;gap:7px;padding:7px 12px;background:var(--face);border-top:1px solid #ACA899}
-  .dock button{flex:1;padding:10px 8px;font-size:15px;font-weight:bold}
+  .dock{display:flex;flex-wrap:wrap;gap:7px;padding:7px 12px;background:var(--face);border-top:1px solid #ACA899}
+  .dock button{flex:1 1 120px;padding:10px 8px;font-size:15px;font-weight:bold}
   .dock button.card{flex:0 0 auto;padding:10px 18px}
 
   /* ---- overlays: readability first ---- */
@@ -1141,6 +1141,7 @@
 
   <div class="dock">
     <button id="typeBtn">Type something</button>
+    <button id="momentBtn" type="button">Give me a moment</button>
     <button class="card" id="cardBtn">Card</button>
   </div>
 
@@ -1915,12 +1916,14 @@ if(window.speechSynthesis){
   speechSynthesis.onvoiceschanged = loadVoices;
 }
 
-function speak(text){
+function speak(text, {preserveMessage = false} = {}){
   if(!text) return;
-  lastSaid = text;
-  renderSaid();
+  if(!preserveMessage){
+    lastSaid = text;
+    renderSaid();
+  }
   if(!window.speechSynthesis){
-    if(gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
+    if(!preserveMessage && gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
     else showBig(text);
     return;
   }
@@ -1933,7 +1936,7 @@ function speak(text){
     if(v) u.voice = v;
     speechSynthesis.speak(u);
   }catch(e){ showBig(text); }
-  if(gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
+  if(!preserveMessage && gifFor(text) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) showGif(text);
 }
 
 function bump(p){ counts[p] = (counts[p]||0)+1; save(); }
@@ -2727,6 +2730,10 @@ document.getElementById('editBtn').onclick = (e)=>{
   e.currentTarget.setAttribute('aria-pressed', editing);
   e.currentTarget.textContent = editing ? 'Done' : 'Organize';
   renderGrid();
+};
+
+document.getElementById('momentBtn').onclick = ()=>{
+  speak('I have something to say. Please give me a moment.', {preserveMessage:true});
 };
 
 const typeSheet = document.getElementById('typeSheet');

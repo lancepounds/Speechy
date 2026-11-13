@@ -19,6 +19,17 @@ const root=path.resolve(__dirname,'..');
    const url=`http://127.0.0.1:${server.address().port}/Speechy/`;
    async function ready(page){await page.waitForFunction(()=>document.getElementById('app')?.inert===false);}
    const page=await context.newPage();await page.goto(url);await ready(page);
+   await page.evaluate(()=>{
+     mode='build';buffer='My unfinished message';lastSaid='My previous phrase';renderSaid();
+     window.momentSpoken=[];
+     speechSynthesis.speak=utterance=>momentSpoken.push(utterance.text);
+     speechSynthesis.cancel=()=>{};
+   });
+   await page.locator('#momentBtn').focus();await page.keyboard.press('Enter');
+   assert.deepEqual(await page.evaluate(()=>momentSpoken),['I have something to say. Please give me a moment.']);
+   assert.deepEqual(await page.evaluate(()=>({mode,buffer,lastSaid})),{mode:'build',buffer:'My unfinished message',lastSaid:'My previous phrase'});
+   assert.equal(await page.locator('#saidText').innerText(),'My unfinished message');
+   await page.evaluate(()=>{mode='speak';renderSaid();});
    // Exercise the phrase editor and immediate saving in the actual app.
    await page.locator('#editBtn').click();await page.evaluate(()=>openAdd('now'));
    await page.locator('#addInput').fill('Browser restart phrase');await page.locator('#addSave').click();
