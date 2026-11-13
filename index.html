@@ -1062,6 +1062,7 @@
   #findPhraseResults .tile{width:100%;min-height:88px;white-space:normal;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left}
   #findPhraseResults small{font-size:14px;font-weight:normal}
   @media(max-width:540px){#findPhraseResults{grid-template-columns:1fr}}
+  #buildActions .act{min-width:0;min-height:52px;white-space:normal}
 </style>
 </head>
 <body>
@@ -1132,9 +1133,10 @@
              <button class="act secondary" id="showBig" disabled>Show big</button>
              <button class="act secondary" id="showGif" hidden disabled>Show GIF</button>
            </div>
-          <div class="actions three" id="buildActions" hidden>
+          <div class="actions" id="buildActions" hidden>
             <button class="act" id="buildSay" disabled>Say it</button>
             <button class="act secondary" id="buildExpand" disabled>Make a sentence</button>
+            <button class="act secondary" id="buildUndo" disabled>Undo last phrase</button>
             <button class="act ghost" id="buildClear" disabled>Clear</button>
           </div>
         </div>
@@ -1753,6 +1755,7 @@ let activeSubtopic = {};
 let editing = false;
 let lastSaid = '';
 let buffer = '';
+let phraseUndo = [];
 let mode = 'speak';
 let addTarget = null;
 let gifs = {}; // { phrase text: direct GIF URL }
@@ -2089,12 +2092,14 @@ function subtopicsFor(cat, list){
 }
 
 function renderSaid(){
+  if(phraseUndo.length && phraseUndo.at(-1).after !== buffer) phraseUndo = [];
+  document.getElementById('buildUndo').disabled = !phraseUndo.length;
   const el = document.getElementById('saidText');
   const build = mode === 'build';
   document.getElementById('settingsTapMode').value = mode;
   const help = document.getElementById('modeHelp');
   const explanation = build
-    ? 'Tap phrases to add them silently. Press Say it to speak your message, or Clear to start again.'
+    ? 'Tap phrases to add them silently. Use Undo last phrase to correct a tap, Say it to speak, or Clear to start again.'
     : 'Tap a phrase to hear it immediately. Say again repeats the last phrase.';
   if(help.textContent !== explanation) help.textContent = explanation;
   document.getElementById('speakActions').hidden = build;
@@ -2124,8 +2129,13 @@ function renderSaid(){
 
 function addToBuffer(fragment, isAddon){
   const f = fragment.trim();
+  if(!f) return;
+  if(phraseUndo.length && phraseUndo.at(-1).after !== buffer) phraseUndo = [];
+  const before = buffer;
+  const remember = ()=>{ phraseUndo.push({before,after:buffer}); if(phraseUndo.length>30) phraseUndo.shift(); };
   if(!buffer){
     buffer = isAddon ? f.charAt(0).toUpperCase() + f.slice(1) : f;
+    remember();
     renderSaid();
     return;
   }
@@ -2142,6 +2152,7 @@ function addToBuffer(fragment, isAddon){
   } else {
     buffer = buffer + ' ' + f;
   }
+  remember();
   renderSaid();
 }
 
@@ -2736,7 +2747,11 @@ document.getElementById('modeSpeak').onclick = ()=>{ mode='speak'; renderSaid();
 document.getElementById('modeBuild').onclick = ()=>{ mode='build'; renderSaid(); };
 document.getElementById('buildSay').onclick = ()=>{ if(buffer){ speak(buffer); bump(buffer); } };
 document.getElementById('buildExpand').onclick = ()=>{ if(buffer) openOptions(buffer); };
-document.getElementById('buildClear').onclick = ()=>{ buffer=''; renderSaid(); };
+document.getElementById('buildUndo').onclick = ()=>{
+  if(!phraseUndo.length || phraseUndo.at(-1).after !== buffer) return;
+  buffer = phraseUndo.pop().before; renderSaid();
+};
+document.getElementById('buildClear').onclick = ()=>{ phraseUndo=[]; buffer=''; renderSaid(); };
 document.getElementById('sayAgain').onclick = ()=> speak(lastSaid);
 document.getElementById('stopBtn').onclick = ()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); };
 document.getElementById('showBig').onclick  = ()=> showBig(lastSaid);

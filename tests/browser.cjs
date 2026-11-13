@@ -56,6 +56,20 @@ const root=path.resolve(__dirname,'..');
    await page.waitForFunction(()=>document.activeElement===document.getElementById('findPhraseBtn'));
    await page.setViewportSize({width:1024,height:768});
    await page.evaluate(()=>{mode='speak';buffer='';custom.now=custom.now.filter(p=>p!=='Unique custom search phrase');renderSaid();});
+   // Undo restores whole phrases and original punctuation without speaking.
+   await page.evaluate(()=>{mode='build';buffer='';phraseUndo=[];addToBuffer('Can you help?',false);addToBuffer('after lunch.',true);});
+   const speechCount=await page.evaluate(()=>momentSpoken.length);
+   assert.equal(await page.evaluate(()=>buffer),'Can you help after lunch?');
+   await page.locator('#buildUndo').focus();await page.keyboard.press('Enter');
+   assert.equal(await page.evaluate(()=>buffer),'Can you help?');
+   await page.locator('#buildUndo').click();assert.equal(await page.evaluate(()=>buffer),'');
+   assert(await page.locator('#buildUndo').isDisabled());
+   assert.equal(await page.evaluate(()=>momentSpoken.length),speechCount);
+   await page.evaluate(()=>addToBuffer('A new message.',false));
+   await page.locator('#buildClear').click();assert(await page.locator('#buildUndo').isDisabled());
+   await page.evaluate(()=>{addToBuffer('Old draft.',false);buffer='Replacement draft.';renderSaid();});
+   assert(await page.locator('#buildUndo').isDisabled());
+   await page.evaluate(()=>{mode='speak';buffer='';renderSaid();});
    // Exercise the phrase editor and immediate saving in the actual app.
    await page.locator('#editBtn').click();await page.evaluate(()=>openAdd('now'));
    await page.locator('#addInput').fill('Browser restart phrase');await page.locator('#addSave').click();
